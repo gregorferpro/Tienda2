@@ -31,7 +31,6 @@ def home_redirect(request):
 
     return redirect('catalogo_cliente')
 
-
 @login_required
 def dashboard(request):
     if hasattr(request.user, 'perfil') and request.user.perfil.rol == 'cliente':
@@ -195,3 +194,46 @@ def configurar_google_render(request):
         f"Dominio: {site.domain}<br>"
         f"SocialApp: {app.name}"
     )
+
+
+
+from django.db.models import Q
+from django.shortcuts import render, get_object_or_404, redirect
+from django.contrib import messages
+from django.contrib.auth.decorators import login_required
+from .models import Producto
+
+
+def catalogo_cliente(request):
+    q = request.GET.get('q', '').strip()
+    productos = Producto.objects.filter(activo=True).order_by('-id')
+
+    if q:
+        productos = productos.filter(
+            Q(codigo__icontains=q) |
+            Q(nombre__icontains=q) |
+            Q(marca__icontains=q) |
+            Q(modelo__icontains=q)
+        )
+
+    return render(request, 'tienda/catalogo_cliente.html', {
+        'productos': productos,
+        'q': q,
+    })
+
+
+@login_required
+def agregar_al_carrito(request, producto_id):
+    producto = get_object_or_404(Producto, id=producto_id, activo=True)
+
+    carrito = request.session.get('carrito', {})
+    producto_id_str = str(producto.id)
+
+    if producto_id_str in carrito:
+        carrito[producto_id_str] += 1
+    else:
+        carrito[producto_id_str] = 1
+
+    request.session['carrito'] = carrito
+    messages.success(request, 'Producto agregado al carrito.')
+    return redirect('catalogo_cliente')

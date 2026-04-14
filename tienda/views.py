@@ -1,10 +1,10 @@
 from decimal import Decimal
-from django.db.models.deletion import ProtectedError
+
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required, user_passes_test
-from django.contrib.auth.models import User
 from django.db import transaction
 from django.db.models import Q
+from django.db.models.deletion import ProtectedError
 from django.shortcuts import get_object_or_404, redirect, render
 
 from .forms import ProductoForm, ClienteForm, CheckoutForm
@@ -39,9 +39,13 @@ def obtener_carrito(request):
     return request.session.setdefault('carrito', {})
 
 
+# =========================
+# CATÁLOGO PÚBLICO CLIENTE
+# =========================
+
 def catalogo_cliente(request):
     q = request.GET.get('q', '').strip()
-    productos = Producto.objects.filter(activo=True)
+    productos = Producto.objects.filter(activo=True).order_by('-id')
 
     if q:
         productos = productos.filter(
@@ -64,6 +68,11 @@ def detalle_producto_cliente(request, pk):
     })
 
 
+# =========================
+# CARRITO Y CHECKOUT
+# =========================
+
+@login_required
 def agregar_carrito(request, pk):
     producto = get_object_or_404(Producto, pk=pk, activo=True)
     carrito = obtener_carrito(request)
@@ -81,6 +90,7 @@ def agregar_carrito(request, pk):
     return redirect('carrito')
 
 
+@login_required
 def quitar_carrito(request, pk):
     carrito = obtener_carrito(request)
 
@@ -92,13 +102,14 @@ def quitar_carrito(request, pk):
     return redirect('carrito')
 
 
+@login_required
 def carrito(request):
     carrito_data = obtener_carrito(request)
     items = []
     total = Decimal('0.00')
 
     for pk, data in carrito_data.items():
-        producto = get_object_or_404(Producto, pk=int(pk))
+        producto = get_object_or_404(Producto, pk=int(pk), activo=True)
         subtotal = producto.precio * data['cantidad']
         total += subtotal
 
@@ -114,6 +125,7 @@ def carrito(request):
     })
 
 
+@login_required
 @transaction.atomic
 def checkout(request):
     carrito_data = obtener_carrito(request)
@@ -141,7 +153,7 @@ def checkout(request):
 
         if form.is_valid():
             cliente = Cliente.objects.create(
-                user=None,
+                user=request.user,
                 nombres=form.cleaned_data['nombres'],
                 apellidos=form.cleaned_data['apellidos'],
                 ci_nit=form.cleaned_data['ci_nit'],
@@ -151,21 +163,9 @@ def checkout(request):
                 estado='activo'
             )
 
-            usuario_venta = (
-                request.user
-                if request.user.is_authenticated
-                else User.objects.filter(is_superuser=True).first()
-            )
-
-            if usuario_venta is None:
-                usuario_venta = User.objects.create_user(
-                    username='caja_default',
-                    password='123456'
-                )
-
             venta = Venta.objects.create(
                 cliente=cliente,
-                usuario=usuario_venta,
+                usuario=request.user,
                 numero_factura=generar_numero_factura(),
                 metodo_pago=form.cleaned_data['metodo_pago'],
                 subtotal=total,
@@ -206,6 +206,8 @@ def checkout(request):
         'total': total,
     })
 
+
+@login_required
 def factura_view(request, pk):
     venta = get_object_or_404(
         Venta.objects.prefetch_related('detalles__producto'),
@@ -217,6 +219,10 @@ def factura_view(request, pk):
     })
 
 
+# =========================
+# PANEL ADMINISTRATIVO
+# =========================
+
 @login_required
 @user_passes_test(es_staff_o_superuser)
 def productos_list(request):
@@ -225,10 +231,10 @@ def productos_list(request):
 
     if q:
         productos = productos.filter(
-            Q(codigo__icontains=q)
-            | Q(nombre__icontains=q)
-            | Q(marca__icontains=q)
-            | Q(modelo__icontains=q)
+            Q(codigo__icontains=q) |
+            Q(nombre__icontains=q) |
+            Q(marca__icontains=q) |
+            Q(modelo__icontains=q)
         )
 
     if request.headers.get('x-requested-with') == 'XMLHttpRequest':
@@ -251,7 +257,7 @@ def producto_detail(request, pk):
 @user_passes_test(solo_superuser)
 def producto_create(request):
     if request.method == 'POST':
-        form = ProductoForm(request.POST)
+        form = ProductoForm(request.POST, request.FILES)
 
         if form.is_valid():
             producto = form.save()
@@ -274,13 +280,14 @@ def producto_create(request):
         'titulo': 'Nuevo producto'
     })
 
+
 @login_required
 @user_passes_test(solo_superuser)
 def producto_update(request, pk):
     producto = get_object_or_404(Producto, pk=pk)
 
     if request.method == 'POST':
-        form = ProductoForm(request.POST, instance=producto)
+        form = ProductoForm(request.POST, request.FILES, instance=producto)
 
         if form.is_valid():
             producto = form.save()
@@ -304,6 +311,7 @@ def producto_update(request, pk):
         'producto': producto
     })
 
+
 @login_required
 @user_passes_test(solo_superuser)
 def producto_delete(request, pk):
@@ -322,6 +330,8 @@ def producto_delete(request, pk):
             return redirect('productos_list')
 
     return render(request, 'tienda/producto_confirm_delete.html', {'producto': producto})
+
+
 @login_required
 @user_passes_test(es_staff_o_superuser)
 def clientes_list(request):
@@ -330,10 +340,10 @@ def clientes_list(request):
 
     if q:
         clientes = clientes.filter(
-            Q(nombres__icontains=q)
-            | Q(apellidos__icontains=q)
-            | Q(telefono__icontains=q)
-            | Q(ci_nit__icontains=q)
+            Q(nombres__icontains=q) |
+            Q(apellidos__icontains=q) |
+            Q(telefono__icontains=q) |
+            Q(ci_nit__icontains=q)
         )
 
     if request.headers.get('x-requested-with') == 'XMLHttpRequest':
@@ -421,6 +431,7 @@ def ventas_list(request):
         'ventas': ventas,
         'q': q
     })
+
 
 @login_required
 @user_passes_test(lambda u: u.is_superuser or (hasattr(u, 'perfil') and u.perfil.rol in ['superuser', 'staff']))
