@@ -10,53 +10,54 @@
 <div class="row g-4">
     <div class="col-lg-7">
         <div class="dashboard-card checkout-card text-start">
-            <div class="checkout-section mb-4">
-                <h4 class="checkout-subtitle">Datos del cliente</h4>
-                <div class="row g-3">
-                    <div class="col-md-6">
-                        <label class="form-label fw-semibold">Nombres</label>
-                        {{ form.nombres }}
-                        {% if form.nombres.errors %}
-                            <div class="text-danger small mt-1">{{ form.nombres.errors }}</div>
-                        {% endif %}
-                    </div>
-
-                    <div class="col-md-6">
-                        <label class="form-label fw-semibold">Apellidos</label>
-                        {{ form.apellidos }}
-                        {% if form.apellidos.errors %}
-                            <div class="text-danger small mt-1">{{ form.apellidos.errors }}</div>
-                        {% endif %}
-                    </div>
-
-                    <div class="col-md-6">
-                        <label class="form-label fw-semibold">NIT/CI/CEX</label>
-                        {{ form.ci_nit }}
-                        {% if form.ci_nit.errors %}
-                            <div class="text-danger small mt-1">{{ form.ci_nit.errors }}</div>
-                        {% endif %}
-                    </div>
-
-                    <div class="col-md-6">
-                        <label class="form-label fw-semibold">Teléfono</label>
-                        {{ form.telefono }}
-                        {% if form.telefono.errors %}
-                            <div class="text-danger small mt-1">{{ form.telefono.errors }}</div>
-                        {% endif %}
-                    </div>
-
-                    <div class="col-12">
-                        <label class="form-label fw-semibold">Email</label>
-                        {{ form.email }}
-                        {% if form.email.errors %}
-                            <div class="text-danger small mt-1">{{ form.email.errors }}</div>
-                        {% endif %}
-                    </div>
-                </div>
-            </div>
 
             <form method="post" id="checkout-form">
                 {% csrf_token %}
+
+                <div class="checkout-section mb-4">
+                    <h4 class="checkout-subtitle">Datos del cliente</h4>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Nombres</label>
+                            {{ form.nombres }}
+                            {% if form.nombres.errors %}
+                                <div class="text-danger small mt-1">{{ form.nombres.errors }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Apellidos</label>
+                            {{ form.apellidos }}
+                            {% if form.apellidos.errors %}
+                                <div class="text-danger small mt-1">{{ form.apellidos.errors }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">NIT/CI/CEX</label>
+                            {{ form.ci_nit }}
+                            {% if form.ci_nit.errors %}
+                                <div class="text-danger small mt-1">{{ form.ci_nit.errors }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Teléfono</label>
+                            {{ form.telefono }}
+                            {% if form.telefono.errors %}
+                                <div class="text-danger small mt-1">{{ form.telefono.errors }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="col-12">
+                            <label class="form-label fw-semibold">Email</label>
+                            {{ form.email }}
+                            {% if form.email.errors %}
+                                <div class="text-danger small mt-1">{{ form.email.errors }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
 
                 <div class="checkout-section mb-4">
                     <h4 class="checkout-subtitle">Dirección de entrega</h4>
@@ -101,10 +102,11 @@
                     </div>
                 </div>
 
-                <button class="btn btn-primary btn-lg w-100 checkout-btn">
+                <button type="submit" class="btn btn-primary btn-lg w-100 checkout-btn">
                     Finalizar compra
                 </button>
             </form>
+
         </div>
     </div>
 
