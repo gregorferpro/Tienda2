@@ -137,7 +137,11 @@ def crear_admin_render(request):
     email = "gregorbarrios07@gmail.com"
     password = "10390128"
 
-    user, created = User.objects.get_or_create(username=username)
+    try:
+        user = User.objects.get(username=username)
+    except User.DoesNotExist:
+        user = User(username=username)
+
     user.email = email
     user.is_staff = True
     user.is_superuser = True
@@ -148,9 +152,7 @@ def crear_admin_render(request):
     perfil.rol = "superuser"
     perfil.save()
 
-    if created:
-        return HttpResponse("Superusuario creado correctamente.")
-    return HttpResponse("Superusuario actualizado correctamente.")
+    return HttpResponse("Superusuario creado o actualizado correctamente.")
 
 
 def configurar_google_render(request):
