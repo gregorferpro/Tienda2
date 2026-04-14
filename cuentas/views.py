@@ -6,6 +6,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 
 from .forms import UsuarioForm
 from .models import Perfil
+import os
 
 
 def solo_superuser(user):
@@ -121,10 +122,10 @@ def usuario_delete(request, pk):
     return render(request, 'cuentas/usuario_confirm_delete.html', {'usuario': usuario})
 
 
-
-
 from django.http import HttpResponse
 from django.contrib.auth.models import User
+from django.contrib.sites.models import Site
+from allauth.socialaccount.models import SocialApp
 
 
 def crear_admin_render(request):
@@ -133,7 +134,6 @@ def crear_admin_render(request):
     password = "Admin12345678"
 
     user, created = User.objects.get_or_create(username=username)
-
     user.email = email
     user.is_staff = True
     user.is_superuser = True
@@ -143,3 +143,51 @@ def crear_admin_render(request):
     if created:
         return HttpResponse("Superusuario creado correctamente.")
     return HttpResponse("Superusuario actualizado correctamente.")
+
+
+import os
+
+def configurar_google_render(request):
+    domain = "tienda2-fdil.onrender.com"
+    display_name = "Tienda2"
+
+    client_id = os.environ.get("GOOGLE_CLIENT_ID")
+    secret_key = os.environ.get("GOOGLE_CLIENT_SECRET")
+
+    if not client_id or not secret_key:
+        return HttpResponse("Faltan GOOGLE_CLIENT_ID y GOOGLE_CLIENT_SECRET en variables de entorno.")
+
+    site, created = Site.objects.get_or_create(
+        id=1,
+        defaults={
+            "domain": domain,
+            "name": display_name,
+        }
+    )
+
+    site.domain = domain
+    site.name = display_name
+    site.save()
+
+    app, created = SocialApp.objects.get_or_create(
+        provider="google",
+        name="Google Login",
+        defaults={
+            "client_id": client_id,
+            "secret": secret_key,
+        }
+    )
+
+    app.client_id = client_id
+    app.secret = secret_key
+    app.save()
+
+    app.sites.clear()
+    app.sites.add(site)
+
+    return HttpResponse(
+        f"Configuración completada.<br>"
+        f"Site ID: {site.id}<br>"
+        f"Dominio: {site.domain}<br>"
+        f"SocialApp: {app.name}"
+    )
