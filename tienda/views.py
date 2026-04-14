@@ -441,3 +441,26 @@ def venta_detail(request, pk):
         pk=pk
     )
     return render(request, 'tienda/venta_detail.html', {'venta': venta})
+
+
+from django.contrib import messages
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import get_object_or_404, redirect
+from .models import Producto
+
+
+@login_required
+def agregar_al_carrito(request, producto_id):
+    producto = get_object_or_404(Producto, id=producto_id, activo=True)
+
+    carrito = request.session.get('carrito', {})
+    producto_id_str = str(producto.id)
+
+    if producto_id_str in carrito:
+        carrito[producto_id_str] += 1
+    else:
+        carrito[producto_id_str] = 1
+
+    request.session['carrito'] = carrito
+    messages.success(request, 'Producto agregado al carrito.')
+    return redirect('catalogo_cliente')

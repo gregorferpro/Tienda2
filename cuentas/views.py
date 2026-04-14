@@ -201,9 +201,8 @@ from django.db.models import Q
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from .models import Producto
 
-
+from tienda.models import Producto
 def catalogo_cliente(request):
     q = request.GET.get('q', '').strip()
     productos = Producto.objects.filter(activo=True).order_by('-id')
@@ -221,19 +220,3 @@ def catalogo_cliente(request):
         'q': q,
     })
 
-
-@login_required
-def agregar_al_carrito(request, producto_id):
-    producto = get_object_or_404(Producto, id=producto_id, activo=True)
-
-    carrito = request.session.get('carrito', {})
-    producto_id_str = str(producto.id)
-
-    if producto_id_str in carrito:
-        carrito[producto_id_str] += 1
-    else:
-        carrito[producto_id_str] = 1
-
-    request.session['carrito'] = carrito
-    messages.success(request, 'Producto agregado al carrito.')
-    return redirect('catalogo_cliente')
