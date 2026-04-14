@@ -1,29 +1,59 @@
 {% extends 'base.html' %}
-{% block content %}
-<div class="page-header">
-    <h2 class="section-title">Listado de Clientes</h2>
 
-    {% if user.is_superuser or user.perfil.rol == 'superuser' %}
-    <a href="{% url 'cliente_create' %}" class="btn btn-primary btn-main">
+{% block title %}Clientes{% endblock %}
+
+{% block content %}
+<div class="mb-4">
+    <h2 class="section-title">Listado de Clientes</h2>
+    <p class="section-subtitle">Consulta y administra los datos de tus clientes.</p>
+</div>
+
+<div class="toolbar">
+    <form method="get" class="search-wrap" id="clientes-search-form">
+        <i class="fa-solid fa-magnifying-glass"></i>
+        <input
+            type="text"
+            name="q"
+            id="clientes-search"
+            class="search-input"
+            placeholder="Buscar por nombres, apellidos, teléfono o CI/NIT"
+            value="{{ q }}"
+            autocomplete="off"
+        >
+    </form>
+
+    {% if user.is_superuser %}
+    <a href="{% url 'cliente_create' %}" class="btn btn-primary">
         <i class="fa-solid fa-plus"></i> Nuevo cliente
     </a>
     {% endif %}
 </div>
 
-<div class="search-box">
-    <i class="fa-solid fa-magnifying-glass"></i>
-    <input
-        type="text"
-        class="live-search"
-        data-url="{% url 'clientes_list' %}"
-        data-target="#clientes-table-wrap"
-        name="q"
-        placeholder="Buscar por nombres, apellidos, teléfono o CI/NIT"
-        value="{{ q }}"
-    >
-</div>
-
-<div id="clientes-table-wrap">
+<div id="clientes-table-wrapper">
     {% include 'tienda/partials/clientes_table.html' %}
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+(function () {
+    const input = document.getElementById('clientes-search');
+    const wrapper = document.getElementById('clientes-table-wrapper');
+    let timeout = null;
+
+    if (!input || !wrapper) return;
+
+    input.addEventListener('input', function () {
+        clearTimeout(timeout);
+        timeout = setTimeout(() => {
+            const q = encodeURIComponent(input.value.trim());
+            fetch(`?q=${q}`, {
+                headers: { 'x-requested-with': 'XMLHttpRequest' }
+            })
+            .then(r => r.text())
+            .then(html => { wrapper.innerHTML = html; });
+        }, 250);
+    });
+})();
+</script>
 {% endblock %}

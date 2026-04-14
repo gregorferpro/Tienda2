@@ -1,26 +1,57 @@
 {% extends 'base.html' %}
+
+{% block title %}Usuarios{% endblock %}
+
 {% block content %}
-<div class="page-header">
+<div class="mb-4">
     <h2 class="section-title">Usuarios</h2>
-    <a href="{% url 'usuario_create' %}" class="btn btn-primary btn-main">
+    <p class="section-subtitle">Administra cuentas, roles y accesos del sistema.</p>
+</div>
+
+<div class="toolbar">
+    <form method="get" class="search-wrap" id="usuarios-search-form">
+        <i class="fa-solid fa-magnifying-glass"></i>
+        <input
+            type="text"
+            name="q"
+            id="usuarios-search"
+            class="search-input"
+            placeholder="Buscar por nombre, usuario, email o rol"
+            value="{{ q }}"
+            autocomplete="off"
+        >
+    </form>
+
+    <a href="{% url 'usuario_create' %}" class="btn btn-primary">
         <i class="fa-solid fa-plus"></i> Nuevo usuario
     </a>
 </div>
 
-<div class="search-box">
-    <i class="fa-solid fa-magnifying-glass"></i>
-    <input
-        type="text"
-        class="live-search"
-        data-url="{% url 'usuarios_list' %}"
-        data-target="#usuarios-table-wrap"
-        name="q"
-        placeholder="Buscar por nombre, usuario, email o rol"
-        value="{{ q }}"
-    >
-</div>
-
-<div id="usuarios-table-wrap">
+<div id="usuarios-table-wrapper">
     {% include 'cuentas/partials/usuarios_table.html' %}
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+(function () {
+    const input = document.getElementById('usuarios-search');
+    const wrapper = document.getElementById('usuarios-table-wrapper');
+    let timeout = null;
+
+    if (!input || !wrapper) return;
+
+    input.addEventListener('input', function () {
+        clearTimeout(timeout);
+        timeout = setTimeout(() => {
+            const q = encodeURIComponent(input.value.trim());
+            fetch(`?q=${q}`, {
+                headers: { 'x-requested-with': 'XMLHttpRequest' }
+            })
+            .then(r => r.text())
+            .then(html => { wrapper.innerHTML = html; });
+        }, 250);
+    });
+})();
+</script>
 {% endblock %}

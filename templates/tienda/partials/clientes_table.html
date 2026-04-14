@@ -1,43 +1,49 @@
-<div class="dashboard-card">
-    <div class="table-responsive">
-        <table class="table align-middle mb-0">
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Nombres</th>
-                    <th>Apellidos</th>
-                    <th>CI/NIT</th>
-                    <th>Teléfono</th>
-                    <th>Email</th>
-                    <th>Estado</th>
-                    <th>Acciones</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for c in clientes %}
-                <tr>
-                    <td>{{ c.id }}</td>
-                    <td>{{ c.nombres }}</td>
-                    <td>{{ c.apellidos }}</td>
-                    <td>{{ c.ci_nit }}</td>
-                    <td>{{ c.telefono }}</td>
-                    <td>{{ c.email }}</td>
-                    <td>{{ c.estado }}</td>
-                    <td>
-                        {% if user.is_superuser or user.perfil.rol == 'superuser' %}
-                            <a href="{% url 'cliente_update' c.id %}" class="btn btn-sm btn-warning text-white">Editar</a>
-                            <a href="{% url 'cliente_delete' c.id %}" class="btn btn-sm btn-danger">Eliminar</a>
-                        {% else %}
-                            <span class="text-muted">Solo lectura</span>
-                        {% endif %}
-                    </td>
-                </tr>
-                {% empty %}
-                <tr>
-                    <td colspan="8">No hay clientes registrados.</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
+<div class="table-wrap">
+    <table class="table table-hover align-middle">
+        <thead>
+            <tr>
+                <th style="width: 90px;">ID</th>
+                <th>Nombres</th>
+                <th>Apellidos</th>
+                <th>CI/NIT</th>
+                <th>Teléfono</th>
+                <th>Email</th>
+                <th>Estado</th>
+                <th style="width: 180px;">Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for cliente in clientes %}
+            <tr>
+                <td>{{ cliente.id }}</td>
+                <td>{{ cliente.nombres }}</td>
+                <td>{{ cliente.apellidos }}</td>
+                <td>{{ cliente.ci_nit }}</td>
+                <td>{{ cliente.telefono }}</td>
+                <td>{{ cliente.email }}</td>
+                <td>
+                    {% if cliente.estado == 'activo' %}
+                        <span class="badge text-bg-success">Activo</span>
+                    {% else %}
+                        <span class="badge text-bg-secondary">{{ cliente.estado }}</span>
+                    {% endif %}
+                </td>
+                <td>
+                    {% if user.is_superuser %}
+                    <div class="d-flex gap-2">
+                        <a href="{% url 'cliente_update' cliente.pk %}" class="btn btn-warning btn-sm text-white">Editar</a>
+                        <a href="{% url 'cliente_delete' cliente.pk %}" class="btn btn-danger btn-sm">Eliminar</a>
+                    </div>
+                    {% else %}
+                    <span class="text-muted">Sin acciones</span>
+                    {% endif %}
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="8" class="empty-state">No hay clientes registrados.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
 </div>

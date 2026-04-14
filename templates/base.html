@@ -11,21 +11,28 @@
 
     <style>
         :root{
-            --sidebar-bg:#0f1e3a;
+            --sidebar:#0f1e3a;
+            --sidebar-2:#13264a;
             --primary:#2563eb;
+            --primary-soft:#eaf1ff;
+            --success:#16a34a;
+            --warning:#f59e0b;
             --danger:#dc3545;
             --text:#0f172a;
             --muted:#64748b;
-            --page-bg:#eef2f7;
             --border:#dbe3ef;
+            --bg:#eef3f8;
+            --card:#ffffff;
+            --shadow:0 10px 30px rgba(15, 23, 42, .06);
+            --radius:18px;
         }
 
-        * { box-sizing:border-box; }
+        *{ box-sizing:border-box; }
 
         body{
             margin:0;
             font-family:Arial, sans-serif;
-            background:var(--page-bg);
+            background:var(--bg);
             color:var(--text);
         }
 
@@ -37,9 +44,9 @@
         }
 
         .sidebar{
-            width:240px;
+            width:248px;
             min-height:100vh;
-            background:linear-gradient(180deg, var(--sidebar-bg), #0b1730);
+            background:linear-gradient(180deg, var(--sidebar), #0a1730);
             color:#fff;
             display:flex;
             flex-direction:column;
@@ -48,8 +55,8 @@
         }
 
         .sidebar-brand{
-            padding:24px 18px;
-            font-size:20px;
+            padding:24px 20px;
+            font-size:21px;
             font-weight:700;
             border-bottom:1px solid rgba(255,255,255,.08);
         }
@@ -63,16 +70,22 @@
 
         .sidebar-link{
             color:#e5eefc;
-            padding:12px 14px;
-            border-radius:12px;
+            padding:13px 15px;
+            border-radius:14px;
             display:flex;
             align-items:center;
             gap:12px;
+            font-weight:600;
             transition:.2s ease;
         }
 
         .sidebar-link:hover{
             background:rgba(255,255,255,.08);
+            color:#fff;
+        }
+
+        .sidebar-link.active{
+            background:#16305f;
             color:#fff;
         }
 
@@ -94,10 +107,11 @@
             display:flex;
             align-items:center;
             gap:10px;
-            padding:12px 14px;
-            border-radius:12px;
+            padding:13px 15px;
+            border-radius:14px;
             cursor:pointer;
             text-align:left;
+            font-weight:600;
         }
 
         .logout-link:hover{
@@ -115,7 +129,7 @@
         .topbar{
             background:#fff;
             border-bottom:1px solid var(--border);
-            padding:14px 18px;
+            padding:14px 20px;
             display:flex;
             align-items:center;
             justify-content:space-between;
@@ -123,7 +137,7 @@
         }
 
         .topbar-title{
-            font-size:16px;
+            font-size:18px;
             font-weight:700;
             margin:0;
         }
@@ -141,8 +155,8 @@
         }
 
         .user-badge{
-            width:40px;
-            height:40px;
+            width:42px;
+            height:42px;
             border-radius:50%;
             background:#22c55e;
             color:#fff;
@@ -150,6 +164,143 @@
             align-items:center;
             justify-content:center;
             font-weight:700;
+            box-shadow:var(--shadow);
+        }
+
+        .page-content{
+            padding:22px 20px;
+            flex:1;
+        }
+
+        .page-card{
+            background:var(--card);
+            border:1px solid var(--border);
+            border-radius:var(--radius);
+            box-shadow:var(--shadow);
+            padding:18px;
+        }
+
+        .section-title{
+            font-size:22px;
+            font-weight:700;
+            color:#2450d3;
+            margin:0;
+        }
+
+        .section-subtitle{
+            color:var(--muted);
+            margin-top:6px;
+        }
+
+        .toolbar{
+            display:flex;
+            align-items:center;
+            justify-content:space-between;
+            gap:12px;
+            flex-wrap:wrap;
+            margin-bottom:18px;
+        }
+
+        .search-wrap{
+            position:relative;
+            flex:1;
+            min-width:260px;
+        }
+
+        .search-wrap i{
+            position:absolute;
+            left:16px;
+            top:50%;
+            transform:translateY(-50%);
+            color:#8aa0bd;
+            font-size:15px;
+        }
+
+        .search-input,
+        .form-control,
+        .form-select{
+            height:52px;
+            border-radius:16px !important;
+            border:1px solid #cfd8e6 !important;
+            background:#fff !important;
+            box-shadow:none !important;
+            font-size:16px;
+        }
+
+        .search-input{
+            width:100%;
+            padding:0 16px 0 44px;
+        }
+
+        textarea.form-control{
+            min-height:130px;
+            padding-top:14px;
+            padding-bottom:14px;
+        }
+
+        .form-control:focus,
+        .form-select:focus,
+        .search-input:focus{
+            border-color:#7aa2ff !important;
+            box-shadow:0 0 0 4px rgba(37, 99, 235, .10) !important;
+            outline:none;
+        }
+
+        .btn-soft-primary{
+            background:var(--primary-soft);
+            color:var(--primary);
+            border:none;
+            border-radius:14px;
+            padding:12px 16px;
+            font-weight:700;
+        }
+
+        .btn-soft-primary:hover{
+            background:#dce8ff;
+        }
+
+        .btn-primary,
+        .btn-success,
+        .btn-warning,
+        .btn-danger,
+        .btn-outline-primary{
+            border-radius:14px !important;
+            font-weight:700 !important;
+        }
+
+        .table-wrap{
+            background:#fff;
+            border:1px solid var(--border);
+            border-radius:18px;
+            overflow:hidden;
+            box-shadow:var(--shadow);
+        }
+
+        .table{
+            margin:0;
+        }
+
+        .table thead th{
+            background:#f8fbff;
+            border-bottom:1px solid var(--border);
+            color:#0f172a;
+            font-weight:700;
+            vertical-align:middle;
+            white-space:nowrap;
+        }
+
+        .table td{
+            vertical-align:middle;
+        }
+
+        .empty-state{
+            padding:28px;
+            text-align:center;
+            color:var(--muted);
+        }
+
+        .message-wrap{
+            margin-bottom:18px;
         }
 
         .public-topbar{
@@ -164,7 +315,7 @@
 
         .public-brand h1{
             margin:0;
-            font-size:18px;
+            font-size:20px;
             font-weight:700;
         }
 
@@ -180,25 +331,10 @@
             gap:10px;
         }
 
-        .btn-public{
-            border:none;
-            border-radius:12px;
+        .public-actions .btn{
+            border-radius:14px;
+            font-weight:700;
             padding:10px 16px;
-            font-weight:600;
-        }
-
-        .btn-login{
-            background:var(--primary);
-            color:#fff;
-        }
-
-        .page-content{
-            padding:22px 18px;
-            flex:1;
-        }
-
-        .message-wrap{
-            margin-bottom:18px;
         }
 
         @media (max-width: 991px){
@@ -217,7 +353,7 @@
 </head>
 <body>
 
-{% if user.is_authenticated %}
+{% if user.is_authenticated and user.is_staff %}
     <div class="app-layout">
         <aside class="sidebar">
             <div class="sidebar-brand">Sistema</div>
@@ -249,11 +385,6 @@
                     <span>Usuarios</span>
                 </a>
                 {% endif %}
-
-                <a href="{% url 'catalogo_cliente' %}" class="sidebar-link">
-                    <i class="fa-solid fa-store"></i>
-                    <span>Ver catálogo</span>
-                </a>
             </nav>
 
             <div class="sidebar-footer">
@@ -289,9 +420,17 @@
                 </div>
 
                 <div class="public-actions">
-                    <a href="{% url 'login' %}" class="btn btn-public btn-login">
-                        Iniciar sesión
-                    </a>
+                    {% if user.is_authenticated %}
+                        <a href="{% url 'carrito' %}" class="btn btn-warning">
+                            <i class="fa-solid fa-cart-shopping"></i> Carrito
+                        </a>
+                        <form method="post" action="{% url 'logout' %}" style="margin:0;">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-outline-danger">Salir</button>
+                        </form>
+                    {% else %}
+                        <a href="{% url 'login' %}" class="btn btn-primary">Iniciar sesión</a>
+                    {% endif %}
                 </div>
             </header>
 {% endif %}
@@ -310,7 +449,7 @@
                 {% block content %}{% endblock %}
             </main>
 
-{% if user.is_authenticated %}
+{% if user.is_authenticated and user.is_staff %}
         </div>
     </div>
 {% endif %}

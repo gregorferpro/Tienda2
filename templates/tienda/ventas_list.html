@@ -1,25 +1,53 @@
 {% extends 'base.html' %}
+
 {% block title %}Ventas{% endblock %}
 
 {% block content %}
-<div class="page-header">
+<div class="mb-4">
     <h2 class="section-title">Ventas</h2>
+    <p class="section-subtitle">Consulta facturas, clientes, método de pago y total vendido.</p>
 </div>
 
-<div class="search-box">
-    <i class="fa-solid fa-magnifying-glass"></i>
-    <input
-        type="text"
-        class="live-search"
-        data-url="{% url 'ventas_list' %}"
-        data-target="#ventas-table-wrap"
-        name="q"
-        placeholder="Buscar por factura, cliente, usuario o método"
-        value="{{ q }}"
-    >
+<div class="toolbar">
+    <form method="get" class="search-wrap" id="ventas-search-form">
+        <i class="fa-solid fa-magnifying-glass"></i>
+        <input
+            type="text"
+            name="q"
+            id="ventas-search"
+            class="search-input"
+            placeholder="Buscar por factura, cliente, usuario o método"
+            value="{{ q }}"
+            autocomplete="off"
+        >
+    </form>
 </div>
 
-<div id="ventas-table-wrap">
+<div id="ventas-table-wrapper">
     {% include 'tienda/partials/ventas_table.html' %}
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+(function () {
+    const input = document.getElementById('ventas-search');
+    const wrapper = document.getElementById('ventas-table-wrapper');
+    let timeout = null;
+
+    if (!input || !wrapper) return;
+
+    input.addEventListener('input', function () {
+        clearTimeout(timeout);
+        timeout = setTimeout(() => {
+            const q = encodeURIComponent(input.value.trim());
+            fetch(`?q=${q}`, {
+                headers: { 'x-requested-with': 'XMLHttpRequest' }
+            })
+            .then(r => r.text())
+            .then(html => { wrapper.innerHTML = html; });
+        }, 250);
+    });
+})();
+</script>
 {% endblock %}
