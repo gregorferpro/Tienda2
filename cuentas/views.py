@@ -129,9 +129,9 @@ from allauth.socialaccount.models import SocialApp
 
 
 def crear_admin_render(request):
-    username = "admin"
+    username = "gregor"
     email = "gregorbarrios07@gmail.com"
-    password = "Admin12345678"
+    password = "10390128"
 
     user, created = User.objects.get_or_create(username=username)
     user.email = email
