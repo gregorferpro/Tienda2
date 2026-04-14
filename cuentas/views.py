@@ -128,21 +128,6 @@ from django.contrib.sites.models import Site
 from allauth.socialaccount.models import SocialApp
 
 
-def crear_admin_render(request):
-    username = "gregor"
-    email = "gregorbarrios07@gmail.com"
-    password = "10390128"
-
-    user, created = User.objects.get_or_create(username=username)
-    user.email = email
-    user.is_staff = True
-    user.is_superuser = True
-    user.set_password(password)
-    user.save()
-
-    if created:
-        return HttpResponse("Superusuario creado correctamente.")
-    return HttpResponse("Superusuario actualizado correctamente.")
 
 
 import os
