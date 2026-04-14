@@ -120,6 +120,9 @@ def usuario_delete(request, pk):
 
     return render(request, 'cuentas/usuario_confirm_delete.html', {'usuario': usuario})
 
+
+
+
 from django.http import HttpResponse
 from django.contrib.auth.models import User
 
