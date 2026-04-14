@@ -8,137 +8,398 @@
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
-    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+
+    <style>
+        :root{
+            --sidebar-bg:#0f1e3a;
+            --sidebar-bg-2:#13264a;
+            --primary:#2563eb;
+            --danger:#dc3545;
+            --warning:#f59e0b;
+            --success:#16a34a;
+            --text:#0f172a;
+            --muted:#64748b;
+            --card-bg:#ffffff;
+            --page-bg:#eef2f7;
+            --border:#dbe3ef;
+        }
+
+        *{
+            box-sizing:border-box;
+        }
+
+        body{
+            margin:0;
+            font-family:Arial, sans-serif;
+            background:var(--page-bg);
+            color:var(--text);
+        }
+
+        a{
+            text-decoration:none;
+        }
+
+        .app-layout{
+            min-height:100vh;
+            display:flex;
+        }
+
+        .sidebar{
+            width:240px;
+            min-height:100vh;
+            background:linear-gradient(180deg, var(--sidebar-bg), #0b1730);
+            color:#fff;
+            display:flex;
+            flex-direction:column;
+            position:sticky;
+            top:0;
+        }
+
+        .sidebar-brand{
+            padding:24px 18px;
+            font-size:20px;
+            font-weight:700;
+            border-bottom:1px solid rgba(255,255,255,.08);
+        }
+
+        .sidebar-nav{
+            padding:18px 12px;
+            display:flex;
+            flex-direction:column;
+            gap:8px;
+        }
+
+        .sidebar-link{
+            color:#e5eefc;
+            padding:12px 14px;
+            border-radius:12px;
+            display:flex;
+            align-items:center;
+            gap:12px;
+            transition:.2s ease;
+        }
+
+        .sidebar-link:hover{
+            background:rgba(255,255,255,.08);
+            color:#fff;
+        }
+
+        .sidebar-footer{
+            margin-top:auto;
+            padding:16px 12px 20px;
+            border-top:1px solid rgba(255,255,255,.08);
+        }
+
+        .logout-link{
+            color:#ffd7d7;
+            display:flex;
+            align-items:center;
+            gap:10px;
+            padding:12px 14px;
+            border-radius:12px;
+        }
+
+        .logout-link:hover{
+            background:rgba(220,53,69,.12);
+            color:#fff;
+        }
+
+        .main-area{
+            flex:1;
+            min-width:0;
+            display:flex;
+            flex-direction:column;
+        }
+
+        .topbar{
+            background:#fff;
+            border-bottom:1px solid var(--border);
+            padding:14px 18px;
+            display:flex;
+            align-items:center;
+            justify-content:space-between;
+            gap:16px;
+        }
+
+        .topbar-title{
+            font-size:16px;
+            font-weight:700;
+            margin:0;
+        }
+
+        .topbar-subtitle{
+            font-size:13px;
+            color:var(--muted);
+            margin:3px 0 0;
+        }
+
+        .topbar-user{
+            display:flex;
+            align-items:center;
+            gap:12px;
+        }
+
+        .user-badge{
+            width:40px;
+            height:40px;
+            border-radius:50%;
+            background:#22c55e;
+            color:#fff;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            font-weight:700;
+        }
+
+        .logout-btn{
+            background:var(--danger);
+            color:#fff;
+            border:none;
+            border-radius:12px;
+            padding:10px 16px;
+        }
+
+        .page-content{
+            padding:22px 18px;
+            flex:1;
+        }
+
+        .dashboard-card,
+        .content-card{
+            background:var(--card-bg);
+            border:1px solid var(--border);
+            border-radius:20px;
+            box-shadow:0 8px 24px rgba(15,23,42,.06);
+            padding:18px;
+        }
+
+        .section-title{
+            color:#2450d3;
+            font-size:22px;
+            font-weight:700;
+        }
+
+        .public-wrapper{
+            min-height:100vh;
+            display:flex;
+            flex-direction:column;
+        }
+
+        .public-topbar{
+            background:#fff;
+            border-bottom:1px solid var(--border);
+            padding:18px 24px;
+            display:flex;
+            justify-content:space-between;
+            align-items:center;
+            gap:12px;
+        }
+
+        .public-brand h1{
+            margin:0;
+            font-size:18px;
+            font-weight:700;
+        }
+
+        .public-brand p{
+            margin:4px 0 0;
+            color:var(--muted);
+            font-size:14px;
+        }
+
+        .public-actions{
+            display:flex;
+            align-items:center;
+            gap:10px;
+        }
+
+        .btn-public{
+            border:none;
+            border-radius:12px;
+            padding:10px 16px;
+            font-weight:600;
+        }
+
+        .btn-login{
+            background:var(--primary);
+            color:#fff;
+        }
+
+        .btn-outline-lightblue{
+            background:#e8f0ff;
+            color:var(--primary);
+        }
+
+        .public-content{
+            padding:22px 18px;
+            flex:1;
+        }
+
+        .message-wrap{
+            margin-bottom:18px;
+        }
+
+        .catalog-header{
+            margin-bottom:18px;
+        }
+
+        .catalog-search{
+            margin-bottom:20px;
+        }
+
+        .catalog-search .form-control{
+            height:56px;
+            border-radius:16px;
+            border:1px solid #cfd8e6;
+            font-size:16px;
+        }
+
+        @media (max-width: 991px){
+            .sidebar{
+                display:none;
+            }
+
+            .topbar{
+                padding:14px;
+            }
+
+            .page-content,
+            .public-content{
+                padding:16px;
+            }
+
+            .public-topbar{
+                padding:14px 16px;
+                flex-direction:column;
+                align-items:flex-start;
+            }
+        }
+    </style>
+
+    {% block extra_css %}{% endblock %}
 </head>
 <body>
 
 {% if user.is_authenticated %}
+    <div class="app-layout">
+        <aside class="sidebar">
+            <div class="sidebar-brand">Sistema</div>
 
-    {% if user.perfil.rol != 'cliente' %}
-    <div class="layout-admin">
-        <aside class="sidebar" id="sidebar">
-            <div>
-                <div class="sidebar-brand">Sistema</div>
+            <nav class="sidebar-nav">
+                <a href="{% url 'dashboard' %}" class="sidebar-link">
+                    <i class="fa-solid fa-chart-line"></i>
+                    <span>Dashboard</span>
+                </a>
 
-                <nav class="sidebar-nav">
-                    <a href="{% url 'dashboard' %}" class="sidebar-link">
-                        <i class="fa-solid fa-chart-line"></i>
-                        <span>Dashboard</span>
-                    </a>
+                <a href="{% url 'productos_list' %}" class="sidebar-link">
+                    <i class="fa-solid fa-box"></i>
+                    <span>Productos</span>
+                </a>
 
-                    <a href="{% url 'productos_list' %}" class="sidebar-link">
-                        <i class="fa-solid fa-box"></i>
-                        <span>Productos</span>
-                    </a>
+                <a href="{% url 'clientes_list' %}" class="sidebar-link">
+                    <i class="fa-solid fa-users"></i>
+                    <span>Clientes</span>
+                </a>
 
-                    <a href="{% url 'clientes_list' %}" class="sidebar-link">
-                        <i class="fa-solid fa-users"></i>
-                        <span>Clientes</span>
-                    </a>
+                <a href="{% url 'ventas_list' %}" class="sidebar-link">
+                    <i class="fa-solid fa-cart-shopping"></i>
+                    <span>Ventas</span>
+                </a>
 
-                    <a href="{% url 'ventas_list' %}" class="sidebar-link">
-                        <i class="fa-solid fa-cart-shopping"></i>
-                        <span>Ventas</span>
-                    </a>
+                {% if user.is_superuser or user.perfil.rol == 'superuser' %}
+                <a href="{% url 'usuarios_list' %}" class="sidebar-link">
+                    <i class="fa-solid fa-user-gear"></i>
+                    <span>Usuarios</span>
+                </a>
+                {% endif %}
 
-                    {% if user.is_superuser or user.perfil.rol == 'superuser' %}
-                    <a href="{% url 'usuarios_list' %}" class="sidebar-link">
-                        <i class="fa-solid fa-user-gear"></i>
-                        <span>Usuarios</span>
-                    </a>
-                    {% endif %}
-                </nav>
-            </div>
+                <a href="{% url 'catalogo_cliente' %}" class="sidebar-link">
+                    <i class="fa-solid fa-store"></i>
+                    <span>Ver catálogo</span>
+                </a>
+            </nav>
 
             <div class="sidebar-footer">
-                <form method="post" action="{% url 'logout' %}" class="logout-form">
-                    {% csrf_token %}
-                    <button type="submit" class="logout-link">
-                        <i class="fa-solid fa-right-from-bracket"></i>
-                        <span>Cerrar sesión</span>
-                    </button>
-                </form>
+                <a href="{% url 'logout' %}" class="logout-link">
+                    <i class="fa-solid fa-right-from-bracket"></i>
+                    <span>Cerrar sesión</span>
+                </a>
             </div>
         </aside>
 
-        <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
-    {% endif %}
-
-    <main class="main-content {% if user.perfil.rol == 'cliente' %}cliente-main{% endif %}">
-        <header class="topbar">
-            <div class="topbar-left">
-                {% if user.perfil.rol != 'cliente' %}
-                <button class="menu-toggle" id="menuToggle" type="button">
-                    <i class="fa-solid fa-bars"></i>
-                </button>
-                {% endif %}
-
+        <div class="main-area">
+            <header class="topbar">
                 <div>
                     <h1 class="topbar-title">Sistema de Tienda</h1>
                     <p class="topbar-subtitle">
-                        {% if user.perfil.rol == 'cliente' %}
+                        {% if user.is_superuser or user.perfil.rol == 'superuser' %}
+                            Panel administrativo
+                        {% elif user.perfil.rol == 'cliente' %}
                             Catálogo de compras
                         {% else %}
-                            Panel administrativo
+                            Panel de gestión
                         {% endif %}
                     </p>
                 </div>
+
+                <div class="topbar-user">
+                    <div class="user-badge">
+                        {{ user.username|slice:":1"|upper }}
+                    </div>
+                    <div>{{ user.username }}</div>
+                </div>
+            </header>
+
+            <main class="page-content">
+                {% if messages %}
+                    <div class="message-wrap">
+                        {% for message in messages %}
+                            <div class="alert alert-{{ message.tags|default:'info' }} mb-2">
+                                {{ message }}
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+
+                {% block content %}{% endblock %}
+            </main>
+        </div>
+    </div>
+
+{% else %}
+    <div class="public-wrapper">
+        <header class="public-topbar">
+            <div class="public-brand">
+                <h1>Sistema de Tienda</h1>
+                <p>Catálogo de compras</p>
             </div>
 
-            <div class="topbar-user">
-                <div class="user-avatar">{{ user.username|first|upper }}</div>
-                <span>{{ user.username }}</span>
-
-                {% if user.perfil.rol == 'cliente' %}
-                <form method="post" action="{% url 'logout' %}" class="logout-top-form">
-                    {% csrf_token %}
-                    <button type="submit" class="btn btn-danger btn-sm">Salir</button>
-                </form>
-                {% endif %}
+            <div class="public-actions">
+                <a href="{% url 'carrito' %}" class="btn btn-public btn-outline-lightblue">
+                    <i class="fa-solid fa-cart-shopping"></i> Carrito
+                </a>
+                <a href="{% url 'login' %}" class="btn btn-public btn-login">
+                    Iniciar sesión
+                </a>
             </div>
         </header>
 
-        <section class="page-content">
+        <main class="public-content">
             {% if messages %}
-                {% for message in messages %}
-                    <div class="alert alert-{{ message.tags|default:'info' }} mb-3">
-                        {{ message }}
-                    </div>
-                {% endfor %}
+                <div class="message-wrap">
+                    {% for message in messages %}
+                        <div class="alert alert-{{ message.tags|default:'info' }} mb-2">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                </div>
             {% endif %}
 
             {% block content %}{% endblock %}
-        </section>
-    </main>
-
-    {% if user.perfil.rol != 'cliente' %}
+        </main>
     </div>
-    {% endif %}
-
-{% else %}
-    {% block content_noauth %}{% endblock %}
 {% endif %}
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-<script src="{% static 'js/busqueda.js' %}"></script>
-<script>
-document.addEventListener('DOMContentLoaded', function () {
-    const menuToggle = document.getElementById('menuToggle');
-    const sidebar = document.getElementById('sidebar');
-    const backdrop = document.getElementById('sidebarBackdrop');
-
-    if (menuToggle && sidebar && backdrop) {
-        menuToggle.addEventListener('click', function () {
-            sidebar.classList.toggle('sidebar-open');
-            backdrop.classList.toggle('show');
-        });
-
-        backdrop.addEventListener('click', function () {
-            sidebar.classList.remove('sidebar-open');
-            backdrop.classList.remove('show');
-        });
-    }
-});
-</script>
+{% block extra_js %}{% endblock %}
 </body>
 </html>
