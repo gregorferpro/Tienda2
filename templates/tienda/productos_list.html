@@ -4,26 +4,26 @@
 
 {% block content %}
 <div class="mb-4">
-    <h2 class="section-title">Catálogo de Productos</h2>
-    <p class="section-subtitle">Gestiona, consulta y edita tus productos desde un solo lugar.</p>
+    <h2 class="section-title">Productos</h2>
+    <p class="section-subtitle">Gestiona el catálogo interno con una presentación limpia, moderna y adaptable.</p>
 </div>
 
 <div class="toolbar">
-    <form method="get" id="productos-search-form" class="search-wrap">
+    <form method="get" class="search-wrap" id="productos-search-form">
         <i class="fa-solid fa-magnifying-glass"></i>
         <input
             type="text"
             name="q"
             id="productos-search"
             class="search-input"
-            placeholder="Buscar por código, nombre, marca o modelo"
+            placeholder="Buscar por nombre, código, marca o modelo"
             value="{{ q }}"
             autocomplete="off"
         >
     </form>
 
     {% if user.is_superuser %}
-    <a href="{% url 'producto_create' %}" class="btn btn-primary">
+    <a href="{% url 'producto_create' %}" class="btn btn-primary btn-main">
         <i class="fa-solid fa-plus"></i> Nuevo producto
     </a>
     {% endif %}

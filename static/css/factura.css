@@ -1,0 +1,191 @@
+body.factura-body{
+    font-family:Arial, Helvetica, sans-serif;
+    background:#fff;
+    color:#000;
+    margin:0;
+    padding:0;
+}
+
+.factura{
+    width:1000px;
+    margin:20px auto;
+    padding:20px 28px 40px;
+    background:#fff;
+}
+
+.factura-top{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-start;
+    margin-bottom:90px;
+}
+
+.factura-empresa{
+    width:40%;
+    text-align:center;
+    font-size:18px;
+    line-height:1.35;
+}
+
+.factura-empresa strong{
+    font-size:20px;
+}
+
+.factura-datos{
+    width:32%;
+    font-size:18px;
+    line-height:1.35;
+}
+
+.factura-datos table,
+.factura-detalle,
+.factura-totales{
+    width:100%;
+    border-collapse:collapse;
+}
+
+.factura-datos td{
+    padding:2px 4px;
+    vertical-align:top;
+}
+
+.factura-titulo{
+    text-align:center;
+    margin-bottom:60px;
+}
+
+.factura-titulo h1{
+    font-size:30px;
+    margin:0;
+    font-weight:700;
+}
+
+.factura-titulo p{
+    margin:6px 0 0;
+    font-size:18px;
+}
+
+.factura-cliente{
+    display:flex;
+    justify-content:space-between;
+    margin-bottom:26px;
+    font-size:18px;
+}
+
+.factura-cliente-left,
+.factura-cliente-right{
+    width:48%;
+}
+
+.factura-cliente p{
+    margin:8px 0;
+}
+
+.factura-detalle{
+    margin-top:10px;
+    font-size:18px;
+}
+
+.factura-detalle th,
+.factura-detalle td,
+.factura-totales td{
+    border:2px solid #444;
+    padding:8px 10px;
+    text-align:center;
+}
+
+.factura-detalle th{
+    font-weight:700;
+}
+
+.factura-detalle .desc{
+    text-align:left;
+}
+
+.factura-col-codigo{ width:16%; }
+.factura-col-cantidad{ width:11%; }
+.factura-col-precio{ width:13%; }
+.factura-col-descuento{ width:13%; }
+.factura-col-subtotal{ width:13%; }
+
+.factura-totales{
+    width:42%;
+    margin-left:auto;
+    margin-top:0;
+    font-size:18px;
+}
+
+.factura-totales .label{
+    text-align:right;
+    font-weight:700;
+}
+
+.factura-son{
+    margin:18px 0 60px;
+    font-size:18px;
+    font-weight:700;
+}
+
+.factura-pie{
+    position:relative;
+    margin-top:30px;
+    min-height:170px;
+}
+
+.factura-leyendas{
+    text-align:center;
+    font-size:15px;
+    line-height:1.6;
+    margin-right:190px;
+}
+
+.factura-qr{
+    position:absolute;
+    right:0;
+    bottom:0;
+    text-align:center;
+}
+
+.factura-qr img{
+    width:130px;
+    height:130px;
+    object-fit:contain;
+}
+
+.no-print{
+    margin-top:25px;
+    display:flex;
+    gap:10px;
+}
+
+.factura-btn{
+    display:inline-block;
+    padding:10px 16px;
+    border:none;
+    border-radius:8px;
+    text-decoration:none;
+    font-size:15px;
+    cursor:pointer;
+}
+
+.factura-btn-primary{
+    background:#2563eb;
+    color:#fff;
+}
+
+.factura-btn-secondary{
+    background:#6b7280;
+    color:#fff;
+}
+
+@media print{
+    .no-print{
+        display:none !important;
+    }
+
+    .factura{
+        width:100%;
+        margin:0;
+        padding:0;
+    }
+}

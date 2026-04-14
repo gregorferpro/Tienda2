@@ -1,12 +1,25 @@
 {% extends 'base.html' %}
-{% block content %}
-<div class="dashboard-card" style="max-width:700px;">
-    <h3>¿Eliminar usuario {{ usuario.username }}?</h3>
 
-    <form method="post" class="mt-3">
-        {% csrf_token %}
-        <button class="btn btn-danger">Eliminar</button>
-        <a href="{% url 'usuarios_list' %}" class="btn btn-secondary">Cancelar</a>
-    </form>
+{% block title %}Eliminar usuario{% endblock %}
+
+{% block content %}
+<div class="delete-shell">
+    <div class="delete-card text-center">
+        <div class="delete-icon"><i class="fa-solid fa-user-xmark"></i></div>
+        <h2 class="section-title mb-3">Eliminar usuario</h2>
+        <p class="section-subtitle mb-4">Esta acción eliminará al usuario <strong>{{ object.username }}</strong>. Asegúrate antes de continuar.</p>
+
+        <form method="post">
+            {% csrf_token %}
+            <div class="delete-actions justify-content-center">
+                <button type="submit" class="btn btn-danger">
+                    <i class="fa-solid fa-trash"></i> Eliminar
+                </button>
+                <a href="{% url 'usuarios_list' %}" class="btn btn-secondary">
+                    <i class="fa-solid fa-arrow-left"></i> Cancelar
+                </a>
+            </div>
+        </form>
+    </div>
 </div>
 {% endblock %}

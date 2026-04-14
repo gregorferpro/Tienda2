@@ -2,38 +2,32 @@
     <table class="table table-hover align-middle">
         <thead>
             <tr>
-                <th style="width: 80px;">ID</th>
-                <th>Nombre completo</th>
+                <th class="col-id">ID</th>
                 <th>Usuario</th>
+                <th>Nombre</th>
                 <th>Email</th>
                 <th>Rol</th>
-                <th>Estado</th>
-                <th style="width: 170px;">Acciones</th>
+                <th class="col-actions">Acciones</th>
             </tr>
         </thead>
         <tbody>
             {% for usuario in usuarios %}
             <tr>
                 <td>{{ usuario.id }}</td>
-                <td>{{ usuario.first_name }} {{ usuario.last_name }}</td>
                 <td>{{ usuario.username }}</td>
+                <td>{{ usuario.get_full_name|default:'-' }}</td>
                 <td>{{ usuario.email }}</td>
                 <td>
-                    {% if usuario.perfil %}
-                        {{ usuario.perfil.rol }}
+                    {% if usuario.is_superuser %}
+                        <span class="badge text-bg-dark">Superusuario</span>
+                    {% elif usuario.is_staff %}
+                        <span class="badge text-bg-primary">Staff</span>
                     {% else %}
-                        -
+                        <span class="badge text-bg-secondary">Cliente</span>
                     {% endif %}
                 </td>
                 <td>
-                    {% if usuario.is_active %}
-                        <span class="badge text-bg-success">Activo</span>
-                    {% else %}
-                        <span class="badge text-bg-secondary">Inactivo</span>
-                    {% endif %}
-                </td>
-                <td>
-                    <div class="d-flex gap-2">
+                    <div class="d-flex gap-2 flex-wrap">
                         <a href="{% url 'usuario_update' usuario.pk %}" class="btn btn-warning btn-sm text-white">Editar</a>
                         <a href="{% url 'usuario_delete' usuario.pk %}" class="btn btn-danger btn-sm">Eliminar</a>
                     </div>
@@ -41,7 +35,7 @@
             </tr>
             {% empty %}
             <tr>
-                <td colspan="7" class="empty-state">No hay usuarios registrados.</td>
+                <td colspan="6" class="empty-state">No hay usuarios registrados.</td>
             </tr>
             {% endfor %}
         </tbody>

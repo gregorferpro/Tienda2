@@ -3,78 +3,76 @@
 {% block title %}Dashboard{% endblock %}
 
 {% block content %}
-<div class="page-card">
-    <div class="mb-4">
-        <h2 class="section-title">Bienvenido, {{ user.username }}</h2>
-        <p class="section-subtitle">Accede rápidamente a las áreas principales del sistema.</p>
+<div class="content-card mb-4">
+    <h2 class="section-title">Bienvenido, {{ user.username }}</h2>
+    <p class="section-subtitle">Accede rápidamente a las áreas principales del sistema con una interfaz más clara, moderna y consistente.</p>
+</div>
+
+<div class="dashboard-grid">
+    <div class="dashboard-col">
+        <div class="dashboard-panel">
+            <div class="dashboard-panel-head">
+                <div class="dashboard-icon"><i class="fa-solid fa-box"></i></div>
+                <div>
+                    <h3 class="dashboard-panel-title">Productos</h3>
+                    <p class="dashboard-panel-text">Gestiona catálogo, stock, precios e imágenes del inventario.</p>
+                </div>
+            </div>
+            <a href="{% url 'productos_list' %}" class="btn btn-primary">Entrar</a>
+        </div>
     </div>
 
-    <div class="row g-4">
-        <div class="col-md-6 col-xl-4">
-            <div class="page-card h-100">
-                <div class="d-flex align-items-center gap-3 mb-3">
-                    <div class="btn-soft-primary"><i class="fa-solid fa-box"></i></div>
-                    <div>
-                        <h4 class="mb-1">Productos</h4>
-                        <p class="text-muted mb-0">Gestiona tu catálogo y stock.</p>
-                    </div>
+    <div class="dashboard-col">
+        <div class="dashboard-panel">
+            <div class="dashboard-panel-head">
+                <div class="dashboard-icon"><i class="fa-solid fa-users"></i></div>
+                <div>
+                    <h3 class="dashboard-panel-title">Clientes</h3>
+                    <p class="dashboard-panel-text">Administra clientes, datos de contacto y seguimiento comercial.</p>
                 </div>
-                <a href="{% url 'productos_list' %}" class="btn btn-success w-100">Entrar</a>
             </div>
+            <a href="{% url 'clientes_list' %}" class="btn btn-primary">Entrar</a>
         </div>
+    </div>
 
-        <div class="col-md-6 col-xl-4">
-            <div class="page-card h-100">
-                <div class="d-flex align-items-center gap-3 mb-3">
-                    <div class="btn-soft-primary"><i class="fa-solid fa-users"></i></div>
-                    <div>
-                        <h4 class="mb-1">Clientes</h4>
-                        <p class="text-muted mb-0">Administra el registro de clientes.</p>
-                    </div>
+    <div class="dashboard-col">
+        <div class="dashboard-panel">
+            <div class="dashboard-panel-head">
+                <div class="dashboard-icon"><i class="fa-solid fa-cart-shopping"></i></div>
+                <div>
+                    <h3 class="dashboard-panel-title">Ventas</h3>
+                    <p class="dashboard-panel-text">Consulta facturas, movimientos y detalle de ventas generadas.</p>
                 </div>
-                <a href="{% url 'clientes_list' %}" class="btn btn-primary w-100">Entrar</a>
             </div>
+            <a href="{% url 'ventas_list' %}" class="btn btn-primary">Entrar</a>
         </div>
+    </div>
 
-        <div class="col-md-6 col-xl-4">
-            <div class="page-card h-100">
-                <div class="d-flex align-items-center gap-3 mb-3">
-                    <div class="btn-soft-primary"><i class="fa-solid fa-cart-shopping"></i></div>
-                    <div>
-                        <h4 class="mb-1">Ventas</h4>
-                        <p class="text-muted mb-0">Consulta ventas y facturas.</p>
-                    </div>
+    {% if user.is_superuser %}
+    <div class="dashboard-col">
+        <div class="dashboard-panel">
+            <div class="dashboard-panel-head">
+                <div class="dashboard-icon"><i class="fa-solid fa-user-gear"></i></div>
+                <div>
+                    <h3 class="dashboard-panel-title">Usuarios</h3>
+                    <p class="dashboard-panel-text">Configura cuentas, accesos y permisos del sistema.</p>
                 </div>
-                <a href="{% url 'ventas_list' %}" class="btn btn-warning w-100">Entrar</a>
             </div>
+            <a href="{% url 'usuarios_list' %}" class="btn btn-primary">Entrar</a>
         </div>
+    </div>
+    {% endif %}
 
-        {% if user.is_superuser %}
-        <div class="col-md-6 col-xl-4">
-            <div class="page-card h-100">
-                <div class="d-flex align-items-center gap-3 mb-3">
-                    <div class="btn-soft-primary"><i class="fa-solid fa-user-gear"></i></div>
-                    <div>
-                        <h4 class="mb-1">Usuarios</h4>
-                        <p class="text-muted mb-0">Administra cuentas y roles.</p>
-                    </div>
+    <div class="dashboard-col">
+        <div class="dashboard-panel">
+            <div class="dashboard-panel-head">
+                <div class="dashboard-icon"><i class="fa-solid fa-store"></i></div>
+                <div>
+                    <h3 class="dashboard-panel-title">Tienda pública</h3>
+                    <p class="dashboard-panel-text">Visualiza la experiencia del cliente sin duplicar la gestión interna.</p>
                 </div>
-                <a href="{% url 'usuarios_list' %}" class="btn btn-dark w-100">Entrar</a>
             </div>
-        </div>
-        {% endif %}
-
-        <div class="col-md-6 col-xl-4">
-            <div class="page-card h-100">
-                <div class="d-flex align-items-center gap-3 mb-3">
-                    <div class="btn-soft-primary"><i class="fa-solid fa-store"></i></div>
-                    <div>
-                        <h4 class="mb-1">Catálogo público</h4>
-                        <p class="text-muted mb-0">Ver la tienda como cliente.</p>
-                    </div>
-                </div>
-                <a href="{% url 'catalogo_cliente' %}" class="btn btn-outline-primary w-100">Abrir</a>
-            </div>
+            <a href="{% url 'catalogo_cliente' %}" class="btn btn-outline-primary">Abrir tienda</a>
         </div>
     </div>
 </div>

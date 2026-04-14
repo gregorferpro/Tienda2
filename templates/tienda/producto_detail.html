@@ -2,188 +2,6 @@
 
 {% block title %}Detalle del producto{% endblock %}
 
-{% block extra_css %}
-<style>
-    .detail-shell{
-        max-width:1200px;
-        margin:0 auto;
-    }
-
-    .detail-grid{
-        display:grid;
-        grid-template-columns: 1.05fr .95fr;
-        gap:24px;
-    }
-
-    .detail-card{
-        background:#fff;
-        border:1px solid #dbe3ef;
-        border-radius:22px;
-        box-shadow:0 10px 28px rgba(15,23,42,.06);
-        overflow:hidden;
-    }
-
-    .gallery-main{
-        height:500px;
-        background:#eef3f8;
-        display:flex;
-        align-items:center;
-        justify-content:center;
-        overflow:hidden;
-    }
-
-    .gallery-main img{
-        width:100%;
-        height:100%;
-        object-fit:contain;
-        background:#fff;
-    }
-
-    .thumb-strip{
-        display:flex;
-        gap:12px;
-        padding:16px;
-        flex-wrap:wrap;
-        border-top:1px solid #e6edf7;
-        background:#fff;
-    }
-
-    .thumb-item{
-        width:92px;
-        height:92px;
-        border-radius:14px;
-        overflow:hidden;
-        border:2px solid #dbe3ef;
-        background:#f8fbff;
-        cursor:pointer;
-        transition:.2s ease;
-        padding:0;
-    }
-
-    .thumb-item.active,
-    .thumb-item:hover{
-        border-color:#2563eb;
-        transform:translateY(-1px);
-    }
-
-    .thumb-item img{
-        width:100%;
-        height:100%;
-        object-fit:cover;
-    }
-
-    .info-card{
-        background:#fff;
-        border:1px solid #dbe3ef;
-        border-radius:22px;
-        box-shadow:0 10px 28px rgba(15,23,42,.06);
-        padding:26px;
-    }
-
-    .badge-state{
-        display:inline-flex;
-        align-items:center;
-        gap:8px;
-        background:#e9f8ee;
-        color:#0f9f5f;
-        font-weight:700;
-        border-radius:999px;
-        padding:8px 14px;
-        margin-bottom:16px;
-    }
-
-    .product-name{
-        font-size:34px;
-        font-weight:800;
-        line-height:1.15;
-        margin-bottom:18px;
-        color:#0f172a;
-    }
-
-    .spec-list{
-        display:grid;
-        grid-template-columns:1fr 1fr;
-        gap:14px;
-        margin-bottom:18px;
-    }
-
-    .spec-item{
-        background:#f8fbff;
-        border:1px solid #e2eaf5;
-        border-radius:16px;
-        padding:14px 16px;
-    }
-
-    .spec-label{
-        color:#64748b;
-        font-size:13px;
-        margin-bottom:4px;
-    }
-
-    .spec-value{
-        font-weight:700;
-        color:#0f172a;
-        word-break:break-word;
-    }
-
-    .price-box{
-        margin:22px 0;
-        padding:18px 20px;
-        border-radius:18px;
-        background:#effaf3;
-        border:1px solid #caecd5;
-    }
-
-    .price-label{
-        color:#64748b;
-        margin-bottom:4px;
-    }
-
-    .price-value{
-        font-size:38px;
-        font-weight:800;
-        color:#0f9f5f;
-        line-height:1;
-    }
-
-    .desc-box{
-        background:#fff;
-        border:1px solid #e2eaf5;
-        border-radius:18px;
-        padding:18px;
-        color:#334155;
-        line-height:1.75;
-        margin-bottom:22px;
-    }
-
-    .detail-actions{
-        display:flex;
-        gap:12px;
-        flex-wrap:wrap;
-    }
-
-    .detail-actions .btn{
-        border-radius:14px;
-        font-weight:700;
-        padding:12px 18px;
-    }
-
-    @media (max-width: 991px){
-        .detail-grid{
-            grid-template-columns:1fr;
-        }
-
-        .gallery-main{
-            height:360px;
-        }
-
-        .spec-list{
-            grid-template-columns:1fr;
-        }
-    }
-</style>
-{% endblock %}
-
 {% block content %}
 <div class="detail-shell">
     <div class="detail-grid">
@@ -224,17 +42,14 @@
                     <div class="spec-label">Código</div>
                     <div class="spec-value">{{ producto.codigo }}</div>
                 </div>
-
                 <div class="spec-item">
                     <div class="spec-label">Marca</div>
                     <div class="spec-value">{{ producto.marca }}</div>
                 </div>
-
                 <div class="spec-item">
                     <div class="spec-label">Modelo</div>
                     <div class="spec-value">{{ producto.modelo }}</div>
                 </div>
-
                 <div class="spec-item">
                     <div class="spec-label">Stock</div>
                     <div class="spec-value">{{ producto.stock }}</div>
@@ -255,7 +70,6 @@
                 <a href="{% url 'productos_list' %}" class="btn btn-outline-secondary">
                     <i class="fa-solid fa-arrow-left"></i> Volver
                 </a>
-
                 {% if user.is_superuser %}
                 <a href="{% url 'producto_update' producto.pk %}" class="btn btn-warning text-white">
                     <i class="fa-solid fa-pen"></i> Editar
@@ -278,13 +92,11 @@
 
     if (!mainImage || !thumbs.length) return;
 
-    thumbs.forEach(btn => {
-        btn.addEventListener('click', function () {
-            const img = this.getAttribute('data-img');
-            if (!img) return;
-
-            mainImage.src = img;
-            thumbs.forEach(t => t.classList.remove('active'));
+    thumbs.forEach((thumb) => {
+        thumb.addEventListener('click', function () {
+            const img = this.dataset.img;
+            if (img) mainImage.src = img;
+            thumbs.forEach((item) => item.classList.remove('active'));
             this.classList.add('active');
         });
     });

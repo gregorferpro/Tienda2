@@ -2,14 +2,14 @@
     <table class="table table-hover align-middle">
         <thead>
             <tr>
-                <th style="width: 90px;">ID</th>
+                <th class="col-id">ID</th>
                 <th>Nombres</th>
                 <th>Apellidos</th>
                 <th>CI/NIT</th>
                 <th>Teléfono</th>
                 <th>Email</th>
                 <th>Estado</th>
-                <th style="width: 180px;">Acciones</th>
+                <th class="col-actions">Acciones</th>
             </tr>
         </thead>
         <tbody>
@@ -30,7 +30,7 @@
                 </td>
                 <td>
                     {% if user.is_superuser %}
-                    <div class="d-flex gap-2">
+                    <div class="d-flex gap-2 flex-wrap">
                         <a href="{% url 'cliente_update' cliente.pk %}" class="btn btn-warning btn-sm text-white">Editar</a>
                         <a href="{% url 'cliente_delete' cliente.pk %}" class="btn btn-danger btn-sm">Eliminar</a>
                     </div>

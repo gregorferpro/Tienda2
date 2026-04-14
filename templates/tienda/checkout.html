@@ -1,163 +1,143 @@
 {% extends 'base.html' %}
 {% load static %}
+
+{% block title %}Finalizar compra{% endblock %}
+
 {% block content %}
+<div class="checkout-shell">
+    <div class="page-header">
+        <div>
+            <h2 class="section-title">Finalizar compra</h2>
+            <p class="section-subtitle">Completa tus datos y confirma el pedido. El registro ocurre durante la compra.</p>
+        </div>
+    </div>
 
-<div class="checkout-header mb-4">
-    <h2 class="section-title mb-1">Finalizar compra</h2>
-    <p class="text-muted mb-0">Completa tus datos y confirma tu pedido.</p>
-</div>
+    <div class="row g-4">
+        <div class="col-lg-7">
+            <div class="checkout-card">
+                <form method="post" id="checkout-form">
+                    {% csrf_token %}
 
-<div class="row g-4">
-    <div class="col-lg-7">
-        <div class="dashboard-card checkout-card text-start">
-
-            <form method="post" id="checkout-form">
-                {% csrf_token %}
-
-                <div class="checkout-section mb-4">
-                    <h4 class="checkout-subtitle">Datos del cliente</h4>
-                    <div class="row g-3">
-                        <div class="col-md-6">
-                            <label class="form-label fw-semibold">Nombres</label>
-                            {{ form.nombres }}
-                            {% if form.nombres.errors %}
-                                <div class="text-danger small mt-1">{{ form.nombres.errors }}</div>
-                            {% endif %}
-                        </div>
-
-                        <div class="col-md-6">
-                            <label class="form-label fw-semibold">Apellidos</label>
-                            {{ form.apellidos }}
-                            {% if form.apellidos.errors %}
-                                <div class="text-danger small mt-1">{{ form.apellidos.errors }}</div>
-                            {% endif %}
-                        </div>
-
-                        <div class="col-md-6">
-                            <label class="form-label fw-semibold">NIT/CI/CEX</label>
-                            {{ form.ci_nit }}
-                            {% if form.ci_nit.errors %}
-                                <div class="text-danger small mt-1">{{ form.ci_nit.errors }}</div>
-                            {% endif %}
-                        </div>
-
-                        <div class="col-md-6">
-                            <label class="form-label fw-semibold">Teléfono</label>
-                            {{ form.telefono }}
-                            {% if form.telefono.errors %}
-                                <div class="text-danger small mt-1">{{ form.telefono.errors }}</div>
-                            {% endif %}
-                        </div>
-
-                        <div class="col-12">
-                            <label class="form-label fw-semibold">Email</label>
-                            {{ form.email }}
-                            {% if form.email.errors %}
-                                <div class="text-danger small mt-1">{{ form.email.errors }}</div>
-                            {% endif %}
+                    <div class="checkout-section mb-4">
+                        <h4 class="checkout-subtitle">Datos del cliente</h4>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="checkout-label">Nombres</label>
+                                {{ form.nombres }}
+                                {% if form.nombres.errors %}<div class="field-error">{{ form.nombres.errors|join:", " }}</div>{% endif %}
+                            </div>
+                            <div class="col-md-6">
+                                <label class="checkout-label">Apellidos</label>
+                                {{ form.apellidos }}
+                                {% if form.apellidos.errors %}<div class="field-error">{{ form.apellidos.errors|join:", " }}</div>{% endif %}
+                            </div>
+                            <div class="col-md-6">
+                                <label class="checkout-label">NIT/CI/CEX</label>
+                                {{ form.ci_nit }}
+                                {% if form.ci_nit.errors %}<div class="field-error">{{ form.ci_nit.errors|join:", " }}</div>{% endif %}
+                            </div>
+                            <div class="col-md-6">
+                                <label class="checkout-label">Teléfono</label>
+                                {{ form.telefono }}
+                                {% if form.telefono.errors %}<div class="field-error">{{ form.telefono.errors|join:", " }}</div>{% endif %}
+                            </div>
+                            <div class="col-12">
+                                <label class="checkout-label">Email</label>
+                                {{ form.email }}
+                                {% if form.email.errors %}<div class="field-error">{{ form.email.errors|join:", " }}</div>{% endif %}
+                            </div>
                         </div>
                     </div>
-                </div>
 
-                <div class="checkout-section mb-4">
-                    <h4 class="checkout-subtitle">Dirección de entrega</h4>
-                    <label class="form-label fw-semibold">Dirección</label>
-                    {{ form.direccion }}
-                    {% if form.direccion.errors %}
-                        <div class="text-danger small mt-1">{{ form.direccion.errors }}</div>
-                    {% endif %}
-                </div>
+                    <div class="checkout-section mb-4">
+                        <h4 class="checkout-subtitle">Dirección de entrega</h4>
+                        <label class="checkout-label">Dirección</label>
+                        {{ form.direccion }}
+                        {% if form.direccion.errors %}<div class="field-error">{{ form.direccion.errors|join:", " }}</div>{% endif %}
+                    </div>
 
-                <div class="checkout-section mb-4">
-                    <h4 class="checkout-subtitle">Método de pago</h4>
-                    <label class="form-label fw-semibold">Selecciona una opción</label>
-                    {{ form.metodo_pago }}
-                    {% if form.metodo_pago.errors %}
-                        <div class="text-danger small mt-1">{{ form.metodo_pago.errors }}</div>
-                    {% endif %}
+                    <div class="checkout-section mb-4">
+                        <h4 class="checkout-subtitle">Método de pago</h4>
+                        <label class="checkout-label">Selecciona una opción</label>
+                        {{ form.metodo_pago }}
+                        {% if form.metodo_pago.errors %}<div class="field-error">{{ form.metodo_pago.errors|join:", " }}</div>{% endif %}
 
-                    <div id="qr-box" class="qr-box mt-3" style="display:none;">
-                        <div class="row align-items-center g-3">
-                            <div class="col-md-4 text-center">
-                                <img src="{% static 'img/qr_estatico.png' %}" alt="QR estático" class="img-fluid qr-image">
-                            </div>
-                            <div class="col-md-8">
-                                <h5 class="mb-2">Pago por QR</h5>
-                                <p class="text-muted mb-3">
-                                    Escanea este QR desde tu banco o billetera móvil y luego confirma el pago.
-                                </p>
-
-                                <div class="form-check">
-                                    {{ form.confirmar_pago_qr }}
-                                    <label class="form-check-label" for="{{ form.confirmar_pago_qr.id_for_label }}">
-                                        Confirmo que realicé el pago por QR
-                                    </label>
+                        <div id="qr-box" class="qr-box mt-3 d-none">
+                            <div class="row align-items-center g-3">
+                                <div class="col-md-4 text-center">
+                                    <img src="{% static 'img/qr_estatico.png' %}" alt="QR estático" class="img-fluid">
                                 </div>
-
-                                {% if form.confirmar_pago_qr.errors %}
-                                    <div class="text-danger small mt-2">{{ form.confirmar_pago_qr.errors }}</div>
-                                {% endif %}
+                                <div class="col-md-8">
+                                    <h5 class="mb-2">Pago por QR</h5>
+                                    <p class="text-muted mb-3">Escanea este QR desde tu banco o billetera móvil y luego confirma el pago.</p>
+                                    <div class="form-check">
+                                        {{ form.confirmar_pago_qr }}
+                                        <label class="form-check-label" for="{{ form.confirmar_pago_qr.id_for_label }}">
+                                            Confirmo que realicé el pago por QR
+                                        </label>
+                                    </div>
+                                    {% if form.confirmar_pago_qr.errors %}<div class="field-error">{{ form.confirmar_pago_qr.errors|join:", " }}</div>{% endif %}
+                                </div>
                             </div>
                         </div>
                     </div>
+
+                    <button type="submit" class="btn btn-primary btn-lg w-100">Finalizar compra</button>
+                </form>
+            </div>
+        </div>
+
+        <div class="col-lg-5">
+            <div class="checkout-card">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h4 class="mb-0">Resumen del pedido</h4>
+                    <span class="badge bg-primary rounded-pill">{{ items|length }} producto(s)</span>
                 </div>
 
-                <button type="submit" class="btn btn-primary btn-lg w-100 checkout-btn">
-                    Finalizar compra
-                </button>
-            </form>
-
-        </div>
-    </div>
-
-    <div class="col-lg-5">
-        <div class="dashboard-card checkout-summary text-start">
-            <div class="d-flex justify-content-between align-items-center mb-3">
-                <h4 class="mb-0">Resumen del pedido</h4>
-                <span class="badge bg-primary rounded-pill">{{ items|length }} producto(s)</span>
-            </div>
-
-            <div class="checkout-summary-list">
-                {% for item in items %}
-                    <div class="summary-item">
+                <div class="checkout-summary-list">
+                    {% for item in items %}
+                    <div class="checkout-summary-item">
                         <div>
-                            <div class="summary-name">{{ item.producto.nombre }}</div>
-                            <div class="summary-meta">Cantidad: {{ item.cantidad }}</div>
+                            <div class="fw-bold">{{ item.producto.nombre }}</div>
+                            <div class="text-muted small">Cantidad: {{ item.cantidad }}</div>
                         </div>
-                        <div class="summary-price">Bs {{ item.subtotal }}</div>
+                        <div class="fw-bold">Bs {{ item.subtotal }}</div>
                     </div>
-                {% endfor %}
-            </div>
+                    {% endfor %}
+                </div>
 
-            <hr>
+                <div class="d-flex justify-content-between align-items-center mt-4 mb-2">
+                    <span class="text-muted">Subtotal</span>
+                    <span>Bs {{ total }}</span>
+                </div>
 
-            <div class="d-flex justify-content-between align-items-center mb-2">
-                <span class="text-muted">Subtotal</span>
-                <span>Bs {{ total }}</span>
-            </div>
+                <div class="d-flex justify-content-between align-items-center checkout-total">
+                    <span>Total a pagar</span>
+                    <span>Bs {{ total }}</span>
+                </div>
 
-            <div class="d-flex justify-content-between align-items-center checkout-total">
-                <span>Total a pagar</span>
-                <span>Bs {{ total }}</span>
-            </div>
-
-            <div class="checkout-note mt-4">
-                <strong>Compra segura:</strong> tus productos se registrarán al confirmar el pago.
+                <div class="alert alert-light mt-4 mb-0">
+                    <strong>Compra segura:</strong> tus productos se registrarán y la venta se generará al confirmar el pago.
+                </div>
             </div>
         </div>
     </div>
 </div>
+{% endblock %}
 
+{% block extra_js %}
 <script>
 document.addEventListener('DOMContentLoaded', function () {
     const metodoPago = document.getElementById('id_metodo_pago');
     const qrBox = document.getElementById('qr-box');
 
     function toggleQR() {
-        if (metodoPago && metodoPago.value === 'qr') {
-            qrBox.style.display = 'block';
+        if (!metodoPago || !qrBox) return;
+
+        if (metodoPago.value === 'qr') {
+            qrBox.classList.remove('d-none');
         } else {
-            qrBox.style.display = 'none';
+            qrBox.classList.add('d-none');
             const check = document.getElementById('id_confirmar_pago_qr');
             if (check) check.checked = false;
         }
@@ -169,5 +149,4 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 });
 </script>
-
 {% endblock %}
