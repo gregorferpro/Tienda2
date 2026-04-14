@@ -12,11 +12,8 @@
     <style>
         :root{
             --sidebar-bg:#0f1e3a;
-            --sidebar-bg-2:#13264a;
             --primary:#2563eb;
             --danger:#dc3545;
-            --warning:#f59e0b;
-            --success:#16a34a;
             --text:#0f172a;
             --muted:#64748b;
             --card-bg:#ffffff;
@@ -24,9 +21,7 @@
             --border:#dbe3ef;
         }
 
-        *{
-            box-sizing:border-box;
-        }
+        *{ box-sizing:border-box; }
 
         body{
             margin:0;
@@ -35,9 +30,7 @@
             color:var(--text);
         }
 
-        a{
-            text-decoration:none;
-        }
+        a{ text-decoration:none; }
 
         .app-layout{
             min-height:100vh;
@@ -151,38 +144,9 @@
             font-weight:700;
         }
 
-        .logout-btn{
-            background:var(--danger);
-            color:#fff;
-            border:none;
-            border-radius:12px;
-            padding:10px 16px;
-        }
-
         .page-content{
             padding:22px 18px;
             flex:1;
-        }
-
-        .dashboard-card,
-        .content-card{
-            background:var(--card-bg);
-            border:1px solid var(--border);
-            border-radius:20px;
-            box-shadow:0 8px 24px rgba(15,23,42,.06);
-            padding:18px;
-        }
-
-        .section-title{
-            color:#2450d3;
-            font-size:22px;
-            font-weight:700;
-        }
-
-        .public-wrapper{
-            min-height:100vh;
-            display:flex;
-            flex-direction:column;
         }
 
         .public-topbar{
@@ -230,44 +194,14 @@
             color:var(--primary);
         }
 
-        .public-content{
-            padding:22px 18px;
-            flex:1;
-        }
-
         .message-wrap{
             margin-bottom:18px;
         }
 
-        .catalog-header{
-            margin-bottom:18px;
-        }
-
-        .catalog-search{
-            margin-bottom:20px;
-        }
-
-        .catalog-search .form-control{
-            height:56px;
-            border-radius:16px;
-            border:1px solid #cfd8e6;
-            font-size:16px;
-        }
-
         @media (max-width: 991px){
-            .sidebar{
-                display:none;
-            }
-
-            .topbar{
-                padding:14px;
-            }
-
-            .page-content,
-            .public-content{
-                padding:16px;
-            }
-
+            .sidebar{ display:none; }
+            .topbar{ padding:14px; }
+            .page-content{ padding:16px; }
             .public-topbar{
                 padding:14px 16px;
                 flex-direction:column;
@@ -281,110 +215,68 @@
 <body>
 
 {% if user.is_authenticated %}
-    <div class="app-layout">
-        <aside class="sidebar">
-            <div class="sidebar-brand">Sistema</div>
+<div class="app-layout">
+    <aside class="sidebar">
+        <div class="sidebar-brand">Sistema</div>
 
-            <nav class="sidebar-nav">
-                <a href="{% url 'dashboard' %}" class="sidebar-link">
-                    <i class="fa-solid fa-chart-line"></i>
-                    <span>Dashboard</span>
-                </a>
+        <nav class="sidebar-nav">
+            <a href="{% url 'dashboard' %}" class="sidebar-link">
+                <i class="fa-solid fa-chart-line"></i>
+                <span>Dashboard</span>
+            </a>
 
-                <a href="{% url 'productos_list' %}" class="sidebar-link">
-                    <i class="fa-solid fa-box"></i>
-                    <span>Productos</span>
-                </a>
+            <a href="{% url 'productos_list' %}" class="sidebar-link">
+                <i class="fa-solid fa-box"></i>
+                <span>Productos</span>
+            </a>
 
-                <a href="{% url 'clientes_list' %}" class="sidebar-link">
-                    <i class="fa-solid fa-users"></i>
-                    <span>Clientes</span>
-                </a>
+            <a href="{% url 'clientes_list' %}" class="sidebar-link">
+                <i class="fa-solid fa-users"></i>
+                <span>Clientes</span>
+            </a>
 
-                <a href="{% url 'ventas_list' %}" class="sidebar-link">
-                    <i class="fa-solid fa-cart-shopping"></i>
-                    <span>Ventas</span>
-                </a>
+            <a href="{% url 'ventas_list' %}" class="sidebar-link">
+                <i class="fa-solid fa-cart-shopping"></i>
+                <span>Ventas</span>
+            </a>
 
-                {% if user.is_superuser or user.perfil.rol == 'superuser' %}
-                <a href="{% url 'usuarios_list' %}" class="sidebar-link">
-                    <i class="fa-solid fa-user-gear"></i>
-                    <span>Usuarios</span>
-                </a>
-                {% endif %}
+            {% if user.is_superuser %}
+            <a href="{% url 'usuarios_list' %}" class="sidebar-link">
+                <i class="fa-solid fa-user-gear"></i>
+                <span>Usuarios</span>
+            </a>
+            {% endif %}
 
-                <a href="{% url 'catalogo_cliente' %}" class="sidebar-link">
-                    <i class="fa-solid fa-store"></i>
-                    <span>Ver catálogo</span>
-                </a>
-            </nav>
+            <a href="{% url 'catalogo_cliente' %}" class="sidebar-link">
+                <i class="fa-solid fa-store"></i>
+                <span>Ver catálogo</span>
+            </a>
+        </nav>
 
-            <div class="sidebar-footer">
-                <a href="{% url 'logout' %}" class="logout-link">
-                    <i class="fa-solid fa-right-from-bracket"></i>
-                    <span>Cerrar sesión</span>
-                </a>
-            </div>
-        </aside>
-
-        <div class="main-area">
-            <header class="topbar">
-                <div>
-                    <h1 class="topbar-title">Sistema de Tienda</h1>
-                    <p class="topbar-subtitle">
-                        {% if user.is_superuser or user.perfil.rol == 'superuser' %}
-                            Panel administrativo
-                        {% elif user.perfil.rol == 'cliente' %}
-                            Catálogo de compras
-                        {% else %}
-                            Panel de gestión
-                        {% endif %}
-                    </p>
-                </div>
-
-                <div class="topbar-user">
-                    <div class="user-badge">
-                        {{ user.username|slice:":1"|upper }}
-                    </div>
-                    <div>{{ user.username }}</div>
-                </div>
-            </header>
-
-            <main class="page-content">
-                {% if messages %}
-                    <div class="message-wrap">
-                        {% for message in messages %}
-                            <div class="alert alert-{{ message.tags|default:'info' }} mb-2">
-                                {{ message }}
-                            </div>
-                        {% endfor %}
-                    </div>
-                {% endif %}
-
-                {% block content %}{% endblock %}
-            </main>
+        <div class="sidebar-footer">
+            <a href="{% url 'logout' %}" class="logout-link">
+                <i class="fa-solid fa-right-from-bracket"></i>
+                <span>Cerrar sesión</span>
+            </a>
         </div>
-    </div>
+    </aside>
 
-{% else %}
-    <div class="public-wrapper">
-        <header class="public-topbar">
-            <div class="public-brand">
-                <h1>Sistema de Tienda</h1>
-                <p>Catálogo de compras</p>
+    <div class="main-area">
+        <header class="topbar">
+            <div>
+                <h1 class="topbar-title">Sistema de Tienda</h1>
+                <p class="topbar-subtitle">Panel de gestión</p>
             </div>
 
-            <div class="public-actions">
-                <a href="{% url 'carrito' %}" class="btn btn-public btn-outline-lightblue">
-                    <i class="fa-solid fa-cart-shopping"></i> Carrito
-                </a>
-                <a href="{% url 'login' %}" class="btn btn-public btn-login">
-                    Iniciar sesión
-                </a>
+            <div class="topbar-user">
+                <div class="user-badge">
+                    {{ user.username|slice:":1"|upper }}
+                </div>
+                <div>{{ user.username }}</div>
             </div>
         </header>
 
-        <main class="public-content">
+        <main class="page-content">
             {% if messages %}
                 <div class="message-wrap">
                     {% for message in messages %}
@@ -398,6 +290,35 @@
             {% block content %}{% endblock %}
         </main>
     </div>
+</div>
+
+{% else %}
+<header class="public-topbar">
+    <div class="public-brand">
+        <h1>Sistema de Tienda</h1>
+        <p>Catálogo de compras</p>
+    </div>
+
+    <div class="public-actions">
+        <a href="{% url 'login' %}" class="btn btn-public btn-login">
+            Iniciar sesión
+        </a>
+    </div>
+</header>
+
+<main class="page-content">
+    {% if messages %}
+        <div class="message-wrap">
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags|default:'info' }} mb-2">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    {% block content %}{% endblock %}
+</main>
 {% endif %}
 
 {% block extra_js %}{% endblock %}
