@@ -126,14 +126,27 @@ def usuario_delete(request, pk):
 from django.http import HttpResponse
 from django.contrib.auth.models import User
 
-
 def crear_admin_render(request):
     username = "admin"
     email = "gregorbarrios07@gmail.com"
     password = "Admin12345678"
 
-    if not User.objects.filter(username=username).exists():
-        User.objects.create_superuser(username=username, email=email, password=password)
+    user, created = User.objects.get_or_create(username=username, defaults={
+        "email": email,
+        "is_staff": True,
+        "is_superuser": True,
+    })
+
+    if created:
+        user.set_password(password)
+        user.is_staff = True
+        user.is_superuser = True
+        user.save()
         return HttpResponse("Superusuario creado correctamente.")
 
-    return HttpResponse("El superusuario ya existe.")
+    user.set_password(password)
+    user.is_staff = True
+    user.is_superuser = True
+    user.email = email
+    user.save()
+    return HttpResponse("Superusuario actualizado correctamente.")
