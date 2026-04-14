@@ -39,10 +39,6 @@ def obtener_carrito(request):
     return request.session.setdefault('carrito', {})
 
 
-# =========================
-# CATÁLOGO PÚBLICO CLIENTE
-# =========================
-
 def catalogo_cliente(request):
     q = request.GET.get('q', '').strip()
     productos = Producto.objects.filter(activo=True).order_by('-id')
@@ -67,10 +63,6 @@ def detalle_producto_cliente(request, pk):
         'producto': producto
     })
 
-
-# =========================
-# CARRITO Y CHECKOUT
-# =========================
 
 @login_required
 def agregar_carrito(request, pk):
@@ -218,10 +210,6 @@ def factura_view(request, pk):
         'numero_literal': numero_a_texto_basico(venta.total)
     })
 
-
-# =========================
-# PANEL ADMINISTRATIVO
-# =========================
 
 @login_required
 @user_passes_test(es_staff_o_superuser)
@@ -441,27 +429,3 @@ def venta_detail(request, pk):
         pk=pk
     )
     return render(request, 'tienda/venta_detail.html', {'venta': venta})
-
-
-from django.contrib import messages
-from django.contrib.auth.decorators import login_required
-from django.shortcuts import get_object_or_404, redirect
-from .models import Producto
-
-
-@login_required
-def agregar_carrito(request, pk):
-    producto = get_object_or_404(Producto, pk=pk, activo=True)
-    carrito = obtener_carrito(request)
-
-    item = carrito.get(str(pk), {'cantidad': 0})
-
-    if item['cantidad'] < producto.stock:
-        item['cantidad'] += 1
-        carrito[str(pk)] = item
-        request.session.modified = True
-        messages.success(request, 'Producto agregado al carrito.')
-    else:
-        messages.warning(request, 'No hay suficiente stock disponible.')
-
-    return redirect('carrito')

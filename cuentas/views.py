@@ -1,14 +1,16 @@
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.auth.models import User
+from django.contrib.sites.models import Site
 from django.db.models import Q
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
-from django.contrib.sites.models import Site
+
 from allauth.socialaccount.models import SocialApp
 
 from .forms import UsuarioForm
 from .models import Perfil
+
 import os
 
 
@@ -30,6 +32,7 @@ def home_redirect(request):
         return redirect('dashboard')
 
     return redirect('catalogo_cliente')
+
 
 @login_required
 def dashboard(request):
@@ -160,7 +163,7 @@ def configurar_google_render(request):
     if not client_id or not secret_key:
         return HttpResponse("Faltan GOOGLE_CLIENT_ID y GOOGLE_CLIENT_SECRET en variables de entorno.")
 
-    site, created = Site.objects.get_or_create(
+    site, _ = Site.objects.get_or_create(
         id=1,
         defaults={
             "domain": domain,
@@ -172,7 +175,7 @@ def configurar_google_render(request):
     site.name = display_name
     site.save()
 
-    app, created = SocialApp.objects.get_or_create(
+    app, _ = SocialApp.objects.get_or_create(
         provider="google",
         name="Google Login",
         defaults={
@@ -194,29 +197,3 @@ def configurar_google_render(request):
         f"Dominio: {site.domain}<br>"
         f"SocialApp: {app.name}"
     )
-
-
-
-from django.db.models import Q
-from django.shortcuts import render, get_object_or_404, redirect
-from django.contrib import messages
-from django.contrib.auth.decorators import login_required
-
-from tienda.models import Producto
-def catalogo_cliente(request):
-    q = request.GET.get('q', '').strip()
-    productos = Producto.objects.filter(activo=True).order_by('-id')
-
-    if q:
-        productos = productos.filter(
-            Q(codigo__icontains=q) |
-            Q(nombre__icontains=q) |
-            Q(marca__icontains=q) |
-            Q(modelo__icontains=q)
-        )
-
-    return render(request, 'tienda/catalogo_cliente.html', {
-        'productos': productos,
-        'q': q,
-    })
-

@@ -16,12 +16,11 @@
             --danger:#dc3545;
             --text:#0f172a;
             --muted:#64748b;
-            --card-bg:#ffffff;
             --page-bg:#eef2f7;
             --border:#dbe3ef;
         }
 
-        *{ box-sizing:border-box; }
+        * { box-sizing:border-box; }
 
         body{
             margin:0;
@@ -83,13 +82,22 @@
             border-top:1px solid rgba(255,255,255,.08);
         }
 
+        .logout-form{
+            margin:0;
+        }
+
         .logout-link{
+            width:100%;
+            background:none;
+            border:none;
             color:#ffd7d7;
             display:flex;
             align-items:center;
             gap:10px;
             padding:12px 14px;
             border-radius:12px;
+            cursor:pointer;
+            text-align:left;
         }
 
         .logout-link:hover{
@@ -144,11 +152,6 @@
             font-weight:700;
         }
 
-        .page-content{
-            padding:22px 18px;
-            flex:1;
-        }
-
         .public-topbar{
             background:#fff;
             border-bottom:1px solid var(--border);
@@ -189,9 +192,9 @@
             color:#fff;
         }
 
-        .btn-outline-lightblue{
-            background:#e8f0ff;
-            color:var(--primary);
+        .page-content{
+            padding:22px 18px;
+            flex:1;
         }
 
         .message-wrap{
@@ -215,110 +218,101 @@
 <body>
 
 {% if user.is_authenticated %}
-<div class="app-layout">
-    <aside class="sidebar">
-        <div class="sidebar-brand">Sistema</div>
+    <div class="app-layout">
+        <aside class="sidebar">
+            <div class="sidebar-brand">Sistema</div>
 
-        <nav class="sidebar-nav">
-            <a href="{% url 'dashboard' %}" class="sidebar-link">
-                <i class="fa-solid fa-chart-line"></i>
-                <span>Dashboard</span>
-            </a>
+            <nav class="sidebar-nav">
+                <a href="{% url 'dashboard' %}" class="sidebar-link">
+                    <i class="fa-solid fa-chart-line"></i>
+                    <span>Dashboard</span>
+                </a>
 
-            <a href="{% url 'productos_list' %}" class="sidebar-link">
-                <i class="fa-solid fa-box"></i>
-                <span>Productos</span>
-            </a>
+                <a href="{% url 'productos_list' %}" class="sidebar-link">
+                    <i class="fa-solid fa-box"></i>
+                    <span>Productos</span>
+                </a>
 
-            <a href="{% url 'clientes_list' %}" class="sidebar-link">
-                <i class="fa-solid fa-users"></i>
-                <span>Clientes</span>
-            </a>
+                <a href="{% url 'clientes_list' %}" class="sidebar-link">
+                    <i class="fa-solid fa-users"></i>
+                    <span>Clientes</span>
+                </a>
 
-            <a href="{% url 'ventas_list' %}" class="sidebar-link">
-                <i class="fa-solid fa-cart-shopping"></i>
-                <span>Ventas</span>
-            </a>
+                <a href="{% url 'ventas_list' %}" class="sidebar-link">
+                    <i class="fa-solid fa-cart-shopping"></i>
+                    <span>Ventas</span>
+                </a>
 
-            {% if user.is_superuser %}
-            <a href="{% url 'usuarios_list' %}" class="sidebar-link">
-                <i class="fa-solid fa-user-gear"></i>
-                <span>Usuarios</span>
-            </a>
-            {% endif %}
+                {% if user.is_superuser %}
+                <a href="{% url 'usuarios_list' %}" class="sidebar-link">
+                    <i class="fa-solid fa-user-gear"></i>
+                    <span>Usuarios</span>
+                </a>
+                {% endif %}
 
-            <a href="{% url 'catalogo_cliente' %}" class="sidebar-link">
-                <i class="fa-solid fa-store"></i>
-                <span>Ver catálogo</span>
-            </a>
-        </nav>
+                <a href="{% url 'catalogo_cliente' %}" class="sidebar-link">
+                    <i class="fa-solid fa-store"></i>
+                    <span>Ver catálogo</span>
+                </a>
+            </nav>
 
-        <div class="sidebar-footer">
-            <a href="{% url 'logout' %}" class="logout-link">
-                <i class="fa-solid fa-right-from-bracket"></i>
-                <span>Cerrar sesión</span>
-            </a>
-        </div>
-    </aside>
-
-    <div class="main-area">
-        <header class="topbar">
-            <div>
-                <h1 class="topbar-title">Sistema de Tienda</h1>
-                <p class="topbar-subtitle">Panel de gestión</p>
+            <div class="sidebar-footer">
+                <form method="post" action="{% url 'logout' %}" class="logout-form">
+                    {% csrf_token %}
+                    <button type="submit" class="logout-link">
+                        <i class="fa-solid fa-right-from-bracket"></i>
+                        <span>Cerrar sesión</span>
+                    </button>
+                </form>
             </div>
+        </aside>
 
-            <div class="topbar-user">
-                <div class="user-badge">
-                    {{ user.username|slice:":1"|upper }}
+        <div class="main-area">
+            <header class="topbar">
+                <div>
+                    <h1 class="topbar-title">Sistema de Tienda</h1>
+                    <p class="topbar-subtitle">Panel de gestión</p>
                 </div>
-                <div>{{ user.username }}</div>
-            </div>
-        </header>
 
-        <main class="page-content">
-            {% if messages %}
-                <div class="message-wrap">
-                    {% for message in messages %}
-                        <div class="alert alert-{{ message.tags|default:'info' }} mb-2">
-                            {{ message }}
-                        </div>
-                    {% endfor %}
+                <div class="topbar-user">
+                    <div class="user-badge">
+                        {{ user.username|slice:":1"|upper }}
+                    </div>
+                    <div>{{ user.username }}</div>
                 </div>
-            {% endif %}
-
-            {% block content %}{% endblock %}
-        </main>
-    </div>
-</div>
-
+            </header>
 {% else %}
-<header class="public-topbar">
-    <div class="public-brand">
-        <h1>Sistema de Tienda</h1>
-        <p>Catálogo de compras</p>
-    </div>
-
-    <div class="public-actions">
-        <a href="{% url 'login' %}" class="btn btn-public btn-login">
-            Iniciar sesión
-        </a>
-    </div>
-</header>
-
-<main class="page-content">
-    {% if messages %}
-        <div class="message-wrap">
-            {% for message in messages %}
-                <div class="alert alert-{{ message.tags|default:'info' }} mb-2">
-                    {{ message }}
+            <header class="public-topbar">
+                <div class="public-brand">
+                    <h1>Sistema de Tienda</h1>
+                    <p>Catálogo de compras</p>
                 </div>
-            {% endfor %}
-        </div>
-    {% endif %}
 
-    {% block content %}{% endblock %}
-</main>
+                <div class="public-actions">
+                    <a href="{% url 'login' %}" class="btn btn-public btn-login">
+                        Iniciar sesión
+                    </a>
+                </div>
+            </header>
+{% endif %}
+
+            <main class="page-content">
+                {% if messages %}
+                    <div class="message-wrap">
+                        {% for message in messages %}
+                            <div class="alert alert-{{ message.tags|default:'info' }} mb-2">
+                                {{ message }}
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+
+                {% block content %}{% endblock %}
+            </main>
+
+{% if user.is_authenticated %}
+        </div>
+    </div>
 {% endif %}
 
 {% block extra_js %}{% endblock %}

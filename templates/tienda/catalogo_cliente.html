@@ -1,189 +1,63 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Catálogo público</title>
-    <style>
-        body{
-            margin:0;
-            font-family:Arial, sans-serif;
-            background:#f1f5f9;
-            color:#0f172a;
-        }
+{% extends 'base.html' %}
 
-        .topbar{
-            background:#ffffff;
-            border-bottom:1px solid #dbe3ef;
-            padding:18px 24px;
-            display:flex;
-            justify-content:space-between;
-            align-items:center;
-        }
+{% block title %}Catálogo{% endblock %}
 
-        .brand h1{
-            margin:0;
-            font-size:22px;
-        }
+{% block content %}
+<div class="container-fluid">
+    <div class="mb-4">
+        <h2 style="font-size: 22px; color: #2450d3; font-weight: 700;">Productos disponibles</h2>
+    </div>
 
-        .brand p{
-            margin:4px 0 0;
-            color:#64748b;
-        }
+    <form method="get" class="mb-4">
+        <input
+            type="text"
+            name="q"
+            value="{{ q }}"
+            placeholder="Buscar por código, nombre, marca o modelo"
+            class="form-control"
+            style="height: 52px; border-radius: 14px;"
+        >
+    </form>
 
-        .actions a{
-            display:inline-block;
-            padding:10px 16px;
-            border-radius:10px;
-            text-decoration:none;
-            margin-left:10px;
-            font-weight:600;
-        }
-
-        .btn-login{
-            background:#2563eb;
-            color:white;
-        }
-
-        .container{
-            max-width:1200px;
-            margin:30px auto;
-            padding:0 20px;
-        }
-
-        .title{
-            font-size:32px;
-            margin-bottom:10px;
-            color:#1d4ed8;
-        }
-
-        .search-box{
-            margin:20px 0 30px;
-        }
-
-        .search-box input{
-            width:100%;
-            padding:16px;
-            border:1px solid #cbd5e1;
-            border-radius:14px;
-            font-size:16px;
-        }
-
-        .grid{
-            display:grid;
-            grid-template-columns:repeat(auto-fit, minmax(260px, 1fr));
-            gap:20px;
-        }
-
-        .card{
-            background:white;
-            border:1px solid #dbe3ef;
-            border-radius:18px;
-            overflow:hidden;
-            box-shadow:0 6px 18px rgba(15,23,42,.06);
-        }
-
-        .card img{
-            width:100%;
-            height:220px;
-            object-fit:cover;
-            background:#e5e7eb;
-        }
-
-        .card-body{
-            padding:18px;
-        }
-
-        .card-title{
-            font-size:20px;
-            font-weight:700;
-            margin-bottom:8px;
-        }
-
-        .card-text{
-            color:#64748b;
-            margin-bottom:10px;
-        }
-
-        .price{
-            font-size:22px;
-            font-weight:700;
-            color:#16a34a;
-            margin-bottom:14px;
-        }
-
-        .btn{
-            display:inline-block;
-            width:100%;
-            text-align:center;
-            padding:12px 16px;
-            border-radius:12px;
-            text-decoration:none;
-            background:#2563eb;
-            color:white;
-            font-weight:700;
-        }
-
-        .empty{
-            background:white;
-            border:1px solid #dbe3ef;
-            border-radius:16px;
-            padding:30px;
-            text-align:center;
-            color:#64748b;
-        }
-    </style>
-</head>
-<body>
-
-    <header class="topbar">
-        <div class="brand">
-            <h1>Sistema de Tienda</h1>
-            <p>Catálogo de compras</p>
-        </div>
-
-        <div class="actions">
-            <a href="/login/" class="btn-login">Iniciar sesión</a>
-        </div>
-    </header>
-
-    <div class="container">
-        <h2 class="title">Productos disponibles</h2>
-
-        <form method="get" class="search-box">
-            <input type="text" name="q" value="{{ q }}" placeholder="Buscar por código, nombre, marca o modelo">
-        </form>
-
-        {% if productos %}
-            <div class="grid">
-                {% for producto in productos %}
-                    <div class="card">
+    {% if productos %}
+        <div class="row g-4">
+            {% for producto in productos %}
+                <div class="col-md-6 col-lg-4">
+                    <div class="card h-100 shadow-sm border-0" style="border-radius: 18px;">
                         {% if producto.imagen %}
-                            <img src="{{ producto.imagen.url }}" alt="{{ producto.nombre }}">
+                            <img src="{{ producto.imagen.url }}" class="card-img-top" alt="{{ producto.nombre }}" style="height: 240px; object-fit: cover;">
                         {% else %}
-                            <img src="https://via.placeholder.com/600x400?text=Producto" alt="{{ producto.nombre }}">
+                            <div style="height: 240px; background: #e9eef6; display:flex; align-items:center; justify-content:center; border-top-left-radius:18px; border-top-right-radius:18px;">
+                                <i class="fa-solid fa-box fa-3x text-secondary"></i>
+                            </div>
                         {% endif %}
 
                         <div class="card-body">
-                            <div class="card-title">{{ producto.nombre }}</div>
-                            <div class="card-text">
+                            <h5 class="card-title fw-bold">{{ producto.nombre }}</h5>
+                            <p class="text-muted mb-2">
                                 Código: {{ producto.codigo }}<br>
                                 Marca: {{ producto.marca }}<br>
                                 Modelo: {{ producto.modelo }}
-                            </div>
-                            <div class="price">Bs {{ producto.precio }}</div>
+                            </p>
+                            <p class="fw-bold text-success fs-5 mb-3">Bs {{ producto.precio }}</p>
 
-                            <a href="/login/" class="btn">Agregar al carrito</a>
+                            <div class="d-grid gap-2">
+                                <a href="{% url 'detalle_producto_cliente' producto.pk %}" class="btn btn-outline-primary">
+                                    Ver detalle
+                                </a>
+                                <a href="{% url 'agregar_carrito' producto.pk %}" class="btn btn-primary">
+                                    Agregar al carrito
+                                </a>
+                            </div>
                         </div>
                     </div>
-                {% endfor %}
-            </div>
-        {% else %}
-            <div class="empty">
-                No hay productos disponibles.
-            </div>
-        {% endif %}
-    </div>
-
-</body>
-</html>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="alert alert-light border text-center p-4" style="border-radius: 16px;">
+            No hay productos disponibles.
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
