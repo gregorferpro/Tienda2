@@ -1,29 +1,20 @@
 {% extends 'base.html' %}
-{% block title %}Tienda{% endblock %}
 
 {% block content %}
-<div class="page-header">
-    <h2 class="section-title">Productos disponibles</h2>
+<div style="padding: 30px;">
+    <h1>CATÁLOGO CARGANDO</h1>
+    <p>Si ves esto, el problema estaba en tu template anterior.</p>
 
-    <a href="{% url 'carrito' %}" class="btn btn-warning btn-main">
-        <i class="fa-solid fa-cart-shopping"></i> Carrito
-    </a>
-</div>
-
-<div class="search-box">
-    <i class="fa-solid fa-magnifying-glass"></i>
-    <input
-        type="text"
-        class="live-search"
-        data-url="{% url 'catalogo_cliente' %}"
-        data-target="#catalogo-grid-wrap"
-        name="q"
-        placeholder="Buscar por código, nombre, marca o modelo"
-        value="{{ q }}"
-    >
-</div>
-
-<div id="catalogo-grid-wrap">
-    {% include 'tienda/partials/catalogo_grid.html' %}
+    {% for producto in productos %}
+        <div style="margin-bottom: 10px; padding: 10px; border: 1px solid #ccc;">
+            <strong>{{ producto.nombre }}</strong><br>
+            Código: {{ producto.codigo }}<br>
+            Marca: {{ producto.marca }}<br>
+            Modelo: {{ producto.modelo }}<br>
+            Precio: {{ producto.precio }}
+        </div>
+    {% empty %}
+        <p>No hay productos disponibles.</p>
+    {% endfor %}
 </div>
 {% endblock %}
