@@ -41,18 +41,15 @@ def obtener_carrito(request):
 
 def catalogo_cliente(request):
     q = request.GET.get('q', '').strip()
-    productos = Producto.objects.filter(activo=True, stock__gt=0).order_by('-id')
+    productos = Producto.objects.filter(activo=True)
 
     if q:
         productos = productos.filter(
-            Q(codigo__icontains=q)
-            | Q(nombre__icontains=q)
-            | Q(marca__icontains=q)
-            | Q(modelo__icontains=q)
+            Q(nombre__icontains=q) |
+            Q(codigo__icontains=q) |
+            Q(marca__icontains=q) |
+            Q(modelo__icontains=q)
         )
-
-    if request.headers.get('x-requested-with') == 'XMLHttpRequest':
-        return render(request, 'tienda/partials/catalogo_grid.html', {'productos': productos})
 
     return render(request, 'tienda/catalogo_cliente.html', {
         'productos': productos,

@@ -2,7 +2,10 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.auth.models import User
 from django.db.models import Q
+from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
+from django.contrib.sites.models import Site
+from allauth.socialaccount.models import SocialApp
 
 from .forms import UsuarioForm
 from .models import Perfil
@@ -18,10 +21,15 @@ def solo_superuser(user):
 
 def home_redirect(request):
     if request.user.is_authenticated:
+        if request.user.is_superuser:
+            return redirect('dashboard')
+
         if hasattr(request.user, 'perfil') and request.user.perfil.rol == 'cliente':
             return redirect('catalogo_cliente')
+
         return redirect('dashboard')
-    return redirect('login')
+
+    return redirect('catalogo_cliente')
 
 
 @login_required
@@ -122,16 +130,6 @@ def usuario_delete(request, pk):
     return render(request, 'cuentas/usuario_confirm_delete.html', {'usuario': usuario})
 
 
-from django.http import HttpResponse
-from django.contrib.auth.models import User
-from django.contrib.sites.models import Site
-from allauth.socialaccount.models import SocialApp
-
-
-
-
-import os
-
 def crear_admin_render(request):
     username = "gregor"
     email = "gregorbarrios07@gmail.com"
@@ -151,6 +149,7 @@ def crear_admin_render(request):
     if created:
         return HttpResponse("Superusuario creado correctamente.")
     return HttpResponse("Superusuario actualizado correctamente.")
+
 
 def configurar_google_render(request):
     domain = "tienda2-fdil.onrender.com"
