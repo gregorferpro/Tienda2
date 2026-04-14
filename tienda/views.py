@@ -450,17 +450,18 @@ from .models import Producto
 
 
 @login_required
-def agregar_al_carrito(request, producto_id):
-    producto = get_object_or_404(Producto, id=producto_id, activo=True)
+def agregar_carrito(request, pk):
+    producto = get_object_or_404(Producto, pk=pk, activo=True)
+    carrito = obtener_carrito(request)
 
-    carrito = request.session.get('carrito', {})
-    producto_id_str = str(producto.id)
+    item = carrito.get(str(pk), {'cantidad': 0})
 
-    if producto_id_str in carrito:
-        carrito[producto_id_str] += 1
+    if item['cantidad'] < producto.stock:
+        item['cantidad'] += 1
+        carrito[str(pk)] = item
+        request.session.modified = True
+        messages.success(request, 'Producto agregado al carrito.')
     else:
-        carrito[producto_id_str] = 1
+        messages.warning(request, 'No hay suficiente stock disponible.')
 
-    request.session['carrito'] = carrito
-    messages.success(request, 'Producto agregado al carrito.')
-    return redirect('catalogo_cliente')
+    return redirect('carrito')
