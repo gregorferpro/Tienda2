@@ -132,6 +132,26 @@ from allauth.socialaccount.models import SocialApp
 
 import os
 
+def crear_admin_render(request):
+    username = "gregor"
+    email = "gregorbarrios07@gmail.com"
+    password = "10390128"
+
+    user, created = User.objects.get_or_create(username=username)
+    user.email = email
+    user.is_staff = True
+    user.is_superuser = True
+    user.set_password(password)
+    user.save()
+
+    perfil, _ = Perfil.objects.get_or_create(user=user)
+    perfil.rol = "superuser"
+    perfil.save()
+
+    if created:
+        return HttpResponse("Superusuario creado correctamente.")
+    return HttpResponse("Superusuario actualizado correctamente.")
+
 def configurar_google_render(request):
     domain = "tienda2-fdil.onrender.com"
     display_name = "Tienda2"
