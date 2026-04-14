@@ -1,0 +1,309 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Factura {{ venta.numero_factura }}</title>
+    <style>
+        body{
+            font-family: Arial, Helvetica, sans-serif;
+            background:#fff;
+            color:#000;
+            margin:0;
+            padding:0;
+        }
+
+        .factura{
+            width:1000px;
+            margin:20px auto;
+            padding:20px 28px 40px;
+            background:#fff;
+        }
+
+        .top{
+            display:flex;
+            justify-content:space-between;
+            align-items:flex-start;
+            margin-bottom:90px;
+        }
+
+        .empresa{
+            width:40%;
+            text-align:center;
+            font-size:18px;
+            line-height:1.35;
+        }
+
+        .empresa strong{
+            font-size:20px;
+        }
+
+        .datos-factura{
+            width:32%;
+            font-size:18px;
+            line-height:1.35;
+        }
+
+        .datos-factura table{
+            width:100%;
+            border-collapse:collapse;
+        }
+
+        .datos-factura td{
+            padding:2px 4px;
+            vertical-align:top;
+        }
+
+        .titulo{
+            text-align:center;
+            margin-bottom:60px;
+        }
+
+        .titulo h1{
+            font-size:30px;
+            margin:0;
+            font-weight:700;
+        }
+
+        .titulo p{
+            margin:6px 0 0;
+            font-size:18px;
+        }
+
+        .cliente{
+            display:flex;
+            justify-content:space-between;
+            margin-bottom:26px;
+            font-size:18px;
+        }
+
+        .cliente .izq,
+        .cliente .der{
+            width:48%;
+        }
+
+        .cliente p{
+            margin:8px 0;
+        }
+
+        table.detalle{
+            width:100%;
+            border-collapse:collapse;
+            margin-top:10px;
+            font-size:18px;
+        }
+
+        table.detalle th,
+        table.detalle td{
+            border:2px solid #444;
+            padding:8px 10px;
+            text-align:center;
+        }
+
+        table.detalle th{
+            font-weight:700;
+        }
+
+        table.detalle td.desc{
+            text-align:left;
+        }
+
+        .totales{
+            width:42%;
+            margin-left:auto;
+            border-collapse:collapse;
+            margin-top:0;
+            font-size:18px;
+        }
+
+        .totales td{
+            border:2px solid #444;
+            padding:6px 10px;
+        }
+
+        .totales td.label{
+            text-align:right;
+            font-weight:700;
+        }
+
+        .son{
+            margin:18px 0 60px;
+            font-size:18px;
+            font-weight:700;
+        }
+
+        .pie{
+            position:relative;
+            margin-top:30px;
+            min-height:170px;
+        }
+
+        .leyendas{
+            text-align:center;
+            font-size:15px;
+            line-height:1.6;
+            margin-right:190px;
+        }
+
+        .qr{
+            position:absolute;
+            right:0;
+            bottom:0;
+            text-align:center;
+        }
+
+        .qr img{
+            width:130px;
+            height:130px;
+            object-fit:contain;
+        }
+
+        .no-print{
+            margin-top:25px;
+            display:flex;
+            gap:10px;
+        }
+
+        .btn{
+            display:inline-block;
+            padding:10px 16px;
+            border:none;
+            border-radius:8px;
+            text-decoration:none;
+            font-size:15px;
+            cursor:pointer;
+        }
+
+        .btn-primary{
+            background:#2563eb;
+            color:#fff;
+        }
+
+        .btn-secondary{
+            background:#6b7280;
+            color:#fff;
+        }
+
+        @media print{
+            .no-print{
+                display:none !important;
+            }
+            .factura{
+                width:100%;
+                margin:0;
+                padding:0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="factura">
+        <div class="top">
+            <div class="empresa">
+                <strong>SISTEMA DE TIENDA</strong><br>
+                CASA MATRIZ<br>
+                Calle Principal #123<br>
+                Teléfono: 70000000<br>
+                La Paz - Bolivia
+            </div>
+
+            <div class="datos-factura">
+                <table>
+                    <tr>
+                        <td><strong>NIT</strong></td>
+                        <td>456489012</td>
+                    </tr>
+                    <tr>
+                        <td><strong>FACTURA N°</strong></td>
+                        <td>{{ venta.numero_factura }}</td>
+                    </tr>
+                    <tr>
+                        <td><strong>CUF</strong></td>
+                        <td>B2AFA11610013351564D658EE50D2D2A4AA6B685</td>
+                    </tr>
+                    <tr>
+                        <td><strong>ACTIVIDAD</strong></td>
+                        <td>Venta por mayor de diversos productos sin especialización</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+
+        <div class="titulo">
+            <h1>FACTURA</h1>
+            <p>(Con Derecho a Crédito Fiscal)</p>
+        </div>
+
+        <div class="cliente">
+            <div class="izq">
+                <p><strong>Fecha:</strong> {{ venta.creado|date:'d/m/Y h:i A' }}</p>
+                <p><strong>Nombre/Razón Social:</strong> {{ venta.cliente.nombre_completo }}</p>
+            </div>
+            <div class="der">
+                <p><strong>NIT/CI/CEX:</strong> {{ venta.cliente.ci_nit }}</p>
+            </div>
+        </div>
+
+        <table class="detalle">
+            <thead>
+                <tr>
+                    <th style="width:16%;">CODIGO PRODUCTO / SERVICIO</th>
+                    <th style="width:11%;">CANTIDAD</th>
+                    <th>DESCRIPCIÓN</th>
+                    <th style="width:13%;">PRECIO UNITARIO</th>
+                    <th style="width:13%;">DESCUENTO</th>
+                    <th style="width:13%;">SUBTOTAL</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for d in venta.detalles.all %}
+                <tr>
+                    <td>{{ d.producto.codigo }}</td>
+                    <td>{{ d.cantidad }}</td>
+                    <td class="desc">{{ d.producto.nombre }}</td>
+                    <td>{{ d.precio_unitario }}</td>
+                    <td>0.00</td>
+                    <td>{{ d.subtotal }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <table class="totales">
+            <tr>
+                <td class="label">TOTAL BS</td>
+                <td>{{ venta.total }}</td>
+            </tr>
+            <tr>
+                <td class="label">IMPORTE BASE CRÉDITO FISCAL</td>
+                <td>{{ venta.total }}</td>
+            </tr>
+        </table>
+
+        <div class="son">
+            Son: {{ numero_literal }}
+        </div>
+
+        <div class="pie">
+            <div class="leyendas">
+                <p>"ESTA FACTURA CONTRIBUYE AL DESARROLLO DE NUESTRO PAÍS, EL USO ILÍCITO DE ÉSTA SERÁ SANCIONADO DE ACUERDO A LEY"</p>
+                <p>Ley N° 453: Tienes derecho a recibir información sobre las características y contenidos de los servicios que utilices.</p>
+            </div>
+
+            <div class="qr">
+                {% if venta.metodo_pago == 'qr' %}
+                    <img src="{% static 'img/qr_estatico.png' %}" alt="QR">
+                {% else %}
+                    <img src="{% static 'img/qr_estatico.png' %}" alt="QR">
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="no-print">
+            <button onclick="window.print()" class="btn btn-primary">Imprimir factura</button>
+            <a href="{% url 'productos_list' %}" class="btn btn-secondary">Volver</a>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+{% block title %}Productos{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h2 class="section-title">Catálogo de Productos</h2>
+
+    <div style="display:flex; gap:12px; flex-wrap:wrap;">
+        <a href="{% url 'carrito' %}" class="btn btn-warning btn-main">
+            <i class="fa-solid fa-cart-shopping"></i> Carrito
+        </a>
+
+        {% if user.is_superuser or user.perfil.rol == 'superuser' %}
+        <a href="{% url 'producto_create' %}" class="btn btn-primary btn-main">
+            <i class="fa-solid fa-plus"></i> Nuevo producto
+        </a>
+        {% endif %}
+    </div>
+</div>
+
+<div class="search-box">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <input
+        type="text"
+        class="live-search"
+        data-url="{% url 'productos_list' %}"
+        data-target="#productos-grid-wrap"
+        name="q"
+        placeholder="Buscar por código, nombre, marca o modelo"
+        value="{{ q }}"
+    >
+</div>
+
+<div id="productos-grid-wrap">
+    {% include 'tienda/partials/productos_grid.html' %}
+</div>
+{% endblock %}

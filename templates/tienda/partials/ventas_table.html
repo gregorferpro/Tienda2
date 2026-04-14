@@ -1,0 +1,36 @@
+<div class="dashboard-card table-card">
+    <div class="table-responsive">
+        <table class="table align-middle mb-0">
+            <thead>
+                <tr>
+                    <th>Factura</th>
+                    <th>Cliente</th>
+                    <th>Usuario</th>
+                    <th>Método</th>
+                    <th>Total</th>
+                    <th>Fecha</th>
+                    <th>Acción</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for v in ventas %}
+                <tr>
+                    <td>{{ v.numero_factura }}</td>
+                    <td>{{ v.cliente.nombre_completo }}</td>
+                    <td>{{ v.usuario.username }}</td>
+                    <td>{{ v.get_metodo_pago_display }}</td>
+                    <td>Bs {{ v.total }}</td>
+                    <td>{{ v.creado|date:"d/m/Y H:i" }}</td>
+                    <td>
+                        <a href="{% url 'venta_detail' v.id %}" class="btn btn-sm btn-primary">Ver</a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="7">No hay ventas registradas.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>

@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+{% block title %}Ventas{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h2 class="section-title">Ventas</h2>
+</div>
+
+<div class="search-box">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <input
+        type="text"
+        class="live-search"
+        data-url="{% url 'ventas_list' %}"
+        data-target="#ventas-table-wrap"
+        name="q"
+        placeholder="Buscar por factura, cliente, usuario o método"
+        value="{{ q }}"
+    >
+</div>
+
+<div id="ventas-table-wrap">
+    {% include 'tienda/partials/ventas_table.html' %}
+</div>
+{% endblock %}

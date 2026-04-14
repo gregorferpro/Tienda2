@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+{% block title %}Tienda{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h2 class="section-title">Productos disponibles</h2>
+
+    <a href="{% url 'carrito' %}" class="btn btn-warning btn-main">
+        <i class="fa-solid fa-cart-shopping"></i> Carrito
+    </a>
+</div>
+
+<div class="search-box">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <input
+        type="text"
+        class="live-search"
+        data-url="{% url 'catalogo_cliente' %}"
+        data-target="#catalogo-grid-wrap"
+        name="q"
+        placeholder="Buscar por código, nombre, marca o modelo"
+        value="{{ q }}"
+    >
+</div>
+
+<div id="catalogo-grid-wrap">
+    {% include 'tienda/partials/catalogo_grid.html' %}
+</div>
+{% endblock %}

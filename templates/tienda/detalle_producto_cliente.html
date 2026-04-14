@@ -1,0 +1,80 @@
+{% extends 'base.html' %}
+{% block title %}Detalle del producto{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h2 class="section-title">Detalle del producto</h2>
+
+    <div style="display:flex; gap:12px; flex-wrap:wrap;">
+        <a href="{% url 'carrito' %}" class="btn btn-warning btn-main">
+            <i class="fa-solid fa-cart-shopping"></i> Carrito
+        </a>
+        <a href="{% url 'catalogo_cliente' %}" class="btn btn-secondary btn-main">
+            Volver
+        </a>
+    </div>
+</div>
+
+<div class="product-detail-card">
+    <div class="product-detail-grid">
+        <div>
+            {% if producto.imagenes_extra.all %}
+            <div id="carouselProductoCliente" class="carousel slide" data-bs-ride="false">
+                <div class="carousel-inner detail-carousel-box">
+                    {% for img in producto.imagenes_extra.all %}
+                    <div class="carousel-item {% if forloop.first %}active{% endif %}">
+                        <img src="{{ img.imagen.url }}" class="d-block w-100 detail-carousel-image" alt="{{ producto.nombre }}">
+                    </div>
+                    {% endfor %}
+                </div>
+
+                {% if producto.imagenes_extra.count > 1 %}
+                <button class="carousel-control-prev" type="button" data-bs-target="#carouselProductoCliente" data-bs-slide="prev">
+                    <span class="carousel-control-prev-icon"></span>
+                </button>
+                <button class="carousel-control-next" type="button" data-bs-target="#carouselProductoCliente" data-bs-slide="next">
+                    <span class="carousel-control-next-icon"></span>
+                </button>
+                {% endif %}
+            </div>
+
+            <div class="detail-thumbs">
+                {% for img in producto.imagenes_extra.all %}
+                <img
+                    src="{{ img.imagen.url }}"
+                    class="detail-thumb"
+                    alt="miniatura"
+                    data-bs-target="#carouselProductoCliente"
+                    data-bs-slide-to="{{ forloop.counter0 }}"
+                >
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="detail-carousel-box">
+                <div class="detail-no-image">Sin imagen</div>
+            </div>
+            {% endif %}
+        </div>
+
+        <div>
+            <h2 class="mb-3">{{ producto.nombre }}</h2>
+            <p><strong>Código:</strong> {{ producto.codigo }}</p>
+            <p><strong>Marca:</strong> {{ producto.marca }}</p>
+            <p><strong>Modelo:</strong> {{ producto.modelo }}</p>
+            <p><strong>Descripción:</strong> {{ producto.descripcion }}</p>
+            <p><strong>Stock disponible:</strong> {{ producto.stock }}</p>
+
+            <h3 class="detail-price">Bs {{ producto.precio }}</h3>
+
+            <div class="d-flex gap-2 flex-wrap mt-4">
+                <a href="{% url 'agregar_carrito' producto.id %}" class="btn btn-success">
+                    <i class="fa-solid fa-cart-plus"></i> Agregar al carrito
+                </a>
+                <a href="{% url 'catalogo_cliente' %}" class="btn btn-secondary">
+                    Seguir comprando
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

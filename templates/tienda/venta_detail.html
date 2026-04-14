@@ -1,0 +1,66 @@
+{% extends 'base.html' %}
+{% block title %}Detalle de Venta{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h2 class="section-title">Detalle de Venta</h2>
+    <a href="{% url 'ventas_list' %}" class="btn btn-secondary btn-main">Volver</a>
+</div>
+
+<div class="dashboard-card table-card">
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <p><strong>Factura:</strong> {{ venta.numero_factura }}</p>
+        </div>
+        <div class="col-md-4">
+            <p><strong>Cliente:</strong> {{ venta.cliente.nombre_completo }}</p>
+        </div>
+        <div class="col-md-4">
+            <p><strong>Usuario:</strong> {{ venta.usuario.username }}</p>
+        </div>
+        <div class="col-md-4">
+            <p><strong>Método:</strong> {{ venta.get_metodo_pago_display }}</p>
+        </div>
+        <div class="col-md-4">
+            <p><strong>Fecha:</strong> {{ venta.creado|date:"d/m/Y H:i" }}</p>
+        </div>
+        <div class="col-md-4">
+            <p><strong>Total:</strong> Bs {{ venta.total }}</p>
+        </div>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table align-middle mb-0">
+            <thead>
+                <tr>
+                    <th>Producto</th>
+                    <th>Código</th>
+                    <th>Cantidad</th>
+                    <th>Precio unitario</th>
+                    <th>Subtotal</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for d in venta.detalles.all %}
+                <tr>
+                    <td>{{ d.producto.nombre }}</td>
+                    <td>{{ d.producto.codigo }}</td>
+                    <td>{{ d.cantidad }}</td>
+                    <td>Bs {{ d.precio_unitario }}</td>
+                    <td>Bs {{ d.subtotal }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="5">No hay detalles en esta venta.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <div class="mt-4 d-flex gap-2 flex-wrap">
+        <a href="{% url 'factura_view' venta.id %}" class="btn btn-primary">Ver factura</a>
+        <a href="{% url 'ventas_list' %}" class="btn btn-secondary">Volver al listado</a>
+    </div>
+</div>
+{% endblock %}

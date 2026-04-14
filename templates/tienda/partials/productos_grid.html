@@ -1,0 +1,39 @@
+<div class="products-grid">
+    {% for p in productos %}
+    <div class="product-card">
+        <div class="product-image-wrap">
+            {% if p.imagenes_extra.all %}
+                {% for img in p.imagenes_extra.all %}
+                    {% if forloop.first %}
+                        <img src="{{ img.imagen.url }}" alt="{{ p.nombre }}" class="product-image">
+                    {% endif %}
+                {% endfor %}
+            {% else %}
+                <div class="product-image no-image">Sin imagen</div>
+            {% endif %}
+        </div>
+
+        <h5 class="product-code">{{ p.codigo }}</h5>
+        <p class="product-line">{{ p.nombre }}</p>
+        <p class="product-line">{{ p.marca }} {{ p.modelo }}</p>
+        <p class="product-price">Bs {{ p.precio }}</p>
+
+        <div class="product-actions">
+            <a href="{% url 'agregar_carrito' p.id %}" class="btn btn-success w-100">
+                <i class="fa-solid fa-cart-plus"></i> Agregar al carrito
+            </a>
+
+            <a href="{% url 'producto_detail' p.id %}" class="btn btn-info text-white w-100">
+                Ver
+            </a>
+
+            {% if user.is_superuser or user.perfil.rol == 'superuser' %}
+                <a href="{% url 'producto_update' p.id %}" class="btn btn-warning text-white w-100">Editar</a>
+                <a href="{% url 'producto_delete' p.id %}" class="btn btn-danger w-100">Eliminar</a>
+            {% endif %}
+        </div>
+    </div>
+    {% empty %}
+    <p>No hay productos registrados.</p>
+    {% endfor %}
+</div>

@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="page-header">
+    <h2 class="section-title">Usuarios</h2>
+    <a href="{% url 'usuario_create' %}" class="btn btn-primary btn-main">
+        <i class="fa-solid fa-plus"></i> Nuevo usuario
+    </a>
+</div>
+
+<div class="search-box">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <input
+        type="text"
+        class="live-search"
+        data-url="{% url 'usuarios_list' %}"
+        data-target="#usuarios-table-wrap"
+        name="q"
+        placeholder="Buscar por nombre, usuario, email o rol"
+        value="{{ q }}"
+    >
+</div>
+
+<div id="usuarios-table-wrap">
+    {% include 'cuentas/partials/usuarios_table.html' %}
+</div>
+{% endblock %}
