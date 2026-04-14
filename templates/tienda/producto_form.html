@@ -1,34 +1,372 @@
 {% extends 'base.html' %}
+
 {% block title %}{{ titulo }}{% endblock %}
 
+{% block extra_css %}
+<style>
+    .form-shell{
+        max-width: 1050px;
+        margin: 0 auto;
+    }
+
+    .form-grid{
+        display:grid;
+        grid-template-columns: 1.2fr .8fr;
+        gap: 22px;
+    }
+
+    .panel-card{
+        background:#fff;
+        border:1px solid #dbe3ef;
+        border-radius:20px;
+        box-shadow:0 10px 28px rgba(15,23,42,.06);
+        padding:22px;
+    }
+
+    .panel-title{
+        font-size:24px;
+        font-weight:700;
+        color:#2450d3;
+        margin-bottom:6px;
+    }
+
+    .panel-subtitle{
+        color:#64748b;
+        margin-bottom:20px;
+    }
+
+    .field-grid{
+        display:grid;
+        grid-template-columns:1fr 1fr;
+        gap:18px;
+    }
+
+    .field-group{
+        margin-bottom:18px;
+    }
+
+    .field-group.full{
+        grid-column:1 / -1;
+    }
+
+    .field-label{
+        display:block;
+        font-weight:700;
+        margin-bottom:8px;
+        color:#0f172a;
+    }
+
+    .field-help{
+        font-size:13px;
+        color:#64748b;
+        margin-top:6px;
+    }
+
+    .field-error{
+        color:#dc3545;
+        font-size:13px;
+        margin-top:6px;
+    }
+
+    .field-group input[type="text"],
+    .field-group input[type="number"],
+    .field-group input[type="file"],
+    .field-group textarea,
+    .field-group select{
+        width:100%;
+        border:1px solid #cfd8e6;
+        border-radius:16px;
+        padding:14px 16px;
+        background:#fff;
+        font-size:15px;
+        outline:none;
+        transition:.2s ease;
+    }
+
+    .field-group textarea{
+        min-height:150px;
+        resize:vertical;
+    }
+
+    .field-group input[type="text"]:focus,
+    .field-group input[type="number"]:focus,
+    .field-group input[type="file"]:focus,
+    .field-group textarea:focus,
+    .field-group select:focus{
+        border-color:#7aa2ff;
+        box-shadow:0 0 0 4px rgba(37,99,235,.10);
+    }
+
+    .checkbox-wrap{
+        display:flex;
+        align-items:center;
+        gap:10px;
+        min-height:52px;
+        padding:0 4px;
+    }
+
+    .checkbox-wrap input[type="checkbox"]{
+        width:18px;
+        height:18px;
+    }
+
+    .actions{
+        display:flex;
+        gap:12px;
+        flex-wrap:wrap;
+        margin-top:8px;
+    }
+
+    .btn-main{
+        border:none;
+        border-radius:14px;
+        padding:12px 22px;
+        font-weight:700;
+        text-decoration:none;
+        display:inline-flex;
+        align-items:center;
+        justify-content:center;
+        gap:8px;
+    }
+
+    .btn-save{
+        background:#2563eb;
+        color:#fff;
+    }
+
+    .btn-cancel{
+        background:#6c757d;
+        color:#fff;
+    }
+
+    .side-box{
+        background:#f8fbff;
+        border:1px solid #dbe3ef;
+        border-radius:18px;
+        padding:18px;
+    }
+
+    .side-title{
+        font-size:17px;
+        font-weight:700;
+        margin-bottom:10px;
+    }
+
+    .preview-main{
+        width:100%;
+        height:260px;
+        border-radius:18px;
+        background:#eef3f8;
+        border:1px dashed #c7d5eb;
+        display:flex;
+        align-items:center;
+        justify-content:center;
+        overflow:hidden;
+        margin-bottom:14px;
+    }
+
+    .preview-main img{
+        width:100%;
+        height:100%;
+        object-fit:cover;
+    }
+
+    .preview-icon{
+        font-size:44px;
+        color:#94a3b8;
+    }
+
+    .thumb-grid{
+        display:grid;
+        grid-template-columns:repeat(3, 1fr);
+        gap:10px;
+    }
+
+    .thumb{
+        height:82px;
+        border-radius:14px;
+        overflow:hidden;
+        background:#eef3f8;
+        border:1px solid #dbe3ef;
+        display:flex;
+        align-items:center;
+        justify-content:center;
+    }
+
+    .thumb img{
+        width:100%;
+        height:100%;
+        object-fit:cover;
+    }
+
+    .muted-list{
+        color:#64748b;
+        line-height:1.7;
+        padding-left:18px;
+        margin:0;
+    }
+
+    @media (max-width: 991px){
+        .form-grid{
+            grid-template-columns:1fr;
+        }
+
+        .field-grid{
+            grid-template-columns:1fr;
+        }
+    }
+</style>
+{% endblock %}
+
 {% block content %}
-<div class="page-header">
-    <h2 class="section-title">{{ titulo }}</h2>
-</div>
-
-<div class="dashboard-card" style="max-width:900px;">
-    <form method="post" enctype="multipart/form-data">
-        {% csrf_token %}
-        {{ form.as_p }}
-
-        <div class="mb-3">
-            <label class="form-label">Imágenes del producto</label>
-            <input type="file" name="imagenes_extra" multiple class="form-control">
+<div class="form-shell">
+    <div class="panel-card mb-4">
+        <div class="panel-title">{{ titulo }}</div>
+        <div class="panel-subtitle">
+            {% if producto %}
+                Actualiza la información del producto, imágenes y disponibilidad.
+            {% else %}
+                Registra un nuevo producto para que aparezca en el catálogo.
+            {% endif %}
         </div>
 
-        {% if producto and producto.imagenes_extra.all %}
-            <h5 class="mt-4">Imágenes actuales</h5>
-            <div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:15px;">
-                {% for img in producto.imagenes_extra.all %}
-                    <img src="{{ img.imagen.url }}" style="width:100px; height:100px; object-fit:cover; border-radius:10px;">
-                {% endfor %}
+        <div class="form-grid">
+            <div class="panel-card" style="padding: 0; border:none; box-shadow:none;">
+                <form method="post" enctype="multipart/form-data" novalidate>
+                    {% csrf_token %}
+
+                    <div class="field-grid">
+                        <div class="field-group">
+                            <label class="field-label" for="{{ form.codigo.id_for_label }}">Código</label>
+                            {{ form.codigo }}
+                            {% if form.codigo.errors %}
+                                <div class="field-error">{{ form.codigo.errors|join:", " }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="field-group">
+                            <label class="field-label" for="{{ form.nombre.id_for_label }}">Nombre</label>
+                            {{ form.nombre }}
+                            {% if form.nombre.errors %}
+                                <div class="field-error">{{ form.nombre.errors|join:", " }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="field-group">
+                            <label class="field-label" for="{{ form.marca.id_for_label }}">Marca</label>
+                            {{ form.marca }}
+                            {% if form.marca.errors %}
+                                <div class="field-error">{{ form.marca.errors|join:", " }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="field-group">
+                            <label class="field-label" for="{{ form.modelo.id_for_label }}">Modelo</label>
+                            {{ form.modelo }}
+                            {% if form.modelo.errors %}
+                                <div class="field-error">{{ form.modelo.errors|join:", " }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="field-group full">
+                            <label class="field-label" for="{{ form.descripcion.id_for_label }}">Descripción</label>
+                            {{ form.descripcion }}
+                            {% if form.descripcion.errors %}
+                                <div class="field-error">{{ form.descripcion.errors|join:", " }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="field-group">
+                            <label class="field-label" for="{{ form.precio.id_for_label }}">Precio</label>
+                            {{ form.precio }}
+                            {% if form.precio.errors %}
+                                <div class="field-error">{{ form.precio.errors|join:", " }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="field-group">
+                            <label class="field-label" for="{{ form.stock.id_for_label }}">Stock</label>
+                            {{ form.stock }}
+                            {% if form.stock.errors %}
+                                <div class="field-error">{{ form.stock.errors|join:", " }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="field-group">
+                            <label class="field-label" for="{{ form.imagen.id_for_label }}">Imagen principal</label>
+                            {{ form.imagen }}
+                            {% if form.imagen.errors %}
+                                <div class="field-error">{{ form.imagen.errors|join:", " }}</div>
+                            {% endif %}
+                            <div class="field-help">Se mostrará como imagen destacada del producto.</div>
+                        </div>
+
+                        <div class="field-group">
+                            <label class="field-label" for="id_imagenes_extra">Imágenes adicionales</label>
+                            <input type="file" name="imagenes_extra" id="id_imagenes_extra" multiple>
+                            <div class="field-help">Puedes seleccionar varias imágenes del producto.</div>
+                        </div>
+
+                        <div class="field-group full">
+                            <label class="field-label">Estado</label>
+                            <div class="checkbox-wrap">
+                                {{ form.activo }}
+                                <span>Producto activo en catálogo</span>
+                            </div>
+                            {% if form.activo.errors %}
+                                <div class="field-error">{{ form.activo.errors|join:", " }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="actions">
+                        <button type="submit" class="btn-main btn-save">
+                            <i class="fa-solid fa-floppy-disk"></i>
+                            Guardar
+                        </button>
+
+                        <a href="{% url 'productos_list' %}" class="btn-main btn-cancel">
+                            <i class="fa-solid fa-arrow-left"></i>
+                            Cancelar
+                        </a>
+                    </div>
+                </form>
             </div>
-        {% endif %}
 
-        <div class="d-flex gap-2 flex-wrap mt-3">
-            <button type="submit" class="btn btn-primary">Guardar</button>
-            <a href="{% url 'productos_list' %}" class="btn btn-secondary">Cancelar</a>
+            <div>
+                <div class="side-box mb-4">
+                    <div class="side-title">Vista previa</div>
+
+                    <div class="preview-main">
+                        {% if producto and producto.imagen %}
+                            <img src="{{ producto.imagen.url }}" alt="{{ producto.nombre }}">
+                        {% else %}
+                            <i class="fa-solid fa-box preview-icon"></i>
+                        {% endif %}
+                    </div>
+
+                    {% if producto and producto.productoimagen_set.all %}
+                    <div class="thumb-grid">
+                        {% for img in producto.productoimagen_set.all %}
+                            <div class="thumb">
+                                <img src="{{ img.imagen.url }}" alt="Imagen extra">
+                            </div>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                </div>
+
+                <div class="side-box">
+                    <div class="side-title">Recomendaciones</div>
+                    <ul class="muted-list">
+                        <li>Usa códigos únicos y fáciles de buscar.</li>
+                        <li>Coloca nombres cortos y claros.</li>
+                        <li>Sube una imagen principal nítida.</li>
+                        <li>Mantén actualizado el stock real.</li>
+                    </ul>
+                </div>
+            </div>
         </div>
-    </form>
+    </div>
 </div>
 {% endblock %}

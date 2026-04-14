@@ -1,67 +1,293 @@
 {% extends 'base.html' %}
-{% block title %}Detalle de producto{% endblock %}
+
+{% block title %}Detalle del producto{% endblock %}
+
+{% block extra_css %}
+<style>
+    .detail-shell{
+        max-width:1200px;
+        margin:0 auto;
+    }
+
+    .detail-grid{
+        display:grid;
+        grid-template-columns: 1.05fr .95fr;
+        gap:24px;
+    }
+
+    .detail-card{
+        background:#fff;
+        border:1px solid #dbe3ef;
+        border-radius:22px;
+        box-shadow:0 10px 28px rgba(15,23,42,.06);
+        overflow:hidden;
+    }
+
+    .gallery-main{
+        height:500px;
+        background:#eef3f8;
+        display:flex;
+        align-items:center;
+        justify-content:center;
+        overflow:hidden;
+    }
+
+    .gallery-main img{
+        width:100%;
+        height:100%;
+        object-fit:contain;
+        background:#fff;
+    }
+
+    .thumb-strip{
+        display:flex;
+        gap:12px;
+        padding:16px;
+        flex-wrap:wrap;
+        border-top:1px solid #e6edf7;
+        background:#fff;
+    }
+
+    .thumb-item{
+        width:92px;
+        height:92px;
+        border-radius:14px;
+        overflow:hidden;
+        border:2px solid #dbe3ef;
+        background:#f8fbff;
+        cursor:pointer;
+        transition:.2s ease;
+        padding:0;
+    }
+
+    .thumb-item.active,
+    .thumb-item:hover{
+        border-color:#2563eb;
+        transform:translateY(-1px);
+    }
+
+    .thumb-item img{
+        width:100%;
+        height:100%;
+        object-fit:cover;
+    }
+
+    .info-card{
+        background:#fff;
+        border:1px solid #dbe3ef;
+        border-radius:22px;
+        box-shadow:0 10px 28px rgba(15,23,42,.06);
+        padding:26px;
+    }
+
+    .badge-state{
+        display:inline-flex;
+        align-items:center;
+        gap:8px;
+        background:#e9f8ee;
+        color:#0f9f5f;
+        font-weight:700;
+        border-radius:999px;
+        padding:8px 14px;
+        margin-bottom:16px;
+    }
+
+    .product-name{
+        font-size:34px;
+        font-weight:800;
+        line-height:1.15;
+        margin-bottom:18px;
+        color:#0f172a;
+    }
+
+    .spec-list{
+        display:grid;
+        grid-template-columns:1fr 1fr;
+        gap:14px;
+        margin-bottom:18px;
+    }
+
+    .spec-item{
+        background:#f8fbff;
+        border:1px solid #e2eaf5;
+        border-radius:16px;
+        padding:14px 16px;
+    }
+
+    .spec-label{
+        color:#64748b;
+        font-size:13px;
+        margin-bottom:4px;
+    }
+
+    .spec-value{
+        font-weight:700;
+        color:#0f172a;
+        word-break:break-word;
+    }
+
+    .price-box{
+        margin:22px 0;
+        padding:18px 20px;
+        border-radius:18px;
+        background:#effaf3;
+        border:1px solid #caecd5;
+    }
+
+    .price-label{
+        color:#64748b;
+        margin-bottom:4px;
+    }
+
+    .price-value{
+        font-size:38px;
+        font-weight:800;
+        color:#0f9f5f;
+        line-height:1;
+    }
+
+    .desc-box{
+        background:#fff;
+        border:1px solid #e2eaf5;
+        border-radius:18px;
+        padding:18px;
+        color:#334155;
+        line-height:1.75;
+        margin-bottom:22px;
+    }
+
+    .detail-actions{
+        display:flex;
+        gap:12px;
+        flex-wrap:wrap;
+    }
+
+    .detail-actions .btn{
+        border-radius:14px;
+        font-weight:700;
+        padding:12px 18px;
+    }
+
+    @media (max-width: 991px){
+        .detail-grid{
+            grid-template-columns:1fr;
+        }
+
+        .gallery-main{
+            height:360px;
+        }
+
+        .spec-list{
+            grid-template-columns:1fr;
+        }
+    }
+</style>
+{% endblock %}
 
 {% block content %}
-<div class="page-header">
-    <h2 class="section-title">Detalle del producto</h2>
-</div>
-
-<div class="product-detail-card">
-    <div class="product-detail-grid">
-        <div>
-            {% if producto.imagenes_extra.all %}
-            <div id="carouselProducto" class="carousel slide" data-bs-ride="false">
-                <div class="carousel-inner detail-carousel-box">
-                    {% for img in producto.imagenes_extra.all %}
-                    <div class="carousel-item {% if forloop.first %}active{% endif %}">
-                        <img src="{{ img.imagen.url }}" class="d-block w-100 detail-carousel-image" alt="imagen producto">
-                    </div>
-                    {% endfor %}
-                </div>
-
-                {% if producto.imagenes_extra.count > 1 %}
-                <button class="carousel-control-prev" type="button" data-bs-target="#carouselProducto" data-bs-slide="prev">
-                    <span class="carousel-control-prev-icon"></span>
-                </button>
-                <button class="carousel-control-next" type="button" data-bs-target="#carouselProducto" data-bs-slide="next">
-                    <span class="carousel-control-next-icon"></span>
-                </button>
+<div class="detail-shell">
+    <div class="detail-grid">
+        <div class="detail-card">
+            <div class="gallery-main">
+                {% if producto.imagen %}
+                    <img id="main-image" src="{{ producto.imagen.url }}" alt="{{ producto.nombre }}">
+                {% else %}
+                    <i class="fa-solid fa-box fa-4x text-secondary"></i>
                 {% endif %}
             </div>
 
-            <div class="detail-thumbs">
-                {% for img in producto.imagenes_extra.all %}
-                <img src="{{ img.imagen.url }}"
-                     class="detail-thumb"
-                     alt="miniatura"
-                     data-bs-target="#carouselProducto"
-                     data-bs-slide-to="{{ forloop.counter0 }}">
+            <div class="thumb-strip">
+                {% if producto.imagen %}
+                    <button type="button" class="thumb-item active" data-img="{{ producto.imagen.url }}">
+                        <img src="{{ producto.imagen.url }}" alt="{{ producto.nombre }}">
+                    </button>
+                {% endif %}
+
+                {% for img in producto.productoimagen_set.all %}
+                    <button type="button" class="thumb-item" data-img="{{ img.imagen.url }}">
+                        <img src="{{ img.imagen.url }}" alt="Imagen extra">
+                    </button>
                 {% endfor %}
             </div>
-            {% else %}
-            <div class="detail-carousel-box">
-                <div class="detail-no-image">Sin imagen</div>
-            </div>
-            {% endif %}
         </div>
 
-        <div>
-            <h2 class="mb-3">{{ producto.nombre }}</h2>
-            <p><strong>Código:</strong> {{ producto.codigo }}</p>
-            <p><strong>Marca:</strong> {{ producto.marca }}</p>
-            <p><strong>Modelo:</strong> {{ producto.modelo }}</p>
-            <p><strong>Descripción:</strong> {{ producto.descripcion }}</p>
-            <p><strong>Stock:</strong> {{ producto.stock }}</p>
+        <div class="info-card">
+            <div class="badge-state">
+                <i class="fa-solid fa-circle-check"></i>
+                {% if producto.activo %}Activo{% else %}Inactivo{% endif %}
+            </div>
 
-            <h3 class="detail-price">Bs {{ producto.precio }}</h3>
+            <div class="product-name">{{ producto.nombre }}</div>
 
-            <div class="d-flex gap-2 flex-wrap mt-4">
-                <a href="{% url 'agregar_carrito' producto.id %}" class="btn btn-success">
-                    <i class="fa-solid fa-cart-plus"></i> Agregar al carrito
+            <div class="spec-list">
+                <div class="spec-item">
+                    <div class="spec-label">Código</div>
+                    <div class="spec-value">{{ producto.codigo }}</div>
+                </div>
+
+                <div class="spec-item">
+                    <div class="spec-label">Marca</div>
+                    <div class="spec-value">{{ producto.marca }}</div>
+                </div>
+
+                <div class="spec-item">
+                    <div class="spec-label">Modelo</div>
+                    <div class="spec-value">{{ producto.modelo }}</div>
+                </div>
+
+                <div class="spec-item">
+                    <div class="spec-label">Stock</div>
+                    <div class="spec-value">{{ producto.stock }}</div>
+                </div>
+            </div>
+
+            <div class="price-box">
+                <div class="price-label">Precio de venta</div>
+                <div class="price-value">Bs {{ producto.precio }}</div>
+            </div>
+
+            <div class="desc-box">
+                <strong>Descripción</strong><br>
+                {{ producto.descripcion|default:"Sin descripción registrada." }}
+            </div>
+
+            <div class="detail-actions">
+                <a href="{% url 'productos_list' %}" class="btn btn-outline-secondary">
+                    <i class="fa-solid fa-arrow-left"></i> Volver
                 </a>
-                <a href="{% url 'productos_list' %}" class="btn btn-secondary">Volver</a>
+
+                {% if user.is_superuser %}
+                <a href="{% url 'producto_update' producto.pk %}" class="btn btn-warning text-white">
+                    <i class="fa-solid fa-pen"></i> Editar
+                </a>
+                <a href="{% url 'producto_delete' producto.pk %}" class="btn btn-danger">
+                    <i class="fa-solid fa-trash"></i> Eliminar
+                </a>
+                {% endif %}
             </div>
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+(function () {
+    const mainImage = document.getElementById('main-image');
+    const thumbs = document.querySelectorAll('.thumb-item');
+
+    if (!mainImage || !thumbs.length) return;
+
+    thumbs.forEach(btn => {
+        btn.addEventListener('click', function () {
+            const img = this.getAttribute('data-img');
+            if (!img) return;
+
+            mainImage.src = img;
+            thumbs.forEach(t => t.classList.remove('active'));
+            this.classList.add('active');
+        });
+    });
+})();
+</script>
 {% endblock %}
