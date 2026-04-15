@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 
-{% block title %}Catálogo{% endblock %}
+{% block title %}Catálogo público{% endblock %}
 
 {% block content %}
 <div class="mb-4">
@@ -28,11 +28,10 @@
 </div>
 
 {% if productos %}
-<div class="row g-4">
+<div class="row g-4 align-items-start">
     {% for producto in productos %}
     <div class="col-md-6 col-xl-4">
-        <div class="page-card h-100 p-0 overflow-hidden">
-
+        <div class="page-card p-0 overflow-hidden">
             <div class="product-card-media">
                 {% with imagenes=producto.imagenes_extra.all %}
                     {% if imagenes %}
@@ -56,6 +55,7 @@
                     <div><strong>Código:</strong> {{ producto.codigo }}</div>
                     <div><strong>Marca:</strong> {{ producto.marca }}</div>
                     <div><strong>Modelo:</strong> {{ producto.modelo }}</div>
+                    <div><strong>Stock:</strong> {{ producto.stock }}</div>
                 </div>
 
                 <div class="mb-3 product-card-price">
@@ -63,11 +63,21 @@
                 </div>
 
                 <div class="d-grid gap-2">
-                    <a href="{% url 'detalle_producto_cliente' producto.pk %}" class="btn btn-outline-primary">Ver detalle</a>
-                    <a href="{% url 'agregar_carrito' producto.pk %}" class="btn btn-primary">Agregar al carrito</a>
+                    <a href="{% url 'detalle_producto_cliente' producto.pk %}" class="btn btn-outline-primary">
+                        Ver detalle
+                    </a>
+
+                    {% if user.is_authenticated %}
+                        <a href="{% url 'agregar_carrito' producto.pk %}" class="btn btn-primary">
+                            Agregar al carrito
+                        </a>
+                    {% else %}
+                        <a href="{% url 'login' %}?next={% url 'agregar_carrito' producto.pk %}" class="btn btn-primary">
+                            Comprar
+                        </a>
+                    {% endif %}
                 </div>
             </div>
-
         </div>
     </div>
     {% endfor %}
