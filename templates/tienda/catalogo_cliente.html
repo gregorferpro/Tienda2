@@ -3,34 +3,73 @@
 {% block title %}Catálogo{% endblock %}
 
 {% block content %}
-<div class="catalog-hero">
-    <div class="content-card catalog-hero-card">
-        <div class="catalog-hero-top">
-            <div>
-                <h2 class="section-title">Catálogo público</h2>
-                <p class="section-subtitle">Explora productos sin iniciar sesión. El registro solo se solicita al finalizar la compra.</p>
-            </div>
-            <div class="catalog-cart-badge">
-                <i class="fa-solid fa-cart-shopping"></i>
-                <span>Compra rápida</span>
-            </div>
-        </div>
-
-        <form method="get" class="search-wrap search-wrap-lg catalog-search-bar">
-            <i class="fa-solid fa-magnifying-glass"></i>
-            <input
-                type="text"
-                name="q"
-                class="search-input"
-                placeholder="Buscar por nombre, código, marca o modelo"
-                value="{{ q }}"
-                autocomplete="off"
-            >
-        </form>
-
-        <p class="catalog-note">Diseño limpio, cards consistentes y flujo listo para carrito y checkout.</p>
-    </div>
+<div class="mb-4">
+    <h2 class="section-title">Productos disponibles</h2>
+    <p class="section-subtitle">Explora el catálogo antes de comprar.</p>
 </div>
 
-{% include 'tienda/partials/catalogo_grid.html' %}
+<div class="toolbar">
+    <form method="get" class="search-wrap catalog-search-wrap">
+        <i class="fa-solid fa-magnifying-glass"></i>
+        <input
+            type="text"
+            name="q"
+            class="search-input"
+            placeholder="Buscar por código, nombre, marca o modelo"
+            value="{{ q }}"
+        >
+    </form>
+
+    {% if user.is_authenticated and not user.is_staff %}
+    <a href="{% url 'carrito' %}" class="btn btn-warning">
+        <i class="fa-solid fa-cart-shopping"></i> Carrito
+    </a>
+    {% endif %}
+</div>
+
+{% if productos %}
+<div class="row g-4">
+    {% for producto in productos %}
+    <div class="col-md-6 col-xl-4">
+        <div class="page-card h-100 p-0 overflow-hidden">
+            <div class="product-card-media">
+                {% with imagen=producto.imagenes_extra.first %}
+                    {% if imagen %}
+                        <img src="{{ imagen.imagen.url }}" alt="{{ producto.nombre }}" class="product-card-image">
+                    {% else %}
+                        <div class="product-card-placeholder">
+                            <i class="fa-solid fa-box fa-3x text-secondary"></i>
+                        </div>
+                    {% endif %}
+                {% endwith %}
+            </div>
+
+            <div class="p-4">
+                <h4 class="mb-2 product-card-title">{{ producto.nombre }}</h4>
+
+                <div class="text-muted mb-3 product-card-meta">
+                    <div><strong>Código:</strong> {{ producto.codigo }}</div>
+                    <div><strong>Marca:</strong> {{ producto.marca }}</div>
+                    <div><strong>Modelo:</strong> {{ producto.modelo }}</div>
+                </div>
+
+                <div class="mb-3 product-card-price">
+                    Bs {{ producto.precio }}
+                </div>
+
+                <div class="d-grid gap-2">
+                    <a href="{% url 'detalle_producto_cliente' producto.pk %}" class="btn btn-outline-primary">Ver detalle</a>
+                    <a href="{% url 'agregar_carrito' producto.pk %}" class="btn btn-primary">Agregar al carrito</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<div class="empty-state page-card">
+    <i class="fa-solid fa-store-slash fa-2x mb-3 text-secondary"></i>
+    <div>No hay productos disponibles.</div>
+</div>
+{% endif %}
 {% endblock %}

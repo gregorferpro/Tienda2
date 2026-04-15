@@ -1,19 +1,24 @@
 {% if productos %}
-<div class="products-grid">
+<div class="row g-4">
     {% for producto in productos %}
-    <div class="product-grid-col">
-        <div class="product-card">
-            <div class="product-card-image">
-                {% if producto.imagen %}
-                    <img src="{{ producto.imagen.url }}" alt="{{ producto.nombre }}">
-                {% else %}
-                    <i class="fa-solid fa-box fa-3x text-secondary"></i>
-                {% endif %}
+    <div class="col-md-6 col-xl-4">
+        <div class="page-card h-100 p-0 overflow-hidden">
+            <div class="product-card-media">
+                {% with imagen=producto.imagenes_extra.first %}
+                    {% if imagen %}
+                        <img src="{{ imagen.imagen.url }}" alt="{{ producto.nombre }}" class="product-card-image">
+                    {% else %}
+                        <div class="product-card-placeholder">
+                            <i class="fa-solid fa-box fa-3x text-secondary"></i>
+                        </div>
+                    {% endif %}
+                {% endwith %}
             </div>
 
-            <div class="product-card-body">
-                <div class="product-card-top">
-                    <h4 class="product-card-title">{{ producto.nombre }}</h4>
+            <div class="p-4">
+                <div class="d-flex justify-content-between align-items-start gap-3 mb-2">
+                    <h4 class="mb-0 product-card-title">{{ producto.nombre }}</h4>
+
                     {% if producto.activo %}
                         <span class="badge text-bg-success">Activo</span>
                     {% else %}
@@ -21,17 +26,20 @@
                     {% endif %}
                 </div>
 
-                <div class="product-card-meta">
+                <div class="text-muted mb-3 product-card-meta">
                     <div><strong>Código:</strong> {{ producto.codigo }}</div>
                     <div><strong>Marca:</strong> {{ producto.marca }}</div>
                     <div><strong>Modelo:</strong> {{ producto.modelo }}</div>
                     <div><strong>Stock:</strong> {{ producto.stock }}</div>
                 </div>
 
-                <div class="product-card-price">Bs {{ producto.precio }}</div>
+                <div class="mb-3 product-card-price">
+                    Bs {{ producto.precio }}
+                </div>
 
-                <div class="product-card-actions">
+                <div class="d-grid gap-2">
                     <a href="{% url 'producto_detail' producto.pk %}" class="btn btn-outline-primary">Ver</a>
+
                     {% if user.is_superuser %}
                     <a href="{% url 'producto_update' producto.pk %}" class="btn btn-warning text-white">Editar</a>
                     <a href="{% url 'producto_delete' producto.pk %}" class="btn btn-danger">Eliminar</a>

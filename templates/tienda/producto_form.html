@@ -1,128 +1,152 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block title %}{{ titulo }}{% endblock %}
 
 {% block content %}
-<div class="form-shell">
-    <div class="panel-card mb-4">
-        <div class="panel-title">{{ titulo }}</div>
-        <div class="panel-subtitle">
-            {% if producto %}
-                Actualiza la información del producto, las imágenes y su disponibilidad en catálogo.
-            {% else %}
-                Registra un nuevo producto para que se publique correctamente en la tienda.
-            {% endif %}
+<div class="form-page">
+    <div class="form-shell">
+        <div class="form-header">
+            <div>
+                <h2 class="section-title mb-1">{{ titulo }}</h2>
+                <p class="section-subtitle mb-0">Completa la información del producto.</p>
+            </div>
+            <a href="{% url 'productos_list' %}" class="btn btn-outline-secondary">
+                <i class="fa-solid fa-arrow-left"></i> Volver
+            </a>
         </div>
 
-        <div class="form-layout-split">
-            <div class="panel-card form-panel-reset">
+        <div class="form-layout">
+            <div class="page-card">
                 <form method="post" enctype="multipart/form-data" novalidate>
                     {% csrf_token %}
 
-                    <div class="field-grid">
+                    <div class="form-grid">
                         <div class="field-group">
                             <label class="field-label" for="{{ form.codigo.id_for_label }}">Código</label>
                             {{ form.codigo }}
-                            {% if form.codigo.errors %}<div class="field-error">{{ form.codigo.errors|join:", " }}</div>{% endif %}
+                            {% if form.codigo.errors %}
+                                <div class="field-error">{{ form.codigo.errors|join:", " }}</div>
+                            {% endif %}
                         </div>
 
                         <div class="field-group">
                             <label class="field-label" for="{{ form.nombre.id_for_label }}">Nombre</label>
                             {{ form.nombre }}
-                            {% if form.nombre.errors %}<div class="field-error">{{ form.nombre.errors|join:", " }}</div>{% endif %}
+                            {% if form.nombre.errors %}
+                                <div class="field-error">{{ form.nombre.errors|join:", " }}</div>
+                            {% endif %}
                         </div>
 
                         <div class="field-group">
                             <label class="field-label" for="{{ form.marca.id_for_label }}">Marca</label>
                             {{ form.marca }}
-                            {% if form.marca.errors %}<div class="field-error">{{ form.marca.errors|join:", " }}</div>{% endif %}
+                            {% if form.marca.errors %}
+                                <div class="field-error">{{ form.marca.errors|join:", " }}</div>
+                            {% endif %}
                         </div>
 
                         <div class="field-group">
                             <label class="field-label" for="{{ form.modelo.id_for_label }}">Modelo</label>
                             {{ form.modelo }}
-                            {% if form.modelo.errors %}<div class="field-error">{{ form.modelo.errors|join:", " }}</div>{% endif %}
-                        </div>
-
-                        <div class="field-group">
-                            <label class="field-label" for="{{ form.precio.id_for_label }}">Precio</label>
-                            {{ form.precio }}
-                            {% if form.precio.errors %}<div class="field-error">{{ form.precio.errors|join:", " }}</div>{% endif %}
-                        </div>
-
-                        <div class="field-group">
-                            <label class="field-label" for="{{ form.stock.id_for_label }}">Stock</label>
-                            {{ form.stock }}
-                            {% if form.stock.errors %}<div class="field-error">{{ form.stock.errors|join:", " }}</div>{% endif %}
+                            {% if form.modelo.errors %}
+                                <div class="field-error">{{ form.modelo.errors|join:", " }}</div>
+                            {% endif %}
                         </div>
 
                         <div class="field-group full">
                             <label class="field-label" for="{{ form.descripcion.id_for_label }}">Descripción</label>
                             {{ form.descripcion }}
-                            {% if form.descripcion.errors %}<div class="field-error">{{ form.descripcion.errors|join:", " }}</div>{% endif %}
+                            {% if form.descripcion.errors %}
+                                <div class="field-error">{{ form.descripcion.errors|join:", " }}</div>
+                            {% endif %}
                         </div>
 
                         <div class="field-group">
-                            <label class="field-label" for="{{ form.imagen.id_for_label }}">Imagen principal</label>
-                            {{ form.imagen }}
-                            {% if form.imagen.errors %}<div class="field-error">{{ form.imagen.errors|join:", " }}</div>{% endif %}
+                            <label class="field-label" for="{{ form.precio.id_for_label }}">Precio</label>
+                            {{ form.precio }}
+                            {% if form.precio.errors %}
+                                <div class="field-error">{{ form.precio.errors|join:", " }}</div>
+                            {% endif %}
                         </div>
 
                         <div class="field-group">
-                            <label class="field-label" for="imagenes_extra">Imágenes adicionales</label>
-                            <input type="file" name="imagenes_extra" id="imagenes_extra" multiple>
-                            <div class="field-help">Puedes seleccionar varias imágenes extra para el carrusel del producto.</div>
+                            <label class="field-label" for="{{ form.stock.id_for_label }}">Stock</label>
+                            {{ form.stock }}
+                            {% if form.stock.errors %}
+                                <div class="field-error">{{ form.stock.errors|join:", " }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="field-group full">
+                            <label class="field-label" for="id_imagenes_extra">Imágenes del producto</label>
+                            <input type="file" name="imagenes_extra" id="id_imagenes_extra" multiple>
+                            <div class="field-help">
+                                La primera imagen que subas será usada como imagen principal en tarjetas y detalle.
+                            </div>
                         </div>
 
                         <div class="field-group full">
                             <label class="field-label">Estado</label>
                             <div class="checkbox-wrap">
                                 {{ form.activo }}
-                                <span>Producto activo y visible en el sistema</span>
+                                <span>Producto activo en catálogo</span>
                             </div>
-                            {% if form.activo.errors %}<div class="field-error">{{ form.activo.errors|join:", " }}</div>{% endif %}
+                            {% if form.activo.errors %}
+                                <div class="field-error">{{ form.activo.errors|join:", " }}</div>
+                            {% endif %}
                         </div>
                     </div>
 
                     <div class="actions">
-                        <button type="submit" class="btn btn-primary">
-                            <i class="fa-solid fa-floppy-disk"></i> Guardar producto
+                        <button type="submit" class="btn-main btn-save">
+                            <i class="fa-solid fa-floppy-disk"></i>
+                            Guardar
                         </button>
-                        <a href="{% url 'productos_list' %}" class="btn btn-secondary">
-                            <i class="fa-solid fa-arrow-left"></i> Cancelar
+
+                        <a href="{% url 'productos_list' %}" class="btn-main btn-cancel">
+                            <i class="fa-solid fa-arrow-left"></i>
+                            Cancelar
                         </a>
                     </div>
                 </form>
             </div>
 
-            <div class="side-box">
-                <div class="side-title">Vista previa</div>
+            <div>
+                <div class="side-box mb-4">
+                    <div class="side-title">Vista previa</div>
 
-                <div class="preview-main">
-                    {% if producto and producto.imagen %}
-                        <img src="{{ producto.imagen.url }}" alt="{{ producto.nombre }}">
-                    {% else %}
-                        <i class="fa-solid fa-image preview-icon"></i>
-                    {% endif %}
-                </div>
+                    <div class="preview-main">
+                        {% with imagen_principal=producto.imagenes_extra.first %}
+                            {% if producto and imagen_principal %}
+                                <img src="{{ imagen_principal.imagen.url }}" alt="{{ producto.nombre }}">
+                            {% else %}
+                                <i class="fa-solid fa-box preview-icon"></i>
+                            {% endif %}
+                        {% endwith %}
+                    </div>
 
-                {% if producto and producto.productoimagen_set.all %}
-                    <div class="thumb-grid mb-3">
-                        {% for img in producto.productoimagen_set.all %}
+                    {% if producto and producto.imagenes_extra.all %}
+                    <div class="thumb-grid">
+                        {% for img in producto.imagenes_extra.all %}
                             <div class="thumb">
-                                <img src="{{ img.imagen.url }}" alt="Imagen extra {{ forloop.counter }}">
+                                <img src="{{ img.imagen.url }}" alt="Imagen extra">
                             </div>
                         {% endfor %}
                     </div>
-                {% endif %}
+                    {% endif %}
+                </div>
 
-                <div class="side-title">Recomendaciones</div>
-                <ul class="muted-list">
-                    <li>Usa una imagen principal nítida y bien centrada.</li>
-                    <li>Evita nombres demasiado largos para mejorar las cards.</li>
-                    <li>Completa marca y modelo para búsquedas más precisas.</li>
-                    <li>Mantén el stock actualizado antes de publicar.</li>
-                </ul>
+                <div class="side-box">
+                    <div class="side-title">Recomendaciones</div>
+                    <ul class="muted-list">
+                        <li>Usa códigos únicos y fáciles de buscar.</li>
+                        <li>Coloca nombres cortos y claros.</li>
+                        <li>Sube varias imágenes nítidas del producto.</li>
+                        <li>La primera imagen será la portada.</li>
+                        <li>Mantén actualizado el stock real.</li>
+                    </ul>
+                </div>
             </div>
         </div>
     </div>

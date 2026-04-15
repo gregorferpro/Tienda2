@@ -7,26 +7,26 @@
     <div class="detail-grid">
         <div class="detail-card">
             <div class="gallery-main">
-                {% if producto.imagen %}
-                    <img id="main-image" src="{{ producto.imagen.url }}" alt="{{ producto.nombre }}">
-                {% else %}
-                    <i class="fa-solid fa-box fa-4x text-secondary"></i>
-                {% endif %}
+                {% with imagen_principal=producto.imagenes_extra.first %}
+                    {% if imagen_principal %}
+                        <img id="main-image" src="{{ imagen_principal.imagen.url }}" alt="{{ producto.nombre }}">
+                    {% else %}
+                        <div class="product-card-placeholder h-100">
+                            <i class="fa-solid fa-box fa-4x text-secondary"></i>
+                        </div>
+                    {% endif %}
+                {% endwith %}
             </div>
 
+            {% if producto.imagenes_extra.all %}
             <div class="thumb-strip">
-                {% if producto.imagen %}
-                    <button type="button" class="thumb-item active" data-img="{{ producto.imagen.url }}">
-                        <img src="{{ producto.imagen.url }}" alt="{{ producto.nombre }}">
-                    </button>
-                {% endif %}
-
-                {% for img in producto.productoimagen_set.all %}
-                    <button type="button" class="thumb-item" data-img="{{ img.imagen.url }}">
+                {% for img in producto.imagenes_extra.all %}
+                    <button type="button" class="thumb-item {% if forloop.first %}active{% endif %}" data-img="{{ img.imagen.url }}">
                         <img src="{{ img.imagen.url }}" alt="Imagen extra">
                     </button>
                 {% endfor %}
             </div>
+            {% endif %}
         </div>
 
         <div class="info-card">
@@ -42,14 +42,17 @@
                     <div class="spec-label">Código</div>
                     <div class="spec-value">{{ producto.codigo }}</div>
                 </div>
+
                 <div class="spec-item">
                     <div class="spec-label">Marca</div>
                     <div class="spec-value">{{ producto.marca }}</div>
                 </div>
+
                 <div class="spec-item">
                     <div class="spec-label">Modelo</div>
                     <div class="spec-value">{{ producto.modelo }}</div>
                 </div>
+
                 <div class="spec-item">
                     <div class="spec-label">Stock</div>
                     <div class="spec-value">{{ producto.stock }}</div>
@@ -70,6 +73,7 @@
                 <a href="{% url 'productos_list' %}" class="btn btn-outline-secondary">
                     <i class="fa-solid fa-arrow-left"></i> Volver
                 </a>
+
                 {% if user.is_superuser %}
                 <a href="{% url 'producto_update' producto.pk %}" class="btn btn-warning text-white">
                     <i class="fa-solid fa-pen"></i> Editar
@@ -92,11 +96,13 @@
 
     if (!mainImage || !thumbs.length) return;
 
-    thumbs.forEach((thumb) => {
-        thumb.addEventListener('click', function () {
-            const img = this.dataset.img;
-            if (img) mainImage.src = img;
-            thumbs.forEach((item) => item.classList.remove('active'));
+    thumbs.forEach(btn => {
+        btn.addEventListener('click', function () {
+            const img = this.getAttribute('data-img');
+            if (!img) return;
+
+            mainImage.src = img;
+            thumbs.forEach(t => t.classList.remove('active'));
             this.classList.add('active');
         });
     });

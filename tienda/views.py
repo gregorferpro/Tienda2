@@ -3,7 +3,7 @@ from decimal import Decimal
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.db import transaction
-from django.db.models import Q
+from django.db.models import Prefetch, Q
 from django.db.models.deletion import ProtectedError
 from django.shortcuts import get_object_or_404, redirect, render
 
@@ -41,7 +41,13 @@ def obtener_carrito(request):
 
 def catalogo_cliente(request):
     q = request.GET.get('q', '').strip()
-    productos = Producto.objects.filter(activo=True).order_by('-id')
+
+    productos = (
+        Producto.objects
+        .filter(activo=True)
+        .prefetch_related('imagenes_extra')
+        .order_by('-id')
+    )
 
     if q:
         productos = productos.filter(
@@ -58,7 +64,11 @@ def catalogo_cliente(request):
 
 
 def detalle_producto_cliente(request, pk):
-    producto = get_object_or_404(Producto, pk=pk, activo=True)
+    producto = get_object_or_404(
+        Producto.objects.prefetch_related('imagenes_extra'),
+        pk=pk,
+        activo=True
+    )
     return render(request, 'tienda/detalle_producto_cliente.html', {
         'producto': producto
     })
@@ -101,7 +111,11 @@ def carrito(request):
     total = Decimal('0.00')
 
     for pk, data in carrito_data.items():
-        producto = get_object_or_404(Producto, pk=int(pk), activo=True)
+        producto = get_object_or_404(
+            Producto.objects.prefetch_related('imagenes_extra'),
+            pk=int(pk),
+            activo=True
+        )
         subtotal = producto.precio * data['cantidad']
         total += subtotal
 
@@ -130,7 +144,11 @@ def checkout(request):
     total = Decimal('0.00')
 
     for pk, data in carrito_data.items():
-        producto = get_object_or_404(Producto, pk=int(pk), activo=True)
+        producto = get_object_or_404(
+            Producto.objects.prefetch_related('imagenes_extra'),
+            pk=int(pk),
+            activo=True
+        )
         subtotal = producto.precio * data['cantidad']
         total += subtotal
 
@@ -215,7 +233,13 @@ def factura_view(request, pk):
 @user_passes_test(es_staff_o_superuser)
 def productos_list(request):
     q = request.GET.get('q', '').strip()
-    productos = Producto.objects.all().order_by('-id')
+
+    productos = (
+        Producto.objects
+        .prefetch_related('imagenes_extra')
+        .all()
+        .order_by('-id')
+    )
 
     if q:
         productos = productos.filter(
@@ -237,7 +261,10 @@ def productos_list(request):
 @login_required
 @user_passes_test(es_staff_o_superuser)
 def producto_detail(request, pk):
-    producto = get_object_or_404(Producto, pk=pk)
+    producto = get_object_or_404(
+        Producto.objects.prefetch_related('imagenes_extra'),
+        pk=pk
+    )
     return render(request, 'tienda/producto_detail.html', {'producto': producto})
 
 
@@ -272,7 +299,10 @@ def producto_create(request):
 @login_required
 @user_passes_test(solo_superuser)
 def producto_update(request, pk):
-    producto = get_object_or_404(Producto, pk=pk)
+    producto = get_object_or_404(
+        Producto.objects.prefetch_related('imagenes_extra'),
+        pk=pk
+    )
 
     if request.method == 'POST':
         form = ProductoForm(request.POST, request.FILES, instance=producto)
