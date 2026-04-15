@@ -26,28 +26,28 @@
             </div>
 
             <nav class="sidebar-nav">
-                <a href="{% url 'dashboard' %}" class="nav-link {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">
+                <a href="{% url 'dashboard' %}" class="nav-link">
                     <i class="fa-solid fa-chart-line"></i>
                     <span>Dashboard</span>
                 </a>
 
-                <a href="{% url 'productos_list' %}" class="nav-link {% if request.resolver_match.url_name in 'productos_list producto_create producto_update producto_detail producto_delete' %}active{% endif %}">
+                <a href="{% url 'productos_list' %}" class="nav-link">
                     <i class="fa-solid fa-box"></i>
                     <span>Productos</span>
                 </a>
 
-                <a href="{% url 'clientes_list' %}" class="nav-link {% if request.resolver_match.url_name in 'clientes_list cliente_create cliente_update cliente_delete' %}active{% endif %}">
+                <a href="{% url 'clientes_list' %}" class="nav-link">
                     <i class="fa-solid fa-users"></i>
                     <span>Clientes</span>
                 </a>
 
-                <a href="{% url 'ventas_list' %}" class="nav-link {% if request.resolver_match.url_name in 'ventas_list venta_detail' %}active{% endif %}">
+                <a href="{% url 'ventas_list' %}" class="nav-link">
                     <i class="fa-solid fa-cart-shopping"></i>
                     <span>Ventas</span>
                 </a>
 
                 {% if user.is_superuser %}
-                <a href="{% url 'usuarios_list' %}" class="nav-link {% if request.resolver_match.url_name in 'usuarios_list usuario_create usuario_update usuario_delete' %}active{% endif %}">
+                <a href="{% url 'usuarios_list' %}" class="nav-link">
                     <i class="fa-solid fa-user-gear"></i>
                     <span>Usuarios</span>
                 </a>
@@ -55,13 +55,10 @@
             </nav>
 
             <div class="sidebar-footer">
-                <form method="post" action="{% url 'logout' %}">
-                    {% csrf_token %}
-                    <button type="submit" class="logout-btn">
-                        <i class="fa-solid fa-right-from-bracket"></i>
-                        <span>Cerrar sesión</span>
-                    </button>
-                </form>
+                <a href="{% url 'logout' %}" class="logout-btn">
+                    <i class="fa-solid fa-right-from-bracket"></i>
+                    <span>Cerrar sesión</span>
+                </a>
             </div>
         </aside>
         {% endif %}
@@ -89,7 +86,7 @@
 
                         <div class="user-chip">
                             <div class="user-avatar">
-                                {{ user.username|first|upper }}
+                                U
                             </div>
                             <span class="user-name">{{ user.username }}</span>
                         </div>
