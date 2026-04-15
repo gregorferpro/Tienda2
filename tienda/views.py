@@ -42,12 +42,7 @@ def obtener_carrito(request):
 def catalogo_cliente(request):
     q = request.GET.get('q', '').strip()
 
-    productos = (
-        Producto.objects
-        .filter(activo=True)
-        .prefetch_related('imagenes_extra')
-        .order_by('-id')
-    )
+    productos = Producto.objects.filter(activo=True)
 
     if q:
         productos = productos.filter(
@@ -59,7 +54,7 @@ def catalogo_cliente(request):
 
     return render(request, 'tienda/catalogo_cliente.html', {
         'productos': productos,
-        'q': q,
+        'q': q
     })
 
 
