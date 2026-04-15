@@ -82,7 +82,7 @@
                             <label class="field-label" for="id_imagenes_extra">Imágenes del producto</label>
                             <input type="file" name="imagenes_extra" id="id_imagenes_extra" multiple>
                             <div class="field-help">
-                                La primera imagen que subas será usada como imagen principal en tarjetas y detalle.
+                                La primera imagen subida será la principal.
                             </div>
                         </div>
 
@@ -117,13 +117,15 @@
                     <div class="side-title">Vista previa</div>
 
                     <div class="preview-main">
-                        {% with imagen_principal=producto.imagenes_extra.first %}
-                            {% if producto and imagen_principal %}
-                                <img src="{{ imagen_principal.imagen.url }}" alt="{{ producto.nombre }}">
-                            {% else %}
-                                <i class="fa-solid fa-box preview-icon"></i>
-                            {% endif %}
-                        {% endwith %}
+                        {% if producto and producto.imagenes_extra.all %}
+                            {% for img in producto.imagenes_extra.all %}
+                                {% if forloop.first %}
+                                    <img src="{{ img.imagen.url }}" alt="{{ producto.nombre }}">
+                                {% endif %}
+                            {% endfor %}
+                        {% else %}
+                            <i class="fa-solid fa-box preview-icon"></i>
+                        {% endif %}
                     </div>
 
                     {% if producto and producto.imagenes_extra.all %}
@@ -141,10 +143,10 @@
                     <div class="side-title">Recomendaciones</div>
                     <ul class="muted-list">
                         <li>Usa códigos únicos y fáciles de buscar.</li>
-                        <li>Coloca nombres cortos y claros.</li>
-                        <li>Sube varias imágenes nítidas del producto.</li>
+                        <li>Coloca nombres claros.</li>
                         <li>La primera imagen será la portada.</li>
-                        <li>Mantén actualizado el stock real.</li>
+                        <li>Sube imágenes nítidas.</li>
+                        <li>Revisa siempre el stock antes de guardar.</li>
                     </ul>
                 </div>
             </div>

@@ -7,9 +7,13 @@
     <div class="detail-grid">
         <div class="detail-card">
             <div class="gallery-main">
-                {% with imagen_principal=producto.imagenes_extra.first %}
-                    {% if imagen_principal %}
-                        <img id="main-image" src="{{ imagen_principal.imagen.url }}" alt="{{ producto.nombre }}">
+                {% with imagenes=producto.imagenes_extra.all %}
+                    {% if imagenes %}
+                        {% for img in imagenes %}
+                            {% if forloop.first %}
+                                <img id="main-image" src="{{ img.imagen.url }}" alt="{{ producto.nombre }}">
+                            {% endif %}
+                        {% endfor %}
                     {% else %}
                         <div class="product-card-placeholder h-100">
                             <i class="fa-solid fa-box fa-4x text-secondary"></i>

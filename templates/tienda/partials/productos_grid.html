@@ -3,16 +3,21 @@
     {% for producto in productos %}
     <div class="col-md-6 col-xl-4">
         <div class="page-card h-100 p-0 overflow-hidden">
+
             <div class="product-card-media">
-                {% with imagen=producto.imagenes_extra.first %}
-                    {% if imagen %}
-                        <img src="{{ imagen.imagen.url }}" alt="{{ producto.nombre }}" class="product-card-image">
-                    {% else %}
-                        <div class="product-card-placeholder">
-                            <i class="fa-solid fa-box fa-3x text-secondary"></i>
-                        </div>
-                    {% endif %}
-                {% endwith %}
+
+                {% if producto.imagenes_extra.all %}
+                    {% for img in producto.imagenes_extra.all %}
+                        {% if forloop.first %}
+                            <img src="{{ img.imagen.url }}" alt="{{ producto.nombre }}" class="product-card-image">
+                        {% endif %}
+                    {% endfor %}
+                {% else %}
+                    <div class="product-card-placeholder">
+                        <i class="fa-solid fa-box fa-3x text-secondary"></i>
+                    </div>
+                {% endif %}
+
             </div>
 
             <div class="p-4">
@@ -46,6 +51,7 @@
                     {% endif %}
                 </div>
             </div>
+
         </div>
     </div>
     {% endfor %}

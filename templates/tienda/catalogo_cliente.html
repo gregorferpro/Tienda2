@@ -32,10 +32,15 @@
     {% for producto in productos %}
     <div class="col-md-6 col-xl-4">
         <div class="page-card h-100 p-0 overflow-hidden">
+
             <div class="product-card-media">
-                {% with imagen=producto.imagenes_extra.first %}
-                    {% if imagen %}
-                        <img src="{{ imagen.imagen.url }}" alt="{{ producto.nombre }}" class="product-card-image">
+                {% with imagenes=producto.imagenes_extra.all %}
+                    {% if imagenes %}
+                        {% for img in imagenes %}
+                            {% if forloop.first %}
+                                <img src="{{ img.imagen.url }}" alt="{{ producto.nombre }}" class="product-card-image">
+                            {% endif %}
+                        {% endfor %}
                     {% else %}
                         <div class="product-card-placeholder">
                             <i class="fa-solid fa-box fa-3x text-secondary"></i>
@@ -62,6 +67,7 @@
                     <a href="{% url 'agregar_carrito' producto.pk %}" class="btn btn-primary">Agregar al carrito</a>
                 </div>
             </div>
+
         </div>
     </div>
     {% endfor %}
