@@ -1,52 +1,51 @@
-<div class="products-grid">
+<div class="admin-products-grid">
     {% for producto in productos %}
-    <article class="product-card">
-        <div class="product-card-media">
+    <article class="admin-product-card">
+        <div class="admin-product-media">
             {% with imagen=producto.imagenes_extra.first %}
                 {% if imagen and imagen.imagen %}
                     <img
                         src="{{ imagen.imagen.url }}"
                         alt="{{ producto.nombre }}"
-                        class="product-card-img"
+                        class="admin-product-img"
                         loading="lazy"
                         onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"
                     >
-                    <div class="product-card-placeholder" style="display:none;">
+                    <div class="admin-product-placeholder" style="display:none;">
                         <i class="fa-solid fa-box"></i>
                     </div>
                 {% else %}
-                    <div class="product-card-placeholder">
+                    <div class="admin-product-placeholder">
                         <i class="fa-solid fa-box"></i>
                     </div>
                 {% endif %}
             {% endwith %}
         </div>
 
-        <div class="product-card-body">
-            <h3 class="product-card-title">{{ producto.codigo }}</h3>
+        <div class="admin-product-body">
+            {% if producto.activo %}
+                <span class="admin-product-status">
+                    <i class="fa-solid fa-circle-check"></i> Activo
+                </span>
+            {% endif %}
 
-            <div class="product-card-meta">
+            <h3 class="admin-product-title">{{ producto.codigo }}</h3>
+
+            <div class="admin-product-meta">
                 <p><strong>Código:</strong> {{ producto.codigo }}</p>
                 <p><strong>Marca:</strong> {{ producto.marca }}</p>
                 <p><strong>Modelo:</strong> {{ producto.modelo }}</p>
                 <p><strong>Stock:</strong> {{ producto.stock }}</p>
             </div>
 
-            <div class="product-card-price">Bs {{ producto.precio }}</div>
+            <div class="admin-product-price">Bs {{ producto.precio }}</div>
 
-            <div class="product-card-actions">
-                <a href="{% url 'detalle_producto_cliente' producto.pk %}" class="btn btn-outline-primary w-100">
-                    Ver detalle
-                </a>
+            <div class="admin-product-actions">
+                <a href="{% url 'producto_detail' producto.pk %}" class="btn btn-outline-primary">Ver</a>
 
-                {% if user.is_authenticated %}
-                    <a href="{% url 'agregar_carrito' producto.pk %}" class="btn btn-primary w-100">
-                        Agregar al carrito
-                    </a>
-                {% else %}
-                    <a href="{% url 'login' %}?next={% url 'agregar_carrito' producto.pk %}" class="btn btn-primary w-100">
-                        Agregar al carrito
-                    </a>
+                {% if user.is_superuser %}
+                    <a href="{% url 'producto_update' producto.pk %}" class="btn btn-warning text-white">Editar</a>
+                    <a href="{% url 'producto_delete' producto.pk %}" class="btn btn-danger">Eliminar</a>
                 {% endif %}
             </div>
         </div>

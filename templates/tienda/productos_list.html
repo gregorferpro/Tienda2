@@ -45,19 +45,13 @@
 
     input.addEventListener('input', function () {
         clearTimeout(timer);
-
         timer = setTimeout(function () {
             const q = encodeURIComponent(input.value.trim());
-
             fetch(`?q=${q}`, {
-                headers: {
-                    'x-requested-with': 'XMLHttpRequest'
-                }
+                headers: { 'x-requested-with': 'XMLHttpRequest' }
             })
             .then(response => response.text())
-            .then(html => {
-                wrapper.innerHTML = html;
-            });
+            .then(html => { wrapper.innerHTML = html; });
         }, 250);
     });
 })();
