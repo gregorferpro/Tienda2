@@ -481,14 +481,24 @@ def cliente_update(request, pk):
     })
 
 
+
+# ... tus otros imports
+
 @login_required
-@user_passes_test(solo_superuser)
+@user_passes_test(lambda u: u.is_superuser)
 def cliente_delete(request, pk):
     cliente = get_object_or_404(Cliente, pk=pk)
 
     if request.method == 'POST':
-        cliente.delete()
-        messages.success(request, 'Cliente eliminado correctamente.')
+        try:
+            cliente.delete()
+            messages.success(request, 'Cliente eliminado correctamente.')
+        except ProtectedError:
+            messages.error(
+                request,
+                'No se puede eliminar este cliente porque ya está relacionado con ventas registradas. '
+                'Puedes editar sus datos, pero no borrarlo.'
+            )
         return redirect('clientes_list')
 
     return render(request, 'tienda/cliente_confirm_delete.html', {
