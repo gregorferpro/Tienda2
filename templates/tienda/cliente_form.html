@@ -3,35 +3,69 @@
 {% block title %}{{ titulo }}{% endblock %}
 
 {% block content %}
-<div class="generic-form-shell">
-    <div class="generic-form-card">
-        <div class="generic-title">{{ titulo }}</div>
-        <div class="generic-subtitle">Completa los datos del cliente con una estructura clara, limpia y consistente.</div>
+<div class="form-page">
+    <div class="form-shell">
+        <div class="form-header">
+            <div>
+                <h2 class="section-title mb-1">{{ titulo }}</h2>
+                <p class="section-subtitle mb-0">Completa la información del cliente.</p>
+            </div>
+            <a href="{% url 'clientes_list' %}" class="btn btn-outline-secondary">
+                <i class="fa-solid fa-arrow-left"></i> Volver
+            </a>
+        </div>
 
-        <form method="post" novalidate>
-            {% csrf_token %}
+        <div class="page-card">
+            <form method="post" novalidate>
+                {% csrf_token %}
 
-            <div class="generic-grid">
-                {% for field in form %}
-                    <div class="form-row {% if field.name == 'direccion' %}full{% endif %}">
-                        <label for="{{ field.id_for_label }}">{{ field.label }}</label>
-                        {{ field }}
-                        {% if field.errors %}
-                            <div class="field-error">{{ field.errors|join:", " }}</div>
-                        {% endif %}
+                <div class="form-grid">
+                    <div class="field-group">
+                        <label class="field-label" for="{{ form.nombres.id_for_label }}">Nombres</label>
+                        {{ form.nombres }}
                     </div>
-                {% endfor %}
-            </div>
 
-            <div class="form-actions">
-                <button type="submit" class="btn btn-primary">
-                    <i class="fa-solid fa-floppy-disk"></i> Guardar
-                </button>
-                <a href="{% url 'clientes_list' %}" class="btn btn-secondary">
-                    <i class="fa-solid fa-arrow-left"></i> Cancelar
-                </a>
-            </div>
-        </form>
+                    <div class="field-group">
+                        <label class="field-label" for="{{ form.apellidos.id_for_label }}">Apellidos</label>
+                        {{ form.apellidos }}
+                    </div>
+
+                    <div class="field-group">
+                        <label class="field-label" for="{{ form.ci_nit.id_for_label }}">CI / NIT</label>
+                        {{ form.ci_nit }}
+                    </div>
+
+                    <div class="field-group">
+                        <label class="field-label" for="{{ form.telefono.id_for_label }}">Teléfono</label>
+                        {{ form.telefono }}
+                    </div>
+
+                    <div class="field-group">
+                        <label class="field-label" for="{{ form.email.id_for_label }}">Correo</label>
+                        {{ form.email }}
+                    </div>
+
+                    <div class="field-group">
+                        <label class="field-label" for="{{ form.estado.id_for_label }}">Estado</label>
+                        {{ form.estado }}
+                    </div>
+
+                    <div class="field-group full">
+                        <label class="field-label" for="{{ form.direccion.id_for_label }}">Dirección</label>
+                        {{ form.direccion }}
+                    </div>
+                </div>
+
+                <div class="actions">
+                    <button type="submit" class="btn-main btn-save">
+                        <i class="fa-solid fa-floppy-disk"></i> Guardar
+                    </button>
+                    <a href="{% url 'clientes_list' %}" class="btn-main btn-cancel">
+                        <i class="fa-solid fa-xmark"></i> Cancelar
+                    </a>
+                </div>
+            </form>
+        </div>
     </div>
 </div>
 {% endblock %}

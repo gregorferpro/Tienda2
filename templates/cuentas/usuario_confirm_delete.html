@@ -3,23 +3,31 @@
 {% block title %}Eliminar usuario{% endblock %}
 
 {% block content %}
-<div class="delete-shell">
-    <div class="delete-card text-center">
-        <div class="delete-icon"><i class="fa-solid fa-user-xmark"></i></div>
-        <h2 class="section-title mb-3">Eliminar usuario</h2>
-        <p class="section-subtitle mb-4">Esta acción eliminará al usuario <strong>{{ object.username }}</strong>. Asegúrate antes de continuar.</p>
+<div class="form-page">
+    <div class="form-shell">
+        <div class="page-card">
+            <h2 class="section-title mb-3">Eliminar usuario</h2>
+            <p class="section-subtitle mb-4">
+                ¿Estás seguro de que deseas eliminar al usuario <strong>{{ usuario.username }}</strong>?
+            </p>
 
-        <form method="post">
-            {% csrf_token %}
-            <div class="delete-actions justify-content-center">
-                <button type="submit" class="btn btn-danger">
-                    <i class="fa-solid fa-trash"></i> Eliminar
-                </button>
-                <a href="{% url 'usuarios_list' %}" class="btn btn-secondary">
-                    <i class="fa-solid fa-arrow-left"></i> Cancelar
-                </a>
+            <div class="mb-4">
+                <p><strong>Nombre:</strong> {{ usuario.first_name }} {{ usuario.last_name }}</p>
+                <p><strong>Email:</strong> {{ usuario.email }}</p>
             </div>
-        </form>
+
+            <form method="post">
+                {% csrf_token %}
+                <div class="actions">
+                    <button type="submit" class="btn-main btn-delete">
+                        <i class="fa-solid fa-trash"></i> Eliminar
+                    </button>
+                    <a href="{% url 'usuarios_list' %}" class="btn-main btn-cancel">
+                        <i class="fa-solid fa-arrow-left"></i> Cancelar
+                    </a>
+                </div>
+            </form>
+        </div>
     </div>
 </div>
 {% endblock %}

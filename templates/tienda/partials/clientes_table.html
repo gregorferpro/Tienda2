@@ -1,15 +1,17 @@
-<div class="table-wrap">
-    <table class="table table-hover align-middle">
-        <thead>
+<div class="table-responsive">
+    <table class="table table-bordered table-hover bg-white">
+        <thead class="table-light">
             <tr>
-                <th class="col-id">ID</th>
+                <th>ID</th>
                 <th>Nombres</th>
                 <th>Apellidos</th>
-                <th>CI/NIT</th>
+                <th>CI / NIT</th>
                 <th>Teléfono</th>
                 <th>Email</th>
                 <th>Estado</th>
-                <th class="col-actions">Acciones</th>
+                {% if user.is_superuser %}
+                <th>Acciones</th>
+                {% endif %}
             </tr>
         </thead>
         <tbody>
@@ -21,27 +23,17 @@
                 <td>{{ cliente.ci_nit }}</td>
                 <td>{{ cliente.telefono }}</td>
                 <td>{{ cliente.email }}</td>
+                <td>{{ cliente.estado }}</td>
+                {% if user.is_superuser %}
                 <td>
-                    {% if cliente.estado == 'activo' %}
-                        <span class="badge text-bg-success">Activo</span>
-                    {% else %}
-                        <span class="badge text-bg-secondary">{{ cliente.estado }}</span>
-                    {% endif %}
+                    <a href="{% url 'cliente_update' cliente.pk %}" class="btn btn-sm btn-warning text-white">Editar</a>
+                    <a href="{% url 'cliente_delete' cliente.pk %}" class="btn btn-sm btn-danger">Eliminar</a>
                 </td>
-                <td>
-                    {% if user.is_superuser %}
-                    <div class="d-flex gap-2 flex-wrap">
-                        <a href="{% url 'cliente_update' cliente.pk %}" class="btn btn-warning btn-sm text-white">Editar</a>
-                        <a href="{% url 'cliente_delete' cliente.pk %}" class="btn btn-danger btn-sm">Eliminar</a>
-                    </div>
-                    {% else %}
-                    <span class="text-muted">Sin acciones</span>
-                    {% endif %}
-                </td>
+                {% endif %}
             </tr>
             {% empty %}
             <tr>
-                <td colspan="8" class="empty-state">No hay clientes registrados.</td>
+                <td colspan="{% if user.is_superuser %}8{% else %}7{% endif %}" class="text-center">No hay clientes registrados.</td>
             </tr>
             {% endfor %}
         </tbody>

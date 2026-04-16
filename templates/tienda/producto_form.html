@@ -20,94 +20,20 @@
             <div class="page-card">
                 <form method="post" enctype="multipart/form-data" novalidate>
                     {% csrf_token %}
-
                     <div class="form-grid">
-                        <div class="field-group">
-                            <label class="field-label" for="{{ form.codigo.id_for_label }}">Código</label>
-                            {{ form.codigo }}
-                            {% if form.codigo.errors %}
-                                <div class="field-error">{{ form.codigo.errors|join:", " }}</div>
-                            {% endif %}
-                        </div>
-
-                        <div class="field-group">
-                            <label class="field-label" for="{{ form.nombre.id_for_label }}">Nombre</label>
-                            {{ form.nombre }}
-                            {% if form.nombre.errors %}
-                                <div class="field-error">{{ form.nombre.errors|join:", " }}</div>
-                            {% endif %}
-                        </div>
-
-                        <div class="field-group">
-                            <label class="field-label" for="{{ form.marca.id_for_label }}">Marca</label>
-                            {{ form.marca }}
-                            {% if form.marca.errors %}
-                                <div class="field-error">{{ form.marca.errors|join:", " }}</div>
-                            {% endif %}
-                        </div>
-
-                        <div class="field-group">
-                            <label class="field-label" for="{{ form.modelo.id_for_label }}">Modelo</label>
-                            {{ form.modelo }}
-                            {% if form.modelo.errors %}
-                                <div class="field-error">{{ form.modelo.errors|join:", " }}</div>
-                            {% endif %}
-                        </div>
-
-                        <div class="field-group full">
-                            <label class="field-label" for="{{ form.descripcion.id_for_label }}">Descripción</label>
-                            {{ form.descripcion }}
-                            {% if form.descripcion.errors %}
-                                <div class="field-error">{{ form.descripcion.errors|join:", " }}</div>
-                            {% endif %}
-                        </div>
-
-                        <div class="field-group">
-                            <label class="field-label" for="{{ form.precio.id_for_label }}">Precio</label>
-                            {{ form.precio }}
-                            {% if form.precio.errors %}
-                                <div class="field-error">{{ form.precio.errors|join:", " }}</div>
-                            {% endif %}
-                        </div>
-
-                        <div class="field-group">
-                            <label class="field-label" for="{{ form.stock.id_for_label }}">Stock</label>
-                            {{ form.stock }}
-                            {% if form.stock.errors %}
-                                <div class="field-error">{{ form.stock.errors|join:", " }}</div>
-                            {% endif %}
-                        </div>
-
-                        <div class="field-group full">
-                            <label class="field-label" for="id_imagenes_extra">Imágenes del producto</label>
-                            <input type="file" name="imagenes_extra" id="id_imagenes_extra" multiple>
-                            <div class="field-help">
-                                La primera imagen subida será la principal.
-                            </div>
-                        </div>
-
-                        <div class="field-group full">
-                            <label class="field-label">Estado</label>
-                            <div class="checkbox-wrap">
-                                {{ form.activo }}
-                                <span>Producto activo en catálogo</span>
-                            </div>
-                            {% if form.activo.errors %}
-                                <div class="field-error">{{ form.activo.errors|join:", " }}</div>
-                            {% endif %}
-                        </div>
+                        <div class="field-group"><label class="field-label" for="{{ form.codigo.id_for_label }}">Código</label>{{ form.codigo }}</div>
+                        <div class="field-group"><label class="field-label" for="{{ form.nombre.id_for_label }}">Nombre</label>{{ form.nombre }}</div>
+                        <div class="field-group"><label class="field-label" for="{{ form.marca.id_for_label }}">Marca</label>{{ form.marca }}</div>
+                        <div class="field-group"><label class="field-label" for="{{ form.modelo.id_for_label }}">Modelo</label>{{ form.modelo }}</div>
+                        <div class="field-group full"><label class="field-label" for="{{ form.descripcion.id_for_label }}">Descripción</label>{{ form.descripcion }}</div>
+                        <div class="field-group"><label class="field-label" for="{{ form.precio.id_for_label }}">Precio</label>{{ form.precio }}</div>
+                        <div class="field-group"><label class="field-label" for="{{ form.stock.id_for_label }}">Stock</label>{{ form.stock }}</div>
+                        <div class="field-group full"><label class="field-label" for="id_imagenes_extra">Imágenes del producto</label><input type="file" name="imagenes_extra" id="id_imagenes_extra" multiple><div class="field-help">La primera imagen será la portada.</div></div>
+                        <div class="field-group full"><label class="field-label">Estado</label><div class="checkbox-wrap">{{ form.activo }}<span>Producto activo en catálogo</span></div></div>
                     </div>
-
                     <div class="actions">
-                        <button type="submit" class="btn-main btn-save">
-                            <i class="fa-solid fa-floppy-disk"></i>
-                            Guardar
-                        </button>
-
-                        <a href="{% url 'productos_list' %}" class="btn-main btn-cancel">
-                            <i class="fa-solid fa-arrow-left"></i>
-                            Cancelar
-                        </a>
+                        <button type="submit" class="btn-main btn-save"><i class="fa-solid fa-floppy-disk"></i> Guardar</button>
+                        <a href="{% url 'productos_list' %}" class="btn-main btn-cancel"><i class="fa-solid fa-arrow-left"></i> Cancelar</a>
                     </div>
                 </form>
             </div>
@@ -115,7 +41,6 @@
             <div>
                 <div class="side-box mb-4">
                     <div class="side-title">Vista previa</div>
-
                     <div class="preview-main">
                         {% if producto and producto.imagenes_extra.all %}
                             {% for img in producto.imagenes_extra.all %}
@@ -127,18 +52,7 @@
                             <i class="fa-solid fa-box preview-icon"></i>
                         {% endif %}
                     </div>
-
-                    {% if producto and producto.imagenes_extra.all %}
-                    <div class="thumb-grid">
-                        {% for img in producto.imagenes_extra.all %}
-                            <div class="thumb">
-                                <img src="{{ img.imagen.url }}" alt="Imagen extra">
-                            </div>
-                        {% endfor %}
-                    </div>
-                    {% endif %}
                 </div>
-
                 <div class="side-box">
                     <div class="side-title">Recomendaciones</div>
                     <ul class="muted-list">

@@ -3,63 +3,61 @@
 {% block title %}Detalle de venta{% endblock %}
 
 {% block content %}
-<div class="sale-shell">
-    <div class="sale-grid">
-        <div class="sale-card">
-            <div class="sale-title">Detalle de venta</div>
-            <div class="sale-subtitle">Resumen general de la operación registrada.</div>
+<div class="page-card">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
+        <div>
+            <h2 class="section-title mb-1">Detalle de venta</h2>
+            <p class="section-subtitle mb-0">Factura {{ venta.numero_factura }}</p>
+        </div>
+        <a href="{% url 'ventas_list' %}" class="btn btn-outline-secondary">
+            <i class="fa-solid fa-arrow-left"></i> Volver
+        </a>
+    </div>
 
-            <div class="info-grid">
-                <div class="info-box"><div class="info-label">Factura</div><div class="info-value">{{ venta.numero_factura }}</div></div>
-                <div class="info-box"><div class="info-label">Método de pago</div><div class="info-value">{{ venta.metodo_pago|upper }}</div></div>
-                <div class="info-box"><div class="info-label">Cliente</div><div class="info-value">{{ venta.cliente.nombres }} {{ venta.cliente.apellidos }}</div></div>
-                <div class="info-box"><div class="info-label">Usuario</div><div class="info-value">{{ venta.usuario.username }}</div></div>
-                <div class="info-box"><div class="info-label">CI / NIT</div><div class="info-value">{{ venta.cliente.ci_nit }}</div></div>
-                <div class="info-box"><div class="info-label">Fecha</div><div class="info-value">{{ venta.fecha|date:"d/m/Y H:i" }}</div></div>
-            </div>
-
-            <div class="sale-actions">
-                <a href="{% url 'ventas_list' %}" class="btn btn-secondary"><i class="fa-solid fa-arrow-left"></i> Volver</a>
-                <a href="{% url 'factura_view' venta.pk %}" class="btn btn-primary"><i class="fa-solid fa-file-invoice"></i> Ver factura</a>
+    <div class="row g-4 mb-4">
+        <div class="col-md-6">
+            <div class="page-card">
+                <h5>Cliente</h5>
+                <p class="mb-1"><strong>Nombre:</strong> {{ venta.cliente.nombre_completo }}</p>
+                <p class="mb-1"><strong>CI/NIT:</strong> {{ venta.cliente.ci_nit }}</p>
+                <p class="mb-0"><strong>Teléfono:</strong> {{ venta.cliente.telefono }}</p>
             </div>
         </div>
-
-        <div class="sale-card">
-            <div class="sale-title">Productos vendidos</div>
-            <div class="sale-subtitle">Detalle por producto, cantidad y subtotal.</div>
-
-            <div class="table-wrap">
-                <table class="table table-hover align-middle">
-                    <thead>
-                        <tr>
-                            <th>Producto</th>
-                            <th>Cantidad</th>
-                            <th>Precio unitario</th>
-                            <th>Subtotal</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for item in venta.detalles.all %}
-                        <tr>
-                            <td>{{ item.producto.nombre }}</td>
-                            <td>{{ item.cantidad }}</td>
-                            <td>Bs {{ item.precio_unitario }}</td>
-                            <td><strong>Bs {{ item.subtotal }}</strong></td>
-                        </tr>
-                        {% empty %}
-                        <tr>
-                            <td colspan="4" class="text-center text-muted py-4">No hay detalles registrados.</td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-
-            <div class="total-box">
-                <div class="label">Total de la venta</div>
-                <div class="value">Bs {{ venta.total }}</div>
+        <div class="col-md-6">
+            <div class="page-card">
+                <h5>Venta</h5>
+                <p class="mb-1"><strong>Usuario:</strong> {{ venta.usuario.username }}</p>
+                <p class="mb-1"><strong>Método de pago:</strong> {{ venta.metodo_pago }}</p>
+                <p class="mb-0"><strong>Fecha:</strong> {{ venta.creado|date:"d/m/Y H:i" }}</p>
             </div>
         </div>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table table-bordered table-hover bg-white">
+            <thead class="table-light">
+                <tr>
+                    <th>Producto</th>
+                    <th>Cantidad</th>
+                    <th>Precio unitario</th>
+                    <th>Subtotal</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for detalle in venta.detalles.all %}
+                <tr>
+                    <td>{{ detalle.producto.nombre }}</td>
+                    <td>{{ detalle.cantidad }}</td>
+                    <td>Bs {{ detalle.precio_unitario }}</td>
+                    <td>Bs {{ detalle.subtotal }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <div class="text-end mt-4">
+        <h4>Total: Bs {{ venta.total }}</h4>
     </div>
 </div>
 {% endblock %}

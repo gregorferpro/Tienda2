@@ -3,55 +3,63 @@
 {% block title %}Usuarios{% endblock %}
 
 {% block content %}
-<div class="mb-4">
-    <h2 class="section-title">Usuarios</h2>
-    <p class="section-subtitle">Administra cuentas, roles y accesos del sistema.</p>
-</div>
+<div class="page-card">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
+        <div>
+            <h2 class="section-title mb-1">Usuarios</h2>
+            <p class="section-subtitle mb-0">Administra las cuentas del sistema.</p>
+        </div>
+        <a href="{% url 'usuario_create' %}" class="btn btn-primary">
+            + Nuevo usuario
+        </a>
+    </div>
 
-<div class="toolbar">
-    <form method="get" class="search-wrap" id="usuarios-search-form">
-        <i class="fa-solid fa-magnifying-glass"></i>
+    <form method="get" class="mb-4">
         <input
             type="text"
             name="q"
-            id="usuarios-search"
-            class="search-input"
-            placeholder="Buscar por nombre, usuario, email o rol"
             value="{{ q }}"
-            autocomplete="off"
+            placeholder="Buscar por nombre, usuario o email"
+            class="form-control"
         >
     </form>
 
-    <a href="{% url 'usuario_create' %}" class="btn btn-primary">
-        <i class="fa-solid fa-plus"></i> Nuevo usuario
-    </a>
+    <div class="table-responsive">
+        <table class="table table-bordered table-hover bg-white">
+            <thead class="table-light">
+                <tr>
+                    <th>ID</th>
+                    <th>Nombre completo</th>
+                    <th>Usuario</th>
+                    <th>Email</th>
+                    <th>Staff</th>
+                    <th>Superusuario</th>
+                    <th>Activo</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for usuario in usuarios %}
+                <tr>
+                    <td>{{ usuario.id }}</td>
+                    <td>{{ usuario.first_name }} {{ usuario.last_name }}</td>
+                    <td>{{ usuario.username }}</td>
+                    <td>{{ usuario.email }}</td>
+                    <td>{% if usuario.is_staff %}Sí{% else %}No{% endif %}</td>
+                    <td>{% if usuario.is_superuser %}Sí{% else %}No{% endif %}</td>
+                    <td>{% if usuario.is_active %}Sí{% else %}No{% endif %}</td>
+                    <td>
+                        <a href="{% url 'usuario_update' usuario.pk %}" class="btn btn-sm btn-warning text-white">Editar</a>
+                        <a href="{% url 'usuario_delete' usuario.pk %}" class="btn btn-sm btn-danger">Eliminar</a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="8" class="text-center">No hay usuarios registrados.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
 </div>
-
-<div id="usuarios-table-wrapper">
-    {% include 'cuentas/partials/usuarios_table.html' %}
-</div>
-{% endblock %}
-
-{% block extra_js %}
-<script>
-(function () {
-    const input = document.getElementById('usuarios-search');
-    const wrapper = document.getElementById('usuarios-table-wrapper');
-    let timeout = null;
-
-    if (!input || !wrapper) return;
-
-    input.addEventListener('input', function () {
-        clearTimeout(timeout);
-        timeout = setTimeout(() => {
-            const q = encodeURIComponent(input.value.trim());
-            fetch(`?q=${q}`, {
-                headers: { 'x-requested-with': 'XMLHttpRequest' }
-            })
-            .then(r => r.text())
-            .then(html => { wrapper.innerHTML = html; });
-        }, 250);
-    });
-})();
-</script>
 {% endblock %}

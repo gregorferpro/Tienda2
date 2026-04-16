@@ -3,57 +3,29 @@
 {% block title %}Clientes{% endblock %}
 
 {% block content %}
-<div class="mb-4">
-    <h2 class="section-title">Listado de Clientes</h2>
-    <p class="section-subtitle">Consulta y administra los datos de tus clientes.</p>
-</div>
+<div class="page-card">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
+        <div>
+            <h2 class="section-title mb-1">Clientes</h2>
+            <p class="section-subtitle mb-0">Administra la información de tus clientes.</p>
+        </div>
+        {% if user.is_superuser %}
+        <a href="{% url 'cliente_create' %}" class="btn btn-primary">
+            <i class="fa-solid fa-plus"></i> Nuevo cliente
+        </a>
+        {% endif %}
+    </div>
 
-<div class="toolbar">
-    <form method="get" class="search-wrap" id="clientes-search-form">
-        <i class="fa-solid fa-magnifying-glass"></i>
+    <form method="get" class="mb-4">
         <input
             type="text"
             name="q"
-            id="clientes-search"
-            class="search-input"
-            placeholder="Buscar por nombres, apellidos, teléfono o CI/NIT"
             value="{{ q }}"
-            autocomplete="off"
+            placeholder="Buscar por nombre, apellido, teléfono o CI/NIT"
+            class="form-control"
         >
     </form>
 
-    {% if user.is_superuser %}
-    <a href="{% url 'cliente_create' %}" class="btn btn-primary">
-        <i class="fa-solid fa-plus"></i> Nuevo cliente
-    </a>
-    {% endif %}
-</div>
-
-<div id="clientes-table-wrapper">
     {% include 'tienda/partials/clientes_table.html' %}
 </div>
-{% endblock %}
-
-{% block extra_js %}
-<script>
-(function () {
-    const input = document.getElementById('clientes-search');
-    const wrapper = document.getElementById('clientes-table-wrapper');
-    let timeout = null;
-
-    if (!input || !wrapper) return;
-
-    input.addEventListener('input', function () {
-        clearTimeout(timeout);
-        timeout = setTimeout(() => {
-            const q = encodeURIComponent(input.value.trim());
-            fetch(`?q=${q}`, {
-                headers: { 'x-requested-with': 'XMLHttpRequest' }
-            })
-            .then(r => r.text())
-            .then(html => { wrapper.innerHTML = html; });
-        }, 250);
-    });
-})();
-</script>
 {% endblock %}

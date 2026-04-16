@@ -3,40 +3,96 @@
 {% block title %}{{ titulo }}{% endblock %}
 
 {% block content %}
-<div class="generic-form-shell">
-    <div class="generic-form-card">
-        <div class="generic-title">{{ titulo }}</div>
-        <div class="generic-subtitle">Configura el acceso, los datos básicos y el rol del usuario dentro del sistema.</div>
+<div class="form-page">
+    <div class="form-shell">
+        <div class="form-header">
+            <div>
+                <h2 class="section-title mb-1">{{ titulo }}</h2>
+                <p class="section-subtitle mb-0">Completa los datos del usuario y asigna su nivel de acceso.</p>
+            </div>
+            <a href="{% url 'usuarios_list' %}" class="btn btn-outline-secondary">
+                <i class="fa-solid fa-arrow-left"></i> Volver
+            </a>
+        </div>
 
-        <form method="post" novalidate>
-            {% csrf_token %}
+        <div class="page-card">
+            <form method="post" novalidate>
+                {% csrf_token %}
 
-            <div class="generic-grid">
-                {% for field in form %}
-                    <div class="form-row {% if field.name == 'password1' or field.name == 'password2' %}full{% endif %}">
-                        <label for="{{ field.id_for_label }}">{{ field.label }}</label>
-                        {{ field }}
-
-                        {% if field.help_text %}
-                            <div class="field-help">{{ field.help_text|safe }}</div>
-                        {% endif %}
-
-                        {% if field.errors %}
-                            <div class="field-error">{{ field.errors|join:", " }}</div>
+                <div class="form-grid">
+                    <div class="field-group">
+                        <label class="field-label" for="{{ form.first_name.id_for_label }}">Nombres</label>
+                        {{ form.first_name }}
+                        {% if form.first_name.errors %}
+                            <div class="field-error">{{ form.first_name.errors|join:", " }}</div>
                         {% endif %}
                     </div>
-                {% endfor %}
-            </div>
 
-            <div class="form-actions">
-                <button type="submit" class="btn btn-primary">
-                    <i class="fa-solid fa-floppy-disk"></i> Guardar
-                </button>
-                <a href="{% url 'usuarios_list' %}" class="btn btn-secondary">
-                    <i class="fa-solid fa-arrow-left"></i> Cancelar
-                </a>
-            </div>
-        </form>
+                    <div class="field-group">
+                        <label class="field-label" for="{{ form.last_name.id_for_label }}">Apellidos</label>
+                        {{ form.last_name }}
+                        {% if form.last_name.errors %}
+                            <div class="field-error">{{ form.last_name.errors|join:", " }}</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="field-group">
+                        <label class="field-label" for="{{ form.username.id_for_label }}">Usuario</label>
+                        {{ form.username }}
+                        {% if form.username.errors %}
+                            <div class="field-error">{{ form.username.errors|join:", " }}</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="field-group">
+                        <label class="field-label" for="{{ form.email.id_for_label }}">Correo electrónico</label>
+                        {{ form.email }}
+                        {% if form.email.errors %}
+                            <div class="field-error">{{ form.email.errors|join:", " }}</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="field-group">
+                        <label class="field-label" for="{{ form.password1.id_for_label }}">Contraseña</label>
+                        {{ form.password1 }}
+                        {% if form.password1.errors %}
+                            <div class="field-error">{{ form.password1.errors|join:", " }}</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="field-group">
+                        <label class="field-label" for="{{ form.password2.id_for_label }}">Confirmar contraseña</label>
+                        {{ form.password2 }}
+                        {% if form.password2.errors %}
+                            <div class="field-error">{{ form.password2.errors|join:", " }}</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="field-group full">
+                        <label class="field-label" for="{{ form.rol.id_for_label }}">Rol</label>
+                        {{ form.rol }}
+                        {% if form.rol.errors %}
+                            <div class="field-error">{{ form.rol.errors|join:", " }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                {% if form.non_field_errors %}
+                    <div class="alert alert-danger mt-3">
+                        {{ form.non_field_errors }}
+                    </div>
+                {% endif %}
+
+                <div class="actions">
+                    <button type="submit" class="btn-main btn-save">
+                        <i class="fa-solid fa-floppy-disk"></i> Guardar
+                    </button>
+                    <a href="{% url 'usuarios_list' %}" class="btn-main btn-cancel">
+                        <i class="fa-solid fa-xmark"></i> Cancelar
+                    </a>
+                </div>
+            </form>
+        </div>
     </div>
 </div>
 {% endblock %}

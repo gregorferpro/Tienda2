@@ -16,21 +16,15 @@ import os
 
 def solo_superuser(user):
     return user.is_authenticated and (
-        user.is_superuser
-        or (hasattr(user, 'perfil') and user.perfil.rol == 'superuser')
+        user.is_superuser or (hasattr(user, 'perfil') and user.perfil.rol == 'superuser')
     )
 
 
 def home_redirect(request):
     if request.user.is_authenticated:
-        if request.user.is_superuser:
-            return redirect('dashboard')
-
         if hasattr(request.user, 'perfil') and request.user.perfil.rol == 'cliente':
             return redirect('catalogo_cliente')
-
         return redirect('dashboard')
-
     return redirect('catalogo_cliente')
 
 
@@ -45,20 +39,21 @@ def dashboard(request):
 @user_passes_test(solo_superuser)
 def usuarios_list(request):
     q = request.GET.get('q', '').strip()
-    usuarios = User.objects.select_related('perfil').all().order_by('id')
+
+    usuarios = User.objects.all().order_by('id')
 
     if q:
         usuarios = usuarios.filter(
             Q(first_name__icontains=q) |
+            Q(last_name__icontains=q) |
             Q(username__icontains=q) |
-            Q(email__icontains=q) |
-            Q(perfil__rol__icontains=q)
+            Q(email__icontains=q)
         )
 
-    if request.headers.get('x-requested-with') == 'XMLHttpRequest':
-        return render(request, 'cuentas/partials/usuarios_table.html', {'usuarios': usuarios})
-
-    return render(request, 'cuentas/usuarios_list.html', {'usuarios': usuarios, 'q': q})
+    return render(request, 'cuentas/usuarios_list.html', {
+        'usuarios': usuarios,
+        'q': q,
+    })
 
 
 @login_required
@@ -69,7 +64,6 @@ def usuario_create(request):
         if form.is_valid():
             user = form.save(commit=False)
             rol = form.cleaned_data['rol']
-
             user.is_staff = rol in ['superuser', 'staff']
             user.is_superuser = rol == 'superuser'
             user.save()
@@ -85,7 +79,7 @@ def usuario_create(request):
 
     return render(request, 'cuentas/usuario_form.html', {
         'form': form,
-        'titulo': 'Nuevo usuario'
+        'titulo': 'Nuevo usuario',
     })
 
 
@@ -99,7 +93,6 @@ def usuario_update(request, pk):
         if form.is_valid():
             user = form.save(commit=False)
             rol = form.cleaned_data['rol']
-
             user.is_staff = rol in ['superuser', 'staff']
             user.is_superuser = rol == 'superuser'
             user.save()
@@ -115,7 +108,8 @@ def usuario_update(request, pk):
 
     return render(request, 'cuentas/usuario_form.html', {
         'form': form,
-        'titulo': 'Editar usuario'
+        'titulo': 'Editar usuario',
+        'usuario_obj': usuario,
     })
 
 
@@ -129,19 +123,17 @@ def usuario_delete(request, pk):
         messages.success(request, 'Usuario eliminado correctamente.')
         return redirect('usuarios_list')
 
-    return render(request, 'cuentas/usuario_confirm_delete.html', {'usuario': usuario})
+    return render(request, 'cuentas/usuario_confirm_delete.html', {
+        'usuario': usuario
+    })
 
 
 def crear_admin_render(request):
-    username = "gregor"
-    email = "gregorbarrios07@gmail.com"
-    password = "10390128"
+    username = os.environ.get('ADMIN_USERNAME', 'admin')
+    email = os.environ.get('ADMIN_EMAIL', 'admin@example.com')
+    password = os.environ.get('ADMIN_PASSWORD', 'Admin12345678')
 
-    try:
-        user = User.objects.get(username=username)
-    except User.DoesNotExist:
-        user = User(username=username)
-
+    user, _ = User.objects.get_or_create(username=username)
     user.email = email
     user.is_staff = True
     user.is_superuser = True
@@ -149,53 +141,32 @@ def crear_admin_render(request):
     user.save()
 
     perfil, _ = Perfil.objects.get_or_create(user=user)
-    perfil.rol = "superuser"
+    perfil.rol = 'superuser'
     perfil.save()
 
-    return HttpResponse("Superusuario creado o actualizado correctamente.")
+    return HttpResponse(f'Superusuario listo: {username}')
 
 
 def configurar_google_render(request):
-    domain = "tienda2-fdil.onrender.com"
-    display_name = "Tienda2"
+    client_id = os.environ.get('GOOGLE_CLIENT_ID')
+    secret = os.environ.get('GOOGLE_CLIENT_SECRET')
 
-    client_id = os.environ.get("GOOGLE_CLIENT_ID")
-    secret_key = os.environ.get("GOOGLE_CLIENT_SECRET")
-
-    if not client_id or not secret_key:
-        return HttpResponse("Faltan GOOGLE_CLIENT_ID y GOOGLE_CLIENT_SECRET en variables de entorno.")
+    if not client_id or not secret:
+        return HttpResponse('Faltan GOOGLE_CLIENT_ID o GOOGLE_CLIENT_SECRET', status=400)
 
     site, _ = Site.objects.get_or_create(
         id=1,
-        defaults={
-            "domain": domain,
-            "name": display_name,
-        }
+        defaults={'domain': 'tienda2-fdi.onrender.com', 'name': 'Tienda2'}
     )
-
-    site.domain = domain
-    site.name = display_name
+    site.domain = os.environ.get('SITE_DOMAIN', 'tienda2-fdi.onrender.com')
+    site.name = 'Tienda2'
     site.save()
 
-    app, _ = SocialApp.objects.get_or_create(
-        provider="google",
-        name="Google Login",
-        defaults={
-            "client_id": client_id,
-            "secret": secret_key,
-        }
-    )
-
+    app, _ = SocialApp.objects.get_or_create(provider='google', defaults={'name': 'Google'})
+    app.name = 'Google'
     app.client_id = client_id
-    app.secret = secret_key
+    app.secret = secret
     app.save()
+    app.sites.set([site])
 
-    app.sites.clear()
-    app.sites.add(site)
-
-    return HttpResponse(
-        f"Configuración completada.<br>"
-        f"Site ID: {site.id}<br>"
-        f"Dominio: {site.domain}<br>"
-        f"SocialApp: {app.name}"
-    )
+    return HttpResponse('Google configurado correctamente')

@@ -2,85 +2,122 @@
 {% block title %}Detalle del producto{% endblock %}
 
 {% block content %}
-<div class="page-header">
-    <h2 class="section-title">Detalle del producto</h2>
-
-    <div class="header-actions">
-        <a href="{% url 'carrito' %}" class="btn btn-warning btn-main">
-            <i class="fa-solid fa-cart-shopping"></i> Carrito
-        </a>
-        <a href="{% url 'catalogo_cliente' %}" class="btn btn-secondary btn-main">Volver</a>
-    </div>
-</div>
-
 <div class="detail-shell">
-    <div class="product-detail-grid">
+    <div class="detail-grid">
         <div class="detail-card">
+            <div class="gallery-main">
+                {% with imagenes=producto.imagenes_extra.all %}
+                    {% if imagenes %}
+                        {% for img in imagenes %}
+                            {% if forloop.first %}
+                                <img id="main-image" src="{{ img.imagen.url }}" alt="{{ producto.nombre }}">
+                            {% endif %}
+                        {% endfor %}
+                    {% else %}
+                        <div class="product-card-placeholder h-100">
+                            <i class="fa-solid fa-box fa-4x text-secondary"></i>
+                        </div>
+                    {% endif %}
+                {% endwith %}
+            </div>
+
             {% if producto.imagenes_extra.all %}
-            <div id="carouselProductoCliente" class="carousel slide" data-bs-ride="false">
-                <div class="carousel-inner detail-carousel-box">
-                    {% for img in producto.imagenes_extra.all %}
-                    <div class="carousel-item {% if forloop.first %}active{% endif %}">
-                        <img src="{{ img.imagen.url }}" class="d-block w-100 detail-carousel-image" alt="{{ producto.nombre }}">
-                    </div>
-                    {% endfor %}
-                </div>
-
-                {% if producto.imagenes_extra.count > 1 %}
-                <button class="carousel-control-prev" type="button" data-bs-target="#carouselProductoCliente" data-bs-slide="prev">
-                    <span class="carousel-control-prev-icon"></span>
-                </button>
-                <button class="carousel-control-next" type="button" data-bs-target="#carouselProductoCliente" data-bs-slide="next">
-                    <span class="carousel-control-next-icon"></span>
-                </button>
-                {% endif %}
-            </div>
-
-            <div class="detail-thumbs">
+            <div class="thumb-strip">
                 {% for img in producto.imagenes_extra.all %}
-                <img
-                    src="{{ img.imagen.url }}"
-                    class="detail-thumb"
-                    alt="miniatura"
-                    data-bs-target="#carouselProductoCliente"
-                    data-bs-slide-to="{{ forloop.counter0 }}"
-                >
+                    <button
+                        type="button"
+                        class="thumb-item {% if forloop.first %}active{% endif %}"
+                        data-img="{{ img.imagen.url }}"
+                    >
+                        <img src="{{ img.imagen.url }}" alt="Imagen extra de {{ producto.nombre }}">
+                    </button>
                 {% endfor %}
-            </div>
-            {% else %}
-            <div class="detail-carousel-box">
-                <div class="detail-no-image">Sin imagen</div>
             </div>
             {% endif %}
         </div>
 
         <div class="info-card">
-            <h2 class="product-name">{{ producto.nombre }}</h2>
-
-            <div class="spec-list">
-                <div class="spec-item"><div class="spec-label">Código</div><div class="spec-value">{{ producto.codigo }}</div></div>
-                <div class="spec-item"><div class="spec-label">Marca</div><div class="spec-value">{{ producto.marca }}</div></div>
-                <div class="spec-item"><div class="spec-label">Modelo</div><div class="spec-value">{{ producto.modelo }}</div></div>
-                <div class="spec-item"><div class="spec-label">Stock disponible</div><div class="spec-value">{{ producto.stock }}</div></div>
+            <div class="badge-state">
+                <i class="fa-solid fa-circle-check"></i>
+                {% if producto.activo %}Disponible{% else %}No disponible{% endif %}
             </div>
 
-            <div class="detail-description">
-                <strong>Descripción</strong><br>
-                {{ producto.descripcion|default:"Sin descripción disponible." }}
+            <div class="product-name">{{ producto.nombre }}</div>
+
+            <div class="spec-list">
+                <div class="spec-item">
+                    <div class="spec-label">Código</div>
+                    <div class="spec-value">{{ producto.codigo }}</div>
+                </div>
+
+                <div class="spec-item">
+                    <div class="spec-label">Marca</div>
+                    <div class="spec-value">{{ producto.marca }}</div>
+                </div>
+
+                <div class="spec-item">
+                    <div class="spec-label">Modelo</div>
+                    <div class="spec-value">{{ producto.modelo }}</div>
+                </div>
+
+                <div class="spec-item">
+                    <div class="spec-label">Stock</div>
+                    <div class="spec-value">{{ producto.stock }}</div>
+                </div>
             </div>
 
             <div class="price-box">
-                <div class="price-label">Precio</div>
-                <div class="detail-price">Bs {{ producto.precio }}</div>
+                <div class="price-label">Precio de venta</div>
+                <div class="price-value">Bs {{ producto.precio }}</div>
+            </div>
+
+            <div class="desc-box">
+                <strong>Descripción</strong><br>
+                {{ producto.descripcion|default:"Sin descripción registrada." }}
             </div>
 
             <div class="detail-actions">
-                <a href="{% url 'agregar_carrito' producto.id %}" class="btn btn-primary">
-                    <i class="fa-solid fa-cart-plus"></i> Agregar al carrito
+                <a href="{% url 'catalogo_cliente' %}" class="btn btn-outline-secondary">
+                    <i class="fa-solid fa-arrow-left"></i> Volver
                 </a>
-                <a href="{% url 'catalogo_cliente' %}" class="btn btn-outline-secondary">Seguir comprando</a>
+
+                {% if user.is_authenticated %}
+                    <a href="{% url 'agregar_carrito' producto.pk %}" class="btn btn-primary">
+                        <i class="fa-solid fa-cart-plus"></i> Agregar al carrito
+                    </a>
+                {% else %}
+                    <a href="{% url 'login' %}?next={% url 'agregar_carrito' producto.pk %}" class="btn btn-primary">
+                        <i class="fa-solid fa-right-to-bracket"></i> Comprar
+                    </a>
+                {% endif %}
             </div>
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+(function () {
+    const mainImage = document.getElementById('main-image');
+    const thumbs = document.querySelectorAll('.thumb-item');
+
+    if (!mainImage || !thumbs.length) return;
+
+    thumbs.forEach(function (btn) {
+        btn.addEventListener('click', function () {
+            const img = this.getAttribute('data-img');
+            if (!img) return;
+
+            mainImage.src = img;
+
+            thumbs.forEach(function (item) {
+                item.classList.remove('active');
+            });
+
+            this.classList.add('active');
+        });
+    });
+})();
+</script>
 {% endblock %}

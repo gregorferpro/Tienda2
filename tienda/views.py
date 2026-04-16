@@ -3,16 +3,16 @@ from decimal import Decimal
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.db import transaction
-from django.db.models import Prefetch, Q
+from django.db.models import Q
 from django.db.models.deletion import ProtectedError
 from django.shortcuts import get_object_or_404, redirect, render
+from django.utils import timezone
 
-from .forms import ProductoForm, ClienteForm, CheckoutForm
-from .models import Producto, ProductoImagen, Cliente, Venta, DetalleVenta
+from .forms import CheckoutForm, ClienteForm, ProductoForm
+from .models import Cliente, DetalleVenta, Producto, ProductoImagen, Venta
 
 
 def generar_numero_factura():
-    from django.utils import timezone
     return timezone.now().strftime('%Y%m%d%H%M%S')
 
 
@@ -21,28 +21,48 @@ def numero_a_texto_basico(numero):
 
 
 def es_staff_o_superuser(user):
-    return user.is_authenticated and (
-        user.is_superuser
-        or user.is_staff
-        or (hasattr(user, 'perfil') and user.perfil.rol in ['superuser', 'staff'])
-    )
+    if not user.is_authenticated:
+        return False
+
+    if user.is_superuser or user.is_staff:
+        return True
+
+    if hasattr(user, 'perfil'):
+        return user.perfil.rol in ['superuser', 'staff']
+
+    return False
 
 
 def solo_superuser(user):
-    return user.is_authenticated and (
-        user.is_superuser
-        or (hasattr(user, 'perfil') and user.perfil.rol == 'superuser')
-    )
+    if not user.is_authenticated:
+        return False
+
+    if user.is_superuser:
+        return True
+
+    if hasattr(user, 'perfil'):
+        return user.perfil.rol == 'superuser'
+
+    return False
 
 
 def obtener_carrito(request):
-    return request.session.setdefault('carrito', {})
+    carrito = request.session.get('carrito')
+    if carrito is None:
+        carrito = {}
+        request.session['carrito'] = carrito
+    return carrito
 
 
 def catalogo_cliente(request):
     q = request.GET.get('q', '').strip()
 
-    productos = Producto.objects.filter(activo=True)
+    productos = (
+        Producto.objects
+        .filter(activo=True)
+        .prefetch_related('imagenes_extra')
+        .order_by('-id')
+    )
 
     if q:
         productos = productos.filter(
@@ -54,7 +74,7 @@ def catalogo_cliente(request):
 
     return render(request, 'tienda/catalogo_cliente.html', {
         'productos': productos,
-        'q': q
+        'q': q,
     })
 
 
@@ -72,17 +92,18 @@ def detalle_producto_cliente(request, pk):
 @login_required
 def agregar_carrito(request, pk):
     producto = get_object_or_404(Producto, pk=pk, activo=True)
-    carrito = obtener_carrito(request)
 
+    carrito = obtener_carrito(request)
     item = carrito.get(str(pk), {'cantidad': 0})
 
     if item['cantidad'] < producto.stock:
         item['cantidad'] += 1
         carrito[str(pk)] = item
+        request.session['carrito'] = carrito
         request.session.modified = True
         messages.success(request, 'Producto agregado al carrito.')
     else:
-        messages.warning(request, 'No hay suficiente stock disponible.')
+        messages.warning(request, 'No hay suficiente stock disponible para este producto.')
 
     return redirect('carrito')
 
@@ -93,6 +114,7 @@ def quitar_carrito(request, pk):
 
     if str(pk) in carrito:
         del carrito[str(pk)]
+        request.session['carrito'] = carrito
         request.session.modified = True
         messages.success(request, 'Producto quitado del carrito.')
 
@@ -111,12 +133,14 @@ def carrito(request):
             pk=int(pk),
             activo=True
         )
-        subtotal = producto.precio * data['cantidad']
+
+        cantidad = int(data.get('cantidad', 0))
+        subtotal = producto.precio * cantidad
         total += subtotal
 
         items.append({
             'producto': producto,
-            'cantidad': data['cantidad'],
+            'cantidad': cantidad,
             'subtotal': subtotal,
         })
 
@@ -144,29 +168,51 @@ def checkout(request):
             pk=int(pk),
             activo=True
         )
-        subtotal = producto.precio * data['cantidad']
+
+        cantidad = int(data.get('cantidad', 0))
+
+        if cantidad <= 0:
+            continue
+
+        subtotal = producto.precio * cantidad
         total += subtotal
 
         items.append({
             'producto': producto,
-            'cantidad': data['cantidad'],
+            'cantidad': cantidad,
             'subtotal': subtotal,
         })
+
+    if not items:
+        messages.warning(request, 'Tu carrito está vacío.')
+        return redirect('catalogo_cliente')
 
     if request.method == 'POST':
         form = CheckoutForm(request.POST)
 
         if form.is_valid():
-            cliente = Cliente.objects.create(
+            cliente, _ = Cliente.objects.get_or_create(
                 user=request.user,
-                nombres=form.cleaned_data['nombres'],
-                apellidos=form.cleaned_data['apellidos'],
-                ci_nit=form.cleaned_data['ci_nit'],
-                telefono=form.cleaned_data['telefono'],
-                email=form.cleaned_data.get('email', ''),
-                direccion=form.cleaned_data.get('direccion', ''),
-                estado='activo'
+                defaults={
+                    'nombres': form.cleaned_data['nombres'],
+                    'apellidos': form.cleaned_data['apellidos'],
+                    'ci_nit': form.cleaned_data['ci_nit'],
+                    'telefono': form.cleaned_data['telefono'],
+                    'email': form.cleaned_data.get('email', ''),
+                    'direccion': form.cleaned_data.get('direccion', ''),
+                    'estado': 'activo',
+                }
             )
+
+            if cliente.user == request.user:
+                cliente.nombres = form.cleaned_data['nombres']
+                cliente.apellidos = form.cleaned_data['apellidos']
+                cliente.ci_nit = form.cleaned_data['ci_nit']
+                cliente.telefono = form.cleaned_data['telefono']
+                cliente.email = form.cleaned_data.get('email', '')
+                cliente.direccion = form.cleaned_data.get('direccion', '')
+                cliente.estado = 'activo'
+                cliente.save()
 
             venta = Venta.objects.create(
                 cliente=cliente,
@@ -183,8 +229,8 @@ def checkout(request):
                 cantidad = item['cantidad']
 
                 if producto.stock < cantidad:
-                    messages.error(request, f'Stock insuficiente para {producto.nombre}')
-                    return redirect('carrito')
+                    messages.error(request, f'Stock insuficiente para {producto.nombre}.')
+                    raise transaction.TransactionManagementError('Stock insuficiente.')
 
                 DetalleVenta.objects.create(
                     venta=venta,
@@ -203,7 +249,23 @@ def checkout(request):
             messages.success(request, 'Compra registrada correctamente.')
             return redirect('factura_view', pk=venta.pk)
     else:
-        form = CheckoutForm()
+        datos_iniciales = {}
+
+        try:
+            cliente = Cliente.objects.get(user=request.user)
+            datos_iniciales = {
+                'nombres': cliente.nombres,
+                'apellidos': cliente.apellidos,
+                'ci_nit': cliente.ci_nit,
+                'telefono': cliente.telefono,
+                'email': cliente.email,
+                'direccion': cliente.direccion,
+            }
+        except Cliente.DoesNotExist:
+            if request.user.email:
+                datos_iniciales['email'] = request.user.email
+
+        form = CheckoutForm(initial=datos_iniciales)
 
     return render(request, 'tienda/checkout.html', {
         'form': form,
@@ -215,12 +277,13 @@ def checkout(request):
 @login_required
 def factura_view(request, pk):
     venta = get_object_or_404(
-        Venta.objects.prefetch_related('detalles__producto'),
+        Venta.objects.select_related('cliente', 'usuario').prefetch_related('detalles__producto'),
         pk=pk
     )
+
     return render(request, 'tienda/factura.html', {
         'venta': venta,
-        'numero_literal': numero_a_texto_basico(venta.total)
+        'numero_literal': numero_a_texto_basico(venta.total),
     })
 
 
@@ -245,7 +308,9 @@ def productos_list(request):
         )
 
     if request.headers.get('x-requested-with') == 'XMLHttpRequest':
-        return render(request, 'tienda/partials/productos_grid.html', {'productos': productos})
+        return render(request, 'tienda/partials/productos_grid.html', {
+            'productos': productos
+        })
 
     return render(request, 'tienda/productos_list.html', {
         'productos': productos,
@@ -260,7 +325,10 @@ def producto_detail(request, pk):
         Producto.objects.prefetch_related('imagenes_extra'),
         pk=pk
     )
-    return render(request, 'tienda/producto_detail.html', {'producto': producto})
+
+    return render(request, 'tienda/producto_detail.html', {
+        'producto': producto
+    })
 
 
 @login_required
@@ -287,7 +355,7 @@ def producto_create(request):
 
     return render(request, 'tienda/producto_form.html', {
         'form': form,
-        'titulo': 'Nuevo producto'
+        'titulo': 'Nuevo producto',
     })
 
 
@@ -321,7 +389,7 @@ def producto_update(request, pk):
     return render(request, 'tienda/producto_form.html', {
         'form': form,
         'titulo': 'Editar producto',
-        'producto': producto
+        'producto': producto,
     })
 
 
@@ -342,25 +410,30 @@ def producto_delete(request, pk):
             )
             return redirect('productos_list')
 
-    return render(request, 'tienda/producto_confirm_delete.html', {'producto': producto})
+    return render(request, 'tienda/producto_confirm_delete.html', {
+        'producto': producto
+    })
 
 
 @login_required
 @user_passes_test(es_staff_o_superuser)
 def clientes_list(request):
     q = request.GET.get('q', '').strip()
+
     clientes = Cliente.objects.all().order_by('id')
 
     if q:
         clientes = clientes.filter(
             Q(nombres__icontains=q) |
             Q(apellidos__icontains=q) |
-            Q(telefono__icontains=q) |
-            Q(ci_nit__icontains=q)
+            Q(ci_nit__icontains=q) |
+            Q(telefono__icontains=q)
         )
 
     if request.headers.get('x-requested-with') == 'XMLHttpRequest':
-        return render(request, 'tienda/partials/clientes_table.html', {'clientes': clientes})
+        return render(request, 'tienda/partials/clientes_table.html', {
+            'clientes': clientes
+        })
 
     return render(request, 'tienda/clientes_list.html', {
         'clientes': clientes,
@@ -373,6 +446,7 @@ def clientes_list(request):
 def cliente_create(request):
     if request.method == 'POST':
         form = ClienteForm(request.POST)
+
         if form.is_valid():
             form.save()
             messages.success(request, 'Cliente creado correctamente.')
@@ -393,6 +467,7 @@ def cliente_update(request, pk):
 
     if request.method == 'POST':
         form = ClienteForm(request.POST, instance=cliente)
+
         if form.is_valid():
             form.save()
             messages.success(request, 'Cliente actualizado correctamente.')
@@ -416,15 +491,22 @@ def cliente_delete(request, pk):
         messages.success(request, 'Cliente eliminado correctamente.')
         return redirect('clientes_list')
 
-    return render(request, 'tienda/cliente_confirm_delete.html', {'cliente': cliente})
+    return render(request, 'tienda/cliente_confirm_delete.html', {
+        'cliente': cliente
+    })
 
 
 @login_required
-@user_passes_test(lambda u: u.is_superuser or (hasattr(u, 'perfil') and u.perfil.rol in ['superuser', 'staff']))
+@user_passes_test(es_staff_o_superuser)
 def ventas_list(request):
     q = request.GET.get('q', '').strip()
 
-    ventas = Venta.objects.select_related('cliente', 'usuario').all().order_by('-id')
+    ventas = (
+        Venta.objects
+        .select_related('cliente', 'usuario')
+        .all()
+        .order_by('-id')
+    )
 
     if q:
         ventas = ventas.filter(
@@ -442,15 +524,18 @@ def ventas_list(request):
 
     return render(request, 'tienda/ventas_list.html', {
         'ventas': ventas,
-        'q': q
+        'q': q,
     })
 
 
 @login_required
-@user_passes_test(lambda u: u.is_superuser or (hasattr(u, 'perfil') and u.perfil.rol in ['superuser', 'staff']))
+@user_passes_test(es_staff_o_superuser)
 def venta_detail(request, pk):
     venta = get_object_or_404(
         Venta.objects.select_related('cliente', 'usuario').prefetch_related('detalles__producto'),
         pk=pk
     )
-    return render(request, 'tienda/venta_detail.html', {'venta': venta})
+
+    return render(request, 'tienda/venta_detail.html', {
+        'venta': venta
+    })
