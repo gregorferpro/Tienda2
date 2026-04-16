@@ -20,12 +20,46 @@
         <input
             type="text"
             name="q"
+            id="clientes-search"
             value="{{ q }}"
             placeholder="Buscar por nombre, apellido, teléfono o CI/NIT"
             class="form-control"
+            autocomplete="off"
         >
     </form>
 
-    {% include 'tienda/partials/clientes_table.html' %}
+    <div id="clientes-table-wrapper">
+        {% include 'tienda/partials/clientes_table.html' %}
+    </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+(function () {
+    const input = document.getElementById('clientes-search');
+    const wrapper = document.getElementById('clientes-table-wrapper');
+    let timer = null;
+
+    if (!input || !wrapper) return;
+
+    input.addEventListener('input', function () {
+        clearTimeout(timer);
+
+        timer = setTimeout(function () {
+            const q = encodeURIComponent(input.value.trim());
+
+            fetch(`?q=${q}`, {
+                headers: {
+                    'x-requested-with': 'XMLHttpRequest'
+                }
+            })
+            .then(response => response.text())
+            .then(html => {
+                wrapper.innerHTML = html;
+            });
+        }, 250);
+    });
+})();
+</script>
 {% endblock %}

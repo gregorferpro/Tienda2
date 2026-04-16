@@ -3,6 +3,7 @@ from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.auth.models import User
 from django.contrib.sites.models import Site
 from django.db.models import Q
+from django.db.models.deletion import ProtectedError
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 
@@ -50,6 +51,11 @@ def usuarios_list(request):
             Q(email__icontains=q)
         )
 
+    if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+        return render(request, 'cuentas/partials/usuarios_table.html', {
+            'usuarios': usuarios
+        })
+
     return render(request, 'cuentas/usuarios_list.html', {
         'usuarios': usuarios,
         'q': q,
@@ -62,16 +68,7 @@ def usuario_create(request):
     if request.method == 'POST':
         form = UsuarioForm(request.POST)
         if form.is_valid():
-            user = form.save(commit=False)
-            rol = form.cleaned_data['rol']
-            user.is_staff = rol in ['superuser', 'staff']
-            user.is_superuser = rol == 'superuser'
-            user.save()
-
-            perfil, _ = Perfil.objects.get_or_create(user=user)
-            perfil.rol = rol
-            perfil.save()
-
+            form.save()
             messages.success(request, 'Usuario creado correctamente.')
             return redirect('usuarios_list')
     else:
@@ -91,16 +88,7 @@ def usuario_update(request, pk):
     if request.method == 'POST':
         form = UsuarioForm(request.POST, instance=usuario)
         if form.is_valid():
-            user = form.save(commit=False)
-            rol = form.cleaned_data['rol']
-            user.is_staff = rol in ['superuser', 'staff']
-            user.is_superuser = rol == 'superuser'
-            user.save()
-
-            perfil, _ = Perfil.objects.get_or_create(user=user)
-            perfil.rol = rol
-            perfil.save()
-
+            form.save()
             messages.success(request, 'Usuario actualizado correctamente.')
             return redirect('usuarios_list')
     else:
@@ -119,8 +107,15 @@ def usuario_delete(request, pk):
     usuario = get_object_or_404(User, pk=pk)
 
     if request.method == 'POST':
-        usuario.delete()
-        messages.success(request, 'Usuario eliminado correctamente.')
+        try:
+            usuario.delete()
+            messages.success(request, 'Usuario eliminado correctamente.')
+        except ProtectedError:
+            messages.error(
+                request,
+                'No se puede eliminar este usuario porque ya está relacionado con ventas registradas. '
+                'Puedes dejarlo inactivo o cambiar sus permisos, pero no borrarlo.'
+            )
         return redirect('usuarios_list')
 
     return render(request, 'cuentas/usuario_confirm_delete.html', {

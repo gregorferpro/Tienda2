@@ -4,19 +4,19 @@
 
 {% block content %}
 <div class="mb-4">
-    <h2 class="section-title">Catálogo de Productos</h2>
-    <p class="section-subtitle">Gestiona, consulta y edita tus productos desde un solo lugar.</p>
+    <h2 class="section-title">Productos</h2>
+    <p class="section-subtitle">Gestiona el catálogo interno con una presentación limpia, moderna y adaptable.</p>
 </div>
 
 <div class="toolbar">
-    <form method="get" id="productos-search-form" class="search-wrap">
+    <form method="get" class="search-wrap">
         <i class="fa-solid fa-magnifying-glass"></i>
         <input
             type="text"
             name="q"
             id="productos-search"
             class="search-input"
-            placeholder="Buscar por código, nombre, marca o modelo"
+            placeholder="Buscar por nombre, código, marca o modelo"
             value="{{ q }}"
             autocomplete="off"
         >
@@ -39,19 +39,25 @@
 (function () {
     const input = document.getElementById('productos-search');
     const wrapper = document.getElementById('productos-grid-wrapper');
-    let timeout = null;
+    let timer = null;
 
     if (!input || !wrapper) return;
 
     input.addEventListener('input', function () {
-        clearTimeout(timeout);
-        timeout = setTimeout(() => {
+        clearTimeout(timer);
+
+        timer = setTimeout(function () {
             const q = encodeURIComponent(input.value.trim());
+
             fetch(`?q=${q}`, {
-                headers: { 'x-requested-with': 'XMLHttpRequest' }
+                headers: {
+                    'x-requested-with': 'XMLHttpRequest'
+                }
             })
-            .then(r => r.text())
-            .then(html => { wrapper.innerHTML = html; });
+            .then(response => response.text())
+            .then(html => {
+                wrapper.innerHTML = html;
+            });
         }, 250);
     });
 })();
