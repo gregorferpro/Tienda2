@@ -43,6 +43,10 @@
             <div class="admin-product-actions">
                 <a href="{% url 'producto_detail' producto.pk %}" class="btn btn-outline-primary">Ver</a>
 
+                <a href="{% url 'agregar_carrito' producto.pk %}" class="btn btn-primary">
+                    <i class="fa-solid fa-cart-plus"></i> Agregar al carrito
+                </a>
+
                 {% if user.is_superuser %}
                     <a href="{% url 'producto_update' producto.pk %}" class="btn btn-warning text-white">Editar</a>
                     <a href="{% url 'producto_delete' producto.pk %}" class="btn btn-danger">Eliminar</a>
