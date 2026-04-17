@@ -86,11 +86,9 @@
                 <div class="topbar-right">
                     {% if current_name == 'catalogo_cliente' or current_name == 'detalle_producto_cliente' or current_name == 'carrito' or current_name == 'checkout' or current_name == 'factura_view' %}
                         {% if user.is_authenticated %}
-                            {% if not user.is_staff %}
                             <a href="{% url 'carrito' %}" class="btn btn-warning btn-sm me-3">
                                 <i class="fa-solid fa-cart-shopping"></i> Carrito
                             </a>
-                            {% endif %}
 
                             <div class="user-chip">
                                 <div class="user-avatar">U</div>
