@@ -46,24 +46,39 @@ class Cliente(models.Model):
         return self.nombre_completo
 
 
-class Venta(models.Model):
-    METODO_PAGO = (
-        ('efectivo', 'Efectivo'),
-        ('qr', 'QR'),
-    )
 
+from django.db import models
+from django.contrib.auth.models import User
+
+ESTADO_PAGO_CHOICES = [
+    ('pendiente', 'Pendiente'),
+    ('pagado', 'Pagado'),
+    ('rechazado', 'Rechazado'),
+]
+
+METODO_PAGO_CHOICES = [
+    ('EFECTIVO', 'Efectivo'),
+    ('QR', 'QR'),
+    ('TRANSFERENCIA', 'Transferencia'),
+]
+
+class Venta(models.Model):
     cliente = models.ForeignKey(Cliente, on_delete=models.PROTECT, related_name='ventas')
     usuario = models.ForeignKey(User, on_delete=models.PROTECT, related_name='ventas_realizadas')
     numero_factura = models.CharField(max_length=30, unique=True)
-    metodo_pago = models.CharField(max_length=20, choices=METODO_PAGO)
+    metodo_pago = models.CharField(max_length=20, choices=METODO_PAGO_CHOICES)
     subtotal = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     descuento = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     total = models.DecimalField(max_digits=10, decimal_places=2, default=0)
-    creado = models.DateTimeField(auto_now_add=True)
+    estado_pago = models.CharField(
+        max_length=20,
+        choices=ESTADO_PAGO_CHOICES,
+        default='pendiente'
+    )
+    fecha = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return f'Factura {self.numero_factura}'
-
 
 class DetalleVenta(models.Model):
     venta = models.ForeignKey(Venta, on_delete=models.CASCADE, related_name='detalles')

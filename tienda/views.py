@@ -17,33 +17,18 @@ def generar_numero_factura():
 
 
 def numero_a_texto_basico(numero):
-    return f'{numero:.2f} bolivianos'
+    try:
+        return f'{Decimal(numero):.2f} bolivianos'
+    except Exception:
+        return f'{numero} bolivianos'
 
 
 def es_staff_o_superuser(user):
-    if not user.is_authenticated:
-        return False
-
-    if user.is_superuser or user.is_staff:
-        return True
-
-    if hasattr(user, 'perfil'):
-        return user.perfil.rol in ['superuser', 'staff']
-
-    return False
+    return user.is_authenticated and (user.is_staff or user.is_superuser)
 
 
 def solo_superuser(user):
-    if not user.is_authenticated:
-        return False
-
-    if user.is_superuser:
-        return True
-
-    if hasattr(user, 'perfil'):
-        return user.perfil.rol == 'superuser'
-
-    return False
+    return user.is_authenticated and user.is_superuser
 
 
 def obtener_carrito(request):
@@ -52,6 +37,11 @@ def obtener_carrito(request):
         carrito = {}
         request.session['carrito'] = carrito
     return carrito
+
+
+def guardar_carrito(request, carrito):
+    request.session['carrito'] = carrito
+    request.session.modified = True
 
 
 def catalogo_cliente(request):
@@ -72,6 +62,11 @@ def catalogo_cliente(request):
             Q(modelo__icontains=q)
         )
 
+    if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+        return render(request, 'tienda/partials/catalogo_grid.html', {
+            'productos': productos
+        })
+
     return render(request, 'tienda/catalogo_cliente.html', {
         'productos': productos,
         'q': q,
@@ -91,19 +86,43 @@ def detalle_producto_cliente(request, pk):
 
 @login_required
 def agregar_carrito(request, pk):
-    producto = get_object_or_404(Producto, pk=pk, activo=True)
+    producto = get_object_or_404(
+        Producto.objects.prefetch_related('imagenes_extra'),
+        pk=pk,
+        activo=True
+    )
 
     carrito = obtener_carrito(request)
-    item = carrito.get(str(pk), {'cantidad': 0})
+    key = str(pk)
+
+    imagen_url = ''
+    primera = producto.imagenes_extra.first()
+    if primera and primera.imagen:
+        imagen_url = primera.imagen.url
+
+    item = carrito.get(key, {
+        'cantidad': 0,
+        'codigo': producto.codigo,
+        'nombre': producto.nombre,
+        'precio': str(producto.precio),
+        'imagen_url': imagen_url,
+    })
 
     if item['cantidad'] < producto.stock:
         item['cantidad'] += 1
-        carrito[str(pk)] = item
-        request.session['carrito'] = carrito
-        request.session.modified = True
+        item['codigo'] = producto.codigo
+        item['nombre'] = producto.nombre
+        item['precio'] = str(producto.precio)
+        item['imagen_url'] = imagen_url
+        carrito[key] = item
+        guardar_carrito(request, carrito)
         messages.success(request, 'Producto agregado al carrito.')
     else:
         messages.warning(request, 'No hay suficiente stock disponible para este producto.')
+
+    next_url = request.GET.get('next')
+    if next_url:
+        return redirect(next_url)
 
     return redirect('carrito')
 
@@ -114,10 +133,17 @@ def quitar_carrito(request, pk):
 
     if str(pk) in carrito:
         del carrito[str(pk)]
-        request.session['carrito'] = carrito
-        request.session.modified = True
+        guardar_carrito(request, carrito)
         messages.success(request, 'Producto quitado del carrito.')
 
+    return redirect('carrito')
+
+
+@login_required
+def vaciar_carrito(request):
+    request.session['carrito'] = {}
+    request.session.modified = True
+    messages.success(request, 'Carrito vaciado correctamente.')
     return redirect('carrito')
 
 
@@ -135,6 +161,9 @@ def carrito(request):
         )
 
         cantidad = int(data.get('cantidad', 0))
+        if cantidad <= 0:
+            continue
+
         subtotal = producto.precio * cantidad
         total += subtotal
 
@@ -142,6 +171,7 @@ def carrito(request):
             'producto': producto,
             'cantidad': cantidad,
             'subtotal': subtotal,
+            'imagen_url': data.get('imagen_url', ''),
         })
 
     return render(request, 'tienda/carrito.html', {
@@ -170,7 +200,6 @@ def checkout(request):
         )
 
         cantidad = int(data.get('cantidad', 0))
-
         if cantidad <= 0:
             continue
 
@@ -191,6 +220,26 @@ def checkout(request):
         form = CheckoutForm(request.POST)
 
         if form.is_valid():
+            metodo_pago_original = form.cleaned_data['metodo_pago']
+            metodo_pago = str(metodo_pago_original).strip().lower()
+            qr_confirmado = request.POST.get('qr_confirmado')
+
+            if metodo_pago == 'qr' and not qr_confirmado:
+                messages.error(request, 'Debes confirmar el pago por QR antes de finalizar la compra.')
+                return render(request, 'tienda/checkout.html', {
+                    'form': form,
+                    'items': items,
+                    'total': total,
+                })
+
+            for item in items:
+                producto = item['producto']
+                cantidad = item['cantidad']
+
+                if producto.stock < cantidad:
+                    messages.error(request, f'Stock insuficiente para {producto.nombre}.')
+                    return redirect('carrito')
+
             cliente, _ = Cliente.objects.get_or_create(
                 user=request.user,
                 defaults={
@@ -204,33 +253,33 @@ def checkout(request):
                 }
             )
 
-            if cliente.user == request.user:
-                cliente.nombres = form.cleaned_data['nombres']
-                cliente.apellidos = form.cleaned_data['apellidos']
-                cliente.ci_nit = form.cleaned_data['ci_nit']
-                cliente.telefono = form.cleaned_data['telefono']
-                cliente.email = form.cleaned_data.get('email', '')
-                cliente.direccion = form.cleaned_data.get('direccion', '')
-                cliente.estado = 'activo'
-                cliente.save()
+            cliente.nombres = form.cleaned_data['nombres']
+            cliente.apellidos = form.cleaned_data['apellidos']
+            cliente.ci_nit = form.cleaned_data['ci_nit']
+            cliente.telefono = form.cleaned_data['telefono']
+            cliente.email = form.cleaned_data.get('email', '')
+            cliente.direccion = form.cleaned_data.get('direccion', '')
+            cliente.estado = 'activo'
+            cliente.save()
+
+            estado_inicial = 'pagado'
+            if metodo_pago == 'qr':
+                estado_inicial = 'pendiente'
 
             venta = Venta.objects.create(
                 cliente=cliente,
                 usuario=request.user,
                 numero_factura=generar_numero_factura(),
-                metodo_pago=form.cleaned_data['metodo_pago'],
+                metodo_pago=metodo_pago_original,
                 subtotal=total,
                 descuento=Decimal('0.00'),
                 total=total,
+                estado_pago=estado_inicial,
             )
 
             for item in items:
                 producto = item['producto']
                 cantidad = item['cantidad']
-
-                if producto.stock < cantidad:
-                    messages.error(request, f'Stock insuficiente para {producto.nombre}.')
-                    raise transaction.TransactionManagementError('Stock insuficiente.')
 
                 DetalleVenta.objects.create(
                     venta=venta,
@@ -245,6 +294,13 @@ def checkout(request):
 
             request.session['carrito'] = {}
             request.session.modified = True
+
+            if metodo_pago == 'qr':
+                messages.success(
+                    request,
+                    'Tu compra fue registrada y el pago quedó pendiente de confirmación por el administrador.'
+                )
+                return redirect('catalogo_cliente')
 
             messages.success(request, 'Compra registrada correctamente.')
             return redirect('factura_view', pk=venta.pk)
@@ -280,6 +336,13 @@ def factura_view(request, pk):
         Venta.objects.select_related('cliente', 'usuario').prefetch_related('detalles__producto'),
         pk=pk
     )
+
+    if venta.estado_pago != 'pagado':
+        messages.warning(
+            request,
+            'La factura aún no está disponible porque el pago sigue pendiente de confirmación.'
+        )
+        return redirect('catalogo_cliente')
 
     return render(request, 'tienda/factura.html', {
         'venta': venta,
@@ -402,13 +465,12 @@ def producto_delete(request, pk):
         try:
             producto.delete()
             messages.success(request, 'Producto eliminado correctamente.')
-            return redirect('productos_list')
         except ProtectedError:
             messages.error(
                 request,
                 'No se puede eliminar este producto porque ya está relacionado con una venta registrada.'
             )
-            return redirect('productos_list')
+        return redirect('productos_list')
 
     return render(request, 'tienda/producto_confirm_delete.html', {
         'producto': producto
@@ -427,7 +489,8 @@ def clientes_list(request):
             Q(nombres__icontains=q) |
             Q(apellidos__icontains=q) |
             Q(ci_nit__icontains=q) |
-            Q(telefono__icontains=q)
+            Q(telefono__icontains=q) |
+            Q(email__icontains=q)
         )
 
     if request.headers.get('x-requested-with') == 'XMLHttpRequest':
@@ -478,14 +541,12 @@ def cliente_update(request, pk):
     return render(request, 'tienda/cliente_form.html', {
         'form': form,
         'titulo': 'Editar cliente',
+        'cliente': cliente,
     })
 
 
-
-# ... tus otros imports
-
 @login_required
-@user_passes_test(lambda u: u.is_superuser)
+@user_passes_test(solo_superuser)
 def cliente_delete(request, pk):
     cliente = get_object_or_404(Cliente, pk=pk)
 
@@ -523,8 +584,10 @@ def ventas_list(request):
             Q(numero_factura__icontains=q) |
             Q(cliente__nombres__icontains=q) |
             Q(cliente__apellidos__icontains=q) |
+            Q(cliente__ci_nit__icontains=q) |
             Q(usuario__username__icontains=q) |
-            Q(metodo_pago__icontains=q)
+            Q(metodo_pago__icontains=q) |
+            Q(estado_pago__icontains=q)
         )
 
     if request.headers.get('x-requested-with') == 'XMLHttpRequest':
@@ -549,3 +612,44 @@ def venta_detail(request, pk):
     return render(request, 'tienda/venta_detail.html', {
         'venta': venta
     })
+
+
+@login_required
+@user_passes_test(solo_superuser)
+def pagos_pendientes(request):
+    ventas = (
+        Venta.objects
+        .select_related('cliente', 'usuario')
+        .filter(estado_pago='pendiente')
+        .order_by('-id')
+    )
+
+    return render(request, 'tienda/pagos_pendientes.html', {
+        'ventas': ventas
+    })
+
+
+@login_required
+@user_passes_test(solo_superuser)
+def confirmar_pago(request, pk):
+    venta = get_object_or_404(Venta, pk=pk)
+
+    if request.method == 'POST':
+        venta.estado_pago = 'pagado'
+        venta.save()
+        messages.success(request, f'Pago de la factura {venta.numero_factura} confirmado correctamente.')
+
+    return redirect('pagos_pendientes')
+
+
+@login_required
+@user_passes_test(solo_superuser)
+def rechazar_pago(request, pk):
+    venta = get_object_or_404(Venta, pk=pk)
+
+    if request.method == 'POST':
+        venta.estado_pago = 'rechazado'
+        venta.save()
+        messages.warning(request, f'Pago de la factura {venta.numero_factura} fue marcado como rechazado.')
+
+    return redirect('pagos_pendientes')

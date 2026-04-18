@@ -1,0 +1,61 @@
+{% extends 'base.html' %}
+
+{% block title %}Pagos pendientes{% endblock %}
+
+{% block content %}
+<div class="page-card">
+    <div class="mb-4">
+        <h2 class="section-title mb-1">Pagos pendientes</h2>
+        <p class="section-subtitle mb-0">Confirma o rechaza pagos QR antes de liberar la factura.</p>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table table-bordered table-hover bg-white align-middle">
+            <thead class="table-light">
+                <tr>
+                    <th>Factura</th>
+                    <th>Cliente</th>
+                    <th>Usuario</th>
+                    <th>Método</th>
+                    <th>Total</th>
+                    <th>Estado</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for venta in ventas %}
+                <tr>
+                    <td>{{ venta.numero_factura }}</td>
+                    <td>{{ venta.cliente.nombres }} {{ venta.cliente.apellidos }}</td>
+                    <td>{{ venta.usuario.username }}</td>
+                    <td>{{ venta.metodo_pago }}</td>
+                    <td>Bs {{ venta.total }}</td>
+                    <td>
+                        <span class="badge bg-warning text-dark">{{ venta.get_estado_pago_display }}</span>
+                    </td>
+                    <td class="d-flex gap-2">
+                        <form method="post" action="{% url 'confirmar_pago' venta.pk %}">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-success btn-sm">
+                                Confirmar pago
+                            </button>
+                        </form>
+
+                        <form method="post" action="{% url 'rechazar_pago' venta.pk %}">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-danger btn-sm">
+                                Rechazar
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="7" class="text-center">No hay pagos pendientes.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

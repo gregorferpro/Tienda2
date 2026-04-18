@@ -33,6 +33,11 @@
                 <span>Dashboard</span>
             </a>
 
+            <a href="{% url 'pagos_pendientes' %}" class="nav-link {% if current_name == 'pagos_pendientes' %}active{% endif %}">
+    <i class="fa-solid fa-money-check-dollar"></i>
+    <span>Pagos pendientes</span>
+</a>
+
             <a href="{% url 'productos_list' %}" class="nav-link {% if current_name == 'productos_list' or current_name == 'producto_create' or current_name == 'producto_update' or current_name == 'producto_detail' or current_name == 'producto_delete' %}active{% endif %}">
                 <i class="fa-solid fa-box"></i>
                 <span>Productos</span>

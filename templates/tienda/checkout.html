@@ -1,91 +1,145 @@
 {% extends 'base.html' %}
+{% load static %}
 
-{% block title %}Checkout{% endblock %}
+{% block title %}Finalizar compra{% endblock %}
 
 {% block content %}
-<div class="form-page">
-    <div class="form-shell">
-        <div class="form-header">
-            <div>
-                <h2 class="section-title mb-1">Finalizar compra</h2>
-                <p class="section-subtitle mb-0">Completa tus datos para registrar la venta.</p>
-            </div>
-            <a href="{% url 'carrito' %}" class="btn btn-outline-secondary">
-                <i class="fa-solid fa-arrow-left"></i> Volver al carrito
-            </a>
-        </div>
+<div class="checkout-shell">
+    <div class="checkout-header">
+        <h2 class="section-title mb-1">Finalizar compra</h2>
+        <p class="section-subtitle mb-3">Completa tus datos para registrar la venta.</p>
+        <a href="{% url 'carrito' %}" class="btn btn-outline-secondary">
+            <i class="fa-solid fa-arrow-left"></i> Volver al carrito
+        </a>
+    </div>
 
-        <div class="row g-4">
-            <div class="col-lg-7">
-                <div class="page-card">
-                    <form method="post">
-                        {% csrf_token %}
+    <div class="checkout-grid">
+        <div class="checkout-form-card">
+            <form method="post" id="checkout-form">
+                {% csrf_token %}
 
-                        <div class="form-grid">
-                            <div class="field-group">
-                                <label class="field-label">Nombres</label>
-                                {{ form.nombres }}
-                            </div>
-
-                            <div class="field-group">
-                                <label class="field-label">Apellidos</label>
-                                {{ form.apellidos }}
-                            </div>
-
-                            <div class="field-group">
-                                <label class="field-label">CI / NIT</label>
-                                {{ form.ci_nit }}
-                            </div>
-
-                            <div class="field-group">
-                                <label class="field-label">Teléfono</label>
-                                {{ form.telefono }}
-                            </div>
-
-                            <div class="field-group">
-                                <label class="field-label">Correo</label>
-                                {{ form.email }}
-                            </div>
-
-                            <div class="field-group">
-                                <label class="field-label">Método de pago</label>
-                                {{ form.metodo_pago }}
-                            </div>
-
-                            <div class="field-group full">
-                                <label class="field-label">Dirección</label>
-                                {{ form.direccion }}
-                            </div>
-                        </div>
-
-                        <div class="actions">
-                            <button type="submit" class="btn-main btn-save">
-                                <i class="fa-solid fa-check"></i> Confirmar compra
-                            </button>
-                        </div>
-                    </form>
+                <div class="mb-3">
+                    <label class="form-label"><strong>Nombres</strong></label>
+                    {{ form.nombres }}
                 </div>
-            </div>
 
-            <div class="col-lg-5">
-                <div class="page-card">
-                    <h4 class="mb-3">Resumen de compra</h4>
+                <div class="mb-3">
+                    <label class="form-label"><strong>Apellidos</strong></label>
+                    {{ form.apellidos }}
+                </div>
 
-                    <ul class="list-group mb-3">
-                        {% for item in items %}
-                        <li class="list-group-item d-flex justify-content-between align-items-center">
-                            <span>{{ item.producto.nombre }} x {{ item.cantidad }}</span>
-                            <strong>Bs {{ item.subtotal }}</strong>
-                        </li>
-                        {% endfor %}
-                    </ul>
+                <div class="mb-3">
+                    <label class="form-label"><strong>CI / NIT</strong></label>
+                    {{ form.ci_nit }}
+                </div>
 
-                    <div class="text-end">
-                        <h4>Total: Bs {{ total }}</h4>
+                <div class="mb-3">
+                    <label class="form-label"><strong>Teléfono</strong></label>
+                    {{ form.telefono }}
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label"><strong>Correo</strong></label>
+                    {{ form.email }}
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label"><strong>Método de pago</strong></label>
+                    {{ form.metodo_pago }}
+                </div>
+
+                <div id="qr-box" class="qr-box d-none">
+                    <h5 class="mb-3">Escanea este QR para pagar</h5>
+
+                   <div class="qr-image-wrap" style="display:flex; justify-content:center; align-items:center; padding:12px; background:#fff; border:1px solid #e5e7eb; border-radius:14px;">
+    <img
+        src="{% static 'img/qr_estatico.png' %}"
+        alt="QR de pago"
+        style="width: 320px; height:420px; object-fit:contain; display:block;"
+>
+    >
+</div>
+
+                    <div class="form-check mt-3">
+                        <input class="form-check-input" type="checkbox" id="qr_confirmado" name="qr_confirmado">
+                        <label class="form-check-label" for="qr_confirmado">
+                            Confirmo que ya realicé el pago mediante QR
+                        </label>
+                    </div>
+
+                    <div id="qr-error" class="text-danger small mt-2 d-none">
+                        Debes confirmar el pago por QR antes de finalizar la compra.
                     </div>
                 </div>
+
+                <div class="mb-3 mt-3">
+                    <label class="form-label"><strong>Dirección</strong></label>
+                    {{ form.direccion }}
+                </div>
+
+                <button type="submit" class="btn btn-success">
+                    <i class="fa-solid fa-check"></i> Confirmar compra
+                </button>
+            </form>
+        </div>
+
+        <div class="checkout-summary-card">
+            <h3 class="mb-3">Resumen de compra</h3>
+
+            <div class="summary-list">
+                {% for item in carrito_items %}
+                <div class="summary-item">
+                    <span>{{ item.producto.codigo }} x {{ item.cantidad }}</span>
+                    <strong>Bs {{ item.subtotal }}</strong>
+                </div>
+                {% endfor %}
+            </div>
+
+            <div class="summary-total">
+                Total: <strong>Bs {{ total }}</strong>
             </div>
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const metodoPago = document.getElementById('id_metodo_pago');
+    const qrBox = document.getElementById('qr-box');
+    const qrCheck = document.getElementById('qr_confirmado');
+    const qrError = document.getElementById('qr-error');
+    const form = document.getElementById('checkout-form');
+
+    function toggleQR() {
+        if (!metodoPago) return;
+
+        const valor = metodoPago.value.toLowerCase();
+        if (valor === 'qr') {
+            qrBox.classList.remove('d-none');
+        } else {
+            qrBox.classList.add('d-none');
+            qrCheck.checked = false;
+            qrError.classList.add('d-none');
+        }
+    }
+
+    if (metodoPago) {
+        metodoPago.addEventListener('change', toggleQR);
+        toggleQR();
+    }
+
+    form.addEventListener('submit', function (e) {
+        if (!metodoPago) return;
+
+        const valor = metodoPago.value.toLowerCase();
+        if (valor === 'qr' && !qrCheck.checked) {
+            e.preventDefault();
+            qrError.classList.remove('d-none');
+            qrCheck.focus();
+        }
+    });
+});
+</script>
 {% endblock %}
