@@ -5,6 +5,7 @@ from django.contrib.auth.decorators import login_required, user_passes_test
 from django.db import transaction
 from django.db.models import Q
 from django.db.models.deletion import ProtectedError
+from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 
@@ -636,6 +637,7 @@ def confirmar_pago(request, pk):
 
     if request.method == 'POST':
         venta.estado_pago = 'pagado'
+        venta.notificacion_cliente_vista = False
         venta.save()
         messages.success(request, f'Pago de la factura {venta.numero_factura} confirmado correctamente.')
 
@@ -649,7 +651,77 @@ def rechazar_pago(request, pk):
 
     if request.method == 'POST':
         venta.estado_pago = 'rechazado'
+        venta.notificacion_cliente_vista = False
         venta.save()
         messages.warning(request, f'Pago de la factura {venta.numero_factura} fue marcado como rechazado.')
 
     return redirect('pagos_pendientes')
+
+@login_required
+def consultar_notificacion_pago(request):
+    try:
+        cliente = Cliente.objects.get(user=request.user)
+    except Cliente.DoesNotExist:
+        return JsonResponse({'hay_notificacion': False})
+
+    venta = (
+        Venta.objects
+        .filter(cliente=cliente, estado_pago__in=['pagado', 'rechazado'])
+        .order_by('-id')
+        .first()
+    )
+
+    if not venta:
+        return JsonResponse({'hay_notificacion': False})
+
+    return JsonResponse({
+        'hay_notificacion': True,
+        'venta_id': venta.pk,
+        'numero_factura': venta.numero_factura,
+        'estado_pago': venta.estado_pago,
+    })
+
+
+@login_required
+def marcar_notificacion_pago_vista(request, pk):
+    venta = get_object_or_404(
+        Venta,
+        pk=pk,
+        cliente__user=request.user
+    )
+
+    if request.method == 'POST':
+        venta.notificacion_cliente_vista = True
+        venta.save(update_fields=['notificacion_cliente_vista'])
+        return JsonResponse({'ok': True})
+
+    return JsonResponse({'ok': False}, status=400)
+
+@login_required
+def consultar_notificacion_pago(request):
+    venta = (
+        Venta.objects
+        .select_related('cliente')
+        .filter(
+            cliente__user=request.user,
+            estado_pago__in=['pagado', 'rechazado'],
+            notificacion_cliente_vista=False
+        )
+        .order_by('-fecha')
+        .first()
+    )
+
+    if not venta:
+        return JsonResponse({'hay_notificacion': False})
+
+    return JsonResponse({
+        'hay_notificacion': True,
+        'venta_id': venta.pk,
+        'numero_factura': venta.numero_factura,
+        'estado_pago': venta.estado_pago,
+        'mensaje': (
+            f"Tu compra con factura {venta.numero_factura} fue confirmada correctamente."
+            if venta.estado_pago == 'pagado'
+            else f"Tu pago de la factura {venta.numero_factura} fue rechazado."
+        )
+    })

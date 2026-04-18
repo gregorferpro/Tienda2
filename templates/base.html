@@ -34,9 +34,9 @@
             </a>
 
             <a href="{% url 'pagos_pendientes' %}" class="nav-link {% if current_name == 'pagos_pendientes' %}active{% endif %}">
-    <i class="fa-solid fa-money-check-dollar"></i>
-    <span>Pagos pendientes</span>
-</a>
+                <i class="fa-solid fa-money-check-dollar"></i>
+                <span>Pagos pendientes</span>
+            </a>
 
             <a href="{% url 'productos_list' %}" class="nav-link {% if current_name == 'productos_list' or current_name == 'producto_create' or current_name == 'producto_update' or current_name == 'producto_detail' or current_name == 'producto_delete' %}active{% endif %}">
                 <i class="fa-solid fa-box"></i>
@@ -128,7 +128,109 @@
 </div>
 {% endwith %}
 
+<div class="modal fade" id="modalNotificacionPago" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg">
+            <div id="modalNotificacionHeader" class="modal-header bg-success text-white">
+                <h5 class="modal-title" id="modalNotificacionTitulo">
+                    <i class="fa-solid fa-circle-check me-2"></i> Notificación de pago
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+
+            <div class="modal-body">
+                <p class="mb-0" id="modalNotificacionTexto"></p>
+            </div>
+
+            <div class="modal-footer">
+                <a href="#" id="modalNotificacionAccion" class="btn btn-success d-none">Ver factura</a>
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const modalElement = document.getElementById('modalNotificacionPago');
+    if (!modalElement) return;
+
+    const modal = new bootstrap.Modal(modalElement);
+    const header = document.getElementById('modalNotificacionHeader');
+    const titulo = document.getElementById('modalNotificacionTitulo');
+    const texto = document.getElementById('modalNotificacionTexto');
+    const accion = document.getElementById('modalNotificacionAccion');
+
+    let mostrandoModal = false;
+
+    function claveLocal(ventaId, estadoPago) {
+        return 'notificacion_pago_' + ventaId + '_' + estadoPago;
+    }
+
+    function mostrarModal(data) {
+        if (data.estado_pago === 'pagado') {
+            header.className = 'modal-header bg-success text-white';
+            titulo.innerHTML = '<i class="fa-solid fa-circle-check me-2"></i> Pago confirmado';
+            texto.innerHTML = 'Tu compra con factura <strong>' + data.numero_factura + '</strong> fue confirmada correctamente. Ya puedes ver tu factura.';
+            accion.href = '/tienda/factura/' + data.venta_id + '/';
+            accion.textContent = 'Ver factura';
+            accion.className = 'btn btn-success';
+            accion.classList.remove('d-none');
+        } else if (data.estado_pago === 'rechazado') {
+            header.className = 'modal-header bg-danger text-white';
+            titulo.innerHTML = '<i class="fa-solid fa-circle-xmark me-2"></i> Pago rechazado';
+            texto.innerHTML = 'Tu pago de la factura <strong>' + data.numero_factura + '</strong> fue rechazado. Revisa tu comprobante o vuelve a intentar la compra.';
+            accion.href = "{% url 'catalogo_cliente' %}";
+            accion.textContent = 'Volver al catálogo';
+            accion.className = 'btn btn-danger';
+            accion.classList.remove('d-none');
+        } else {
+            return;
+        }
+
+        mostrandoModal = true;
+        modal.show();
+    }
+
+    function consultarNotificacion() {
+        if (mostrandoModal) return;
+
+        fetch("{% url 'consultar_notificacion_pago' %}", {
+            method: 'GET',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(function (response) {
+            return response.json();
+        })
+        .then(function (data) {
+            if (!data.hay_notificacion) return;
+
+            const key = claveLocal(data.venta_id, data.estado_pago);
+            const yaMostrada = localStorage.getItem(key);
+
+            if (yaMostrada === '1') return;
+
+            localStorage.setItem(key, '1');
+            mostrarModal(data);
+        })
+        .catch(function (error) {
+            console.error('Error consultando notificación de pago:', error);
+        });
+    }
+
+    modalElement.addEventListener('hidden.bs.modal', function () {
+        mostrandoModal = false;
+    });
+
+    setInterval(consultarNotificacion, 3000);
+    consultarNotificacion();
+});
+</script>
+
 {% block extra_js %}{% endblock %}
 </body>
 </html>
