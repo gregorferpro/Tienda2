@@ -32,4 +32,5 @@ urlpatterns = [
     path('pagos-pendientes/<int:pk>/rechazar/', views.rechazar_pago, name='rechazar_pago'),
 
     path('notificaciones/pago/consultar/', views.consultar_notificacion_pago, name='consultar_notificacion_pago'),
+    path('notificaciones/pago/<int:pk>/vista/', views.marcar_notificacion_pago_vista, name='marcar_notificacion_pago_vista'),
 ]

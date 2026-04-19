@@ -28,7 +28,8 @@
                 <h5>Venta</h5>
                 <p class="mb-1"><strong>Usuario:</strong> {{ venta.usuario.username }}</p>
                 <p class="mb-1"><strong>Método de pago:</strong> {{ venta.metodo_pago }}</p>
-                <p class="mb-0"><strong>Fecha:</strong> {{ venta.creado|date:"d/m/Y H:i" }}</p>
+                <p class="mb-1"><strong>Estado pago:</strong> {{ venta.estado_pago }}</p>
+                <p class="mb-0"><strong>Fecha:</strong> {{ venta.fecha|date:"d/m/Y H:i" }}</p>
             </div>
         </div>
     </div>

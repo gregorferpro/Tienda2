@@ -1,11 +1,17 @@
 {% extends 'base.html' %}
 {% block title %}Detalle del producto{% endblock %}
 
-{% block content %}
-<div class="detail-shell">
-    <div class="detail-grid">
-        <div class="detail-card">
-            <div class="gallery-main">
+{% block page_content %}
+<section class="asus-detail-shell">
+    <div class="asus-detail-head">
+        <a href="{% url 'catalogo_cliente' %}" class="btn btn-outline-secondary">
+            <i class="fa-solid fa-arrow-left"></i> Volver al catálogo
+        </a>
+    </div>
+
+    <div class="asus-detail-grid">
+        <div class="asus-detail-gallery">
+            <div class="asus-detail-main">
                 {% with imagenes=producto.imagenes_extra.all %}
                     {% if imagenes %}
                         {% for img in imagenes %}
@@ -14,19 +20,19 @@
                             {% endif %}
                         {% endfor %}
                     {% else %}
-                        <div class="product-card-placeholder h-100">
-                            <i class="fa-solid fa-box fa-4x text-secondary"></i>
+                        <div class="asus-product-placeholder asus-detail-placeholder">
+                            <i class="fa-solid fa-mobile-screen-button"></i>
                         </div>
                     {% endif %}
                 {% endwith %}
             </div>
 
             {% if producto.imagenes_extra.all %}
-            <div class="thumb-strip">
+            <div class="asus-thumb-strip">
                 {% for img in producto.imagenes_extra.all %}
                     <button
                         type="button"
-                        class="thumb-item {% if forloop.first %}active{% endif %}"
+                        class="asus-thumb-item {% if forloop.first %}active{% endif %}"
                         data-img="{{ img.imagen.url }}"
                     >
                         <img src="{{ img.imagen.url }}" alt="Imagen extra de {{ producto.nombre }}">
@@ -36,71 +42,66 @@
             {% endif %}
         </div>
 
-        <div class="info-card">
-            <div class="badge-state">
+        <div class="asus-detail-info">
+            <div class="asus-detail-status">
                 <i class="fa-solid fa-circle-check"></i>
                 {% if producto.activo %}Disponible{% else %}No disponible{% endif %}
             </div>
 
-            <div class="product-name">{{ producto.nombre }}</div>
+            <h1 class="asus-detail-title">{{ producto.nombre }}</h1>
 
-            <div class="spec-list">
-                <div class="spec-item">
-                    <div class="spec-label">Código</div>
-                    <div class="spec-value">{{ producto.codigo }}</div>
+            <div class="asus-detail-submeta">
+                <span class="asus-chip">{{ producto.marca }}</span>
+                <span class="asus-chip soft">{{ producto.modelo }}</span>
+            </div>
+
+            <div class="asus-detail-price">Bs {{ producto.precio }}</div>
+
+            <div class="asus-detail-specs">
+                <div class="asus-spec-card">
+                    <span class="asus-spec-label">Código</span>
+                    <strong>{{ producto.codigo }}</strong>
                 </div>
-
-                <div class="spec-item">
-                    <div class="spec-label">Marca</div>
-                    <div class="spec-value">{{ producto.marca }}</div>
+                <div class="asus-spec-card">
+                    <span class="asus-spec-label">Marca</span>
+                    <strong>{{ producto.marca }}</strong>
                 </div>
-
-                <div class="spec-item">
-                    <div class="spec-label">Modelo</div>
-                    <div class="spec-value">{{ producto.modelo }}</div>
+                <div class="asus-spec-card">
+                    <span class="asus-spec-label">Modelo</span>
+                    <strong>{{ producto.modelo }}</strong>
                 </div>
-
-                <div class="spec-item">
-                    <div class="spec-label">Stock</div>
-                    <div class="spec-value">{{ producto.stock }}</div>
+                <div class="asus-spec-card">
+                    <span class="asus-spec-label">Stock</span>
+                    <strong>{{ producto.stock }}</strong>
                 </div>
             </div>
 
-            <div class="price-box">
-                <div class="price-label">Precio de venta</div>
-                <div class="price-value">Bs {{ producto.precio }}</div>
+            <div class="asus-detail-description">
+                <h5>Descripción</h5>
+                <p>{{ producto.descripcion|default:"Sin descripción registrada." }}</p>
             </div>
 
-            <div class="desc-box">
-                <strong>Descripción</strong><br>
-                {{ producto.descripcion|default:"Sin descripción registrada." }}
-            </div>
-
-            <div class="detail-actions">
-                <a href="{% url 'catalogo_cliente' %}" class="btn btn-outline-secondary">
-                    <i class="fa-solid fa-arrow-left"></i> Volver
-                </a>
-
+            <div class="asus-detail-actions">
                 {% if user.is_authenticated %}
-                    <a href="{% url 'agregar_carrito' producto.pk %}" class="btn btn-primary">
+                    <a href="{% url 'agregar_carrito' producto.pk %}" class="btn btn-dark btn-lg">
                         <i class="fa-solid fa-cart-plus"></i> Agregar al carrito
                     </a>
                 {% else %}
-                    <a href="{% url 'login' %}?next={% url 'agregar_carrito' producto.pk %}" class="btn btn-primary">
-                        <i class="fa-solid fa-right-to-bracket"></i> Comprar
+                    <a href="{% url 'login' %}?next={% url 'agregar_carrito' producto.pk %}" class="btn btn-dark btn-lg">
+                        <i class="fa-solid fa-right-to-bracket"></i> Comprar ahora
                     </a>
                 {% endif %}
             </div>
         </div>
     </div>
-</div>
+</section>
 {% endblock %}
 
 {% block extra_js %}
 <script>
 (function () {
     const mainImage = document.getElementById('main-image');
-    const thumbs = document.querySelectorAll('.thumb-item');
+    const thumbs = document.querySelectorAll('.asus-thumb-item');
 
     if (!mainImage || !thumbs.length) return;
 

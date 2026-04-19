@@ -32,10 +32,16 @@
                 </td>
                 <td>Bs {{ venta.total }}</td>
                 <td>{{ venta.fecha|date:"d/m/Y H:i" }}</td>
-                <td>
+                <td class="d-flex gap-2 flex-wrap">
                     <a href="{% url 'venta_detail' venta.pk %}" class="btn btn-outline-primary btn-sm">
                         Ver
                     </a>
+
+                    {% if venta.estado_pago == 'pagado' %}
+                    <a href="{% url 'factura_view' venta.pk %}" class="btn btn-outline-success btn-sm">
+                        Ver factura
+                    </a>
+                    {% endif %}
                 </td>
             </tr>
             {% empty %}

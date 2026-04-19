@@ -263,9 +263,14 @@ def checkout(request):
             cliente.estado = 'activo'
             cliente.save()
 
-            estado_inicial = 'pagado'
+            # Diferenciar QR según quién compra
             if metodo_pago == 'qr':
-                estado_inicial = 'pendiente'
+                if request.user.is_staff or request.user.is_superuser:
+                    estado_inicial = 'pagado'
+                else:
+                    estado_inicial = 'pendiente'
+            else:
+                estado_inicial = 'pagado'
 
             venta = Venta.objects.create(
                 cliente=cliente,
@@ -296,7 +301,8 @@ def checkout(request):
             request.session['carrito'] = {}
             request.session.modified = True
 
-            if metodo_pago == 'qr':
+            # Mensajes y redirección según rol
+            if metodo_pago == 'qr' and not (request.user.is_staff or request.user.is_superuser):
                 messages.success(
                     request,
                     'Tu compra fue registrada y el pago quedó pendiente de confirmación por el administrador.'
@@ -329,7 +335,6 @@ def checkout(request):
         'items': items,
         'total': total,
     })
-
 
 @login_required
 def factura_view(request, pk):
@@ -657,45 +662,6 @@ def rechazar_pago(request, pk):
 
     return redirect('pagos_pendientes')
 
-@login_required
-def consultar_notificacion_pago(request):
-    try:
-        cliente = Cliente.objects.get(user=request.user)
-    except Cliente.DoesNotExist:
-        return JsonResponse({'hay_notificacion': False})
-
-    venta = (
-        Venta.objects
-        .filter(cliente=cliente, estado_pago__in=['pagado', 'rechazado'])
-        .order_by('-id')
-        .first()
-    )
-
-    if not venta:
-        return JsonResponse({'hay_notificacion': False})
-
-    return JsonResponse({
-        'hay_notificacion': True,
-        'venta_id': venta.pk,
-        'numero_factura': venta.numero_factura,
-        'estado_pago': venta.estado_pago,
-    })
-
-
-@login_required
-def marcar_notificacion_pago_vista(request, pk):
-    venta = get_object_or_404(
-        Venta,
-        pk=pk,
-        cliente__user=request.user
-    )
-
-    if request.method == 'POST':
-        venta.notificacion_cliente_vista = True
-        venta.save(update_fields=['notificacion_cliente_vista'])
-        return JsonResponse({'ok': True})
-
-    return JsonResponse({'ok': False}, status=400)
 
 @login_required
 def consultar_notificacion_pago(request):
@@ -725,3 +691,19 @@ def consultar_notificacion_pago(request):
             else f"Tu pago de la factura {venta.numero_factura} fue rechazado."
         )
     })
+
+
+@login_required
+def marcar_notificacion_pago_vista(request, pk):
+    venta = get_object_or_404(
+        Venta,
+        pk=pk,
+        cliente__user=request.user
+    )
+
+    if request.method == 'POST':
+        venta.notificacion_cliente_vista = True
+        venta.save(update_fields=['notificacion_cliente_vista'])
+        return JsonResponse({'ok': True})
+
+    return JsonResponse({'ok': False}, status=400)

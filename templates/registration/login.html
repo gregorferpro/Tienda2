@@ -1,87 +1,84 @@
 {% extends 'base.html' %}
+{% load static %}
 {% load socialaccount %}
 
 {% block title %}Iniciar sesión{% endblock %}
 
-{% block content %}
-<div class="auth-shell">
-    <div class="auth-card">
-        <div class="auth-left">
-            <div class="auth-icon-circle">
-                <i class="fa-solid fa-store"></i>
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/login.css' %}">
+{% endblock %}
+
+{% block page_content %}
+<section class="login-scene">
+    <div class="login-overlay"></div>
+
+    <div class="login-card-wrap">
+        <div class="login-card">
+            <div class="login-card-glow"></div>
+
+            <div class="login-header">
+                <div class="login-badge">
+                    <i class="fa-solid fa-store"></i>
+                </div>
+                <h1 class="login-title">LOGIN</h1>
+                <p class="login-subtitle">Accede a ScourgeTech</p>
             </div>
 
-            <div class="auth-illustration">
-                <img src="https://images.unsplash.com/photo-1556740749-887f6717d7e4?q=80&w=1200&auto=format&fit=crop" alt="Tienda">
-            </div>
-
-            <h2 class="auth-brand-title">Sistema de Tienda</h2>
-            <p class="auth-brand-subtitle">Gestión integral para tu negocio</p>
-        </div>
-
-        <div class="auth-right">
-            <div class="auth-mini-icon">
-                <i class="fa-solid fa-store"></i>
-            </div>
-
-            <h1 class="auth-title">Iniciar sesión</h1>
-            <p class="auth-subtitle">Ingresa tus credenciales</p>
-
-            <form method="post" class="auth-form">
+            <form method="post" class="login-form" autocomplete="off">
                 {% csrf_token %}
-
-                <div class="mb-3">
-                    <input
-                        type="text"
-                        name="username"
-                        class="form-control"
-                        placeholder="Usuario"
-                        required
-                    >
-                </div>
-
-                <div class="mb-3">
-                    <input
-                        type="password"
-                        name="password"
-                        class="form-control"
-                        placeholder="Contraseña"
-                        required
-                    >
-                </div>
-
-                {% if form.errors %}
-                <div class="alert alert-danger">
-                    Usuario o contraseña incorrectos.
-                </div>
-                {% endif %}
 
                 {% if next %}
                     <input type="hidden" name="next" value="{{ next }}">
                 {% endif %}
 
-                <button type="submit" class="btn btn-primary w-100 auth-submit-btn">
-                    Ingresar
+                <div class="login-field">
+                    <span class="login-field-icon">
+                        <i class="fa-solid fa-user"></i>
+                    </span>
+                    <input type="text" name="username" class="login-input" placeholder="Usuario" required>
+                </div>
+
+                <div class="login-field">
+                    <span class="login-field-icon">
+                        <i class="fa-solid fa-lock"></i>
+                    </span>
+                    <input type="password" name="password" class="login-input" placeholder="Contraseña" required>
+                </div>
+
+                {% if form.errors %}
+                <div class="login-alert">
+                    Usuario o contraseña incorrectos.
+                </div>
+                {% endif %}
+
+                <button type="submit" class="login-submit">
+                    <span class="login-submit-text">ENTRAR</span>
+                    <span class="login-submit-icon">
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </span>
                 </button>
             </form>
 
-            <div class="auth-divider">
+            <div class="login-divider">
                 <span>o continúa con</span>
             </div>
 
-            <a href="{% provider_login_url 'google' %}" class="btn btn-light w-100 auth-google-btn">
+            <a href="{% provider_login_url 'google' %}" class="login-google-btn">
                 <i class="fa-brands fa-google"></i>
-                Iniciar con Google
+                <span>Ingresar con Google</span>
             </a>
 
-            <div class="auth-links">
-                <p class="mb-2">
-                    ¿No tienes cuenta?
-                    <a href="{% url 'account_signup' %}">Regístrate</a>
-                </p>
+            <div class="login-links">
                 <a href="{% url 'password_reset' %}">¿Olvidaste tu contraseña?</a>
+                <span class="login-link-dot">•</span>
+                <a href="{% url 'account_signup' %}">Crear cuenta</a>
+            </div>
+
+            <div class="login-footer-brand">
+                <strong>Sistema de Tienda</strong>
+                <small>Diseño moderno y acceso seguro</small>
             </div>
         </div>
     </div>
-</div>
+</section>
 {% endblock %}

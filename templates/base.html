@@ -16,75 +16,130 @@
     <link rel="stylesheet" href="{% static 'css/forms.css' %}">
     <link rel="stylesheet" href="{% static 'css/catalogo.css' %}">
     <link rel="stylesheet" href="{% static 'css/factura.css' %}">
+    {% block extra_css %}{% endblock %}
 </head>
 <body>
 {% with current_name=request.resolver_match.url_name %}
-<div class="app-shell">
+{% if user.is_authenticated and user.is_staff and current_name != 'catalogo_cliente' and current_name != 'detalle_producto_cliente' and current_name != 'carrito' and current_name != 'checkout' and current_name != 'factura_view' and current_name != 'login' and current_name != 'password_reset' and current_name != 'account_signup' %}
 
-    {% if user.is_authenticated and user.is_staff and current_name != 'catalogo_cliente' and current_name != 'detalle_producto_cliente' and current_name != 'carrito' and current_name != 'checkout' and current_name != 'factura_view' %}
-    <aside class="sidebar">
-        <div class="sidebar-brand">
-            <a href="{% url 'dashboard' %}" class="brand-link">Sistema</a>
+<div class="sc-admin-shell">
+    <aside class="sc-sidebar">
+        <div class="sc-sidebar-brand">
+            <a href="{% url 'dashboard' %}" class="sc-brand-link">
+                <div class="sc-brand-copy">
+                    <span class="sc-brand-title">ScourgeTech</span>
+                    <small class="sc-brand-subtitle">PANEL DE GESTION</small>
+                </div>
+            </a>
         </div>
 
-        <nav class="sidebar-nav">
-            <a href="{% url 'dashboard' %}" class="nav-link {% if current_name == 'dashboard' %}active{% endif %}">
-                <i class="fa-solid fa-chart-line"></i>
+        <nav class="sc-sidebar-nav">
+            <a href="{% url 'dashboard' %}" class="sc-nav-link {% if current_name == 'dashboard' %}active{% endif %}">
+                <span class="sc-nav-dot"></span>
                 <span>Dashboard</span>
             </a>
 
-            <a href="{% url 'pagos_pendientes' %}" class="nav-link {% if current_name == 'pagos_pendientes' %}active{% endif %}">
-                <i class="fa-solid fa-money-check-dollar"></i>
+            <a href="{% url 'pagos_pendientes' %}" class="sc-nav-link {% if current_name == 'pagos_pendientes' %}active{% endif %}">
+                <span class="sc-nav-dot"></span>
                 <span>Pagos pendientes</span>
             </a>
 
-            <a href="{% url 'productos_list' %}" class="nav-link {% if current_name == 'productos_list' or current_name == 'producto_create' or current_name == 'producto_update' or current_name == 'producto_detail' or current_name == 'producto_delete' %}active{% endif %}">
-                <i class="fa-solid fa-box"></i>
+            <a href="{% url 'productos_list' %}" class="sc-nav-link {% if current_name == 'productos_list' or current_name == 'producto_create' or current_name == 'producto_update' or current_name == 'producto_detail' or current_name == 'producto_delete' %}active{% endif %}">
+                <span class="sc-nav-dot"></span>
                 <span>Productos</span>
             </a>
 
-            <a href="{% url 'clientes_list' %}" class="nav-link {% if current_name == 'clientes_list' or current_name == 'cliente_create' or current_name == 'cliente_update' or current_name == 'cliente_delete' %}active{% endif %}">
-                <i class="fa-solid fa-users"></i>
+            <a href="{% url 'clientes_list' %}" class="sc-nav-link {% if current_name == 'clientes_list' or current_name == 'cliente_create' or current_name == 'cliente_update' or current_name == 'cliente_delete' %}active{% endif %}">
+                <span class="sc-nav-dot"></span>
                 <span>Clientes</span>
             </a>
 
-            <a href="{% url 'ventas_list' %}" class="nav-link {% if current_name == 'ventas_list' or current_name == 'venta_detail' %}active{% endif %}">
-                <i class="fa-solid fa-cart-shopping"></i>
+            <a href="{% url 'ventas_list' %}" class="sc-nav-link {% if current_name == 'ventas_list' or current_name == 'venta_detail' %}active{% endif %}">
+                <span class="sc-nav-dot"></span>
                 <span>Ventas</span>
             </a>
 
             {% if user.is_superuser %}
-            <a href="{% url 'usuarios_list' %}" class="nav-link {% if current_name == 'usuarios_list' or current_name == 'usuario_create' or current_name == 'usuario_update' or current_name == 'usuario_delete' %}active{% endif %}">
-                <i class="fa-solid fa-user-gear"></i>
+            <a href="{% url 'usuarios_list' %}" class="sc-nav-link {% if current_name == 'usuarios_list' or current_name == 'usuario_create' or current_name == 'usuario_update' or current_name == 'usuario_delete' %}active{% endif %}">
+                <span class="sc-nav-dot"></span>
                 <span>Usuarios</span>
             </a>
             {% endif %}
         </nav>
 
-        <div class="sidebar-footer">
+        <div class="sc-sidebar-footer">
             <form method="post" action="{% url 'logout' %}">
                 {% csrf_token %}
-                <button type="submit" class="logout-btn border-0 bg-transparent w-100 text-start">
-                    <i class="fa-solid fa-right-from-bracket"></i>
-                    <span>Cerrar sesión</span>
+                <button type="submit" class="sc-logout-btn">
+                    <i class="fa-solid fa-arrow-left-long"></i>
+                    <span>Cerrar sesion</span>
                 </button>
             </form>
         </div>
     </aside>
-    {% endif %}
 
+    <div class="sc-main">
+        <header class="sc-topbar">
+            <div class="sc-topbar-left">
+                <img src="{% static 'img/logo-Scourge.png' %}" alt="Logo ScourgeTech" class="sc-topbar-logo">
+                <div class="sc-topbar-copy">
+                    <h1 class="sc-topbar-title">ScourgeTech</h1>
+                    <div class="sc-topbar-subtitle">Panel de gestion</div>
+                </div>
+            </div>
+
+            <div class="sc-topbar-right">
+                <a href="{% url 'carrito' %}" class="sc-cart-btn">
+                    <i class="fa-solid fa-cart-shopping"></i>
+                    <span>Carrito</span>
+                </a>
+
+                <div class="sc-user-chip">
+                    <div class="sc-user-avatar">{{ user.username|first|upper }}</div>
+                    <span class="sc-user-name">{{ user.username }}</span>
+                </div>
+
+                <form method="post" action="{% url 'logout' %}" class="sc-topbar-logout-form">
+                    {% csrf_token %}
+                    <button type="submit" class="sc-topbar-logout-btn" aria-label="Salir">
+                        <i class="fa-solid fa-right-from-bracket"></i>
+                    </button>
+                </form>
+            </div>
+        </header>
+
+        <main class="sc-content-area">
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags|default:'info' }} mb-4" role="alert">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+            {% block content %}{% endblock %}
+        </main>
+    </div>
+</div>
+
+{% else %}
+
+<div class="app-shell">
     <div class="app-main">
+        {% if current_name != 'login' and current_name != 'password_reset' and current_name != 'account_signup' %}
         <header class="topbar">
-            <div class="topbar-left">
-                <h1 class="topbar-title">Sistema de Tienda</h1>
-                <div class="topbar-subtitle">
-                    {% if current_name == 'catalogo_cliente' or current_name == 'detalle_producto_cliente' or current_name == 'carrito' or current_name == 'checkout' or current_name == 'factura_view' %}
-                        Catálogo público
-                    {% elif user.is_authenticated and user.is_staff %}
-                        Panel de gestión
-                    {% else %}
-                        Tienda en línea
-                    {% endif %}
+            <div class="topbar-left topbar-left-with-logo">
+                <img src="{% static 'img/logo-Scourge.png' %}" alt="Logo ScourgeTech" class="public-topbar-logo">
+                <div class="topbar-copy">
+                    <h1 class="topbar-title">Sistema de Tienda</h1>
+                    <div class="topbar-subtitle">
+                        {% if current_name == 'catalogo_cliente' or current_name == 'detalle_producto_cliente' or current_name == 'carrito' or current_name == 'checkout' or current_name == 'factura_view' %}
+                            Catalogo publico
+                        {% elif user.is_authenticated and user.is_staff %}
+                            Panel de gestion
+                        {% else %}
+                            Tienda en linea
+                        {% endif %}
+                    </div>
                 </div>
             </div>
 
@@ -95,7 +150,7 @@
                     </a>
 
                     <div class="user-chip">
-                        <div class="user-avatar">U</div>
+                        <div class="user-avatar">{{ user.username|first|upper }}</div>
                         <span class="user-name">{{ user.username }}</span>
                     </div>
 
@@ -107,13 +162,14 @@
                     </form>
                 {% else %}
                     <a href="{% url 'login' %}" class="btn btn-primary btn-sm">
-                        <i class="fa-solid fa-right-to-bracket"></i> Iniciar sesión
+                        <i class="fa-solid fa-right-to-bracket"></i> Iniciar sesion
                     </a>
                 {% endif %}
             </div>
         </header>
+        {% endif %}
 
-        <main class="content-area">
+        <main class="content-area {% if current_name == 'login' or current_name == 'password_reset' or current_name == 'account_signup' %}auth-page-content{% endif %}">
             {% if messages %}
                 {% for message in messages %}
                     <div class="alert alert-{{ message.tags|default:'info' }} mb-4" role="alert">
@@ -121,13 +177,15 @@
                     </div>
                 {% endfor %}
             {% endif %}
-
-            {% block content %}{% endblock %}
+            {% block page_content %}{% endblock %}
         </main>
     </div>
 </div>
+
+{% endif %}
 {% endwith %}
 
+{% if user.is_authenticated %}
 <div class="modal fade" id="modalNotificacionPago" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content border-0 shadow-lg">
@@ -149,9 +207,11 @@
         </div>
     </div>
 </div>
+{% endif %}
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
+{% if user.is_authenticated %}
 <script>
 document.addEventListener('DOMContentLoaded', function () {
     const modalElement = document.getElementById('modalNotificacionPago');
@@ -163,13 +223,27 @@ document.addEventListener('DOMContentLoaded', function () {
     const texto = document.getElementById('modalNotificacionTexto');
     const accion = document.getElementById('modalNotificacionAccion');
 
+    let ventaActualId = null;
     let mostrandoModal = false;
 
-    function claveLocal(ventaId, estadoPago) {
-        return 'notificacion_pago_' + ventaId + '_' + estadoPago;
+    function obtenerCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
     }
 
-    function mostrarModal(data) {
+    function pintarModal(data) {
+        ventaActualId = data.venta_id;
+
         if (data.estado_pago === 'pagado') {
             header.className = 'modal-header bg-success text-white';
             titulo.innerHTML = '<i class="fa-solid fa-circle-check me-2"></i> Pago confirmado';
@@ -208,14 +282,7 @@ document.addEventListener('DOMContentLoaded', function () {
         })
         .then(function (data) {
             if (!data.hay_notificacion) return;
-
-            const key = claveLocal(data.venta_id, data.estado_pago);
-            const yaMostrada = localStorage.getItem(key);
-
-            if (yaMostrada === '1') return;
-
-            localStorage.setItem(key, '1');
-            mostrarModal(data);
+            pintarModal(data);
         })
         .catch(function (error) {
             console.error('Error consultando notificación de pago:', error);
@@ -223,13 +290,34 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     modalElement.addEventListener('hidden.bs.modal', function () {
-        mostrandoModal = false;
+        if (!ventaActualId) {
+            mostrandoModal = false;
+            return;
+        }
+
+        fetch('/tienda/notificaciones/pago/' + ventaActualId + '/vista/', {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': obtenerCookie('csrftoken'),
+                'X-Requested-With': 'XMLHttpRequest',
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(function () {
+            mostrandoModal = false;
+            ventaActualId = null;
+        })
+        .catch(function (error) {
+            console.error('No se pudo marcar la notificación como vista:', error);
+            mostrandoModal = false;
+        });
     });
 
     setInterval(consultarNotificacion, 3000);
     consultarNotificacion();
 });
 </script>
+{% endif %}
 
 {% block extra_js %}{% endblock %}
 </body>

@@ -3,77 +3,81 @@
 {% block title %}Dashboard{% endblock %}
 
 {% block content %}
-<div class="page-card">
-    <div class="mb-4">
-        <h2 class="section-title">Bienvenido, {{ user.username }}</h2>
-        <p class="section-subtitle">Accede rápidamente a las áreas principales del sistema.</p>
-    </div>
+<div class="scd-shell">
+    <section class="scd-hero">
+        <div class="scd-hero-content">
+            <div class="scd-hero-copy">
+                <h2 class="scd-title">Bienvenido, {{ user.username }}!</h2>
+                <p class="scd-subtitle">
+                    Accede rapidamente a las areas principales del sistema.
+                </p>
+            </div>
+
+            <div class="scd-status-pill">
+                <span class="scd-status-dot"></span>
+                <div class="scd-status-text">
+                    <span>Sistema</span>
+                    <strong>activo</strong>
+                </div>
+            </div>
+        </div>
+    </section>
 
     <div class="row g-4">
         <div class="col-md-6 col-xl-4">
-            <div class="page-card h-100">
-                <div class="d-flex align-items-center gap-3 mb-3">
-                    <div class="btn-soft-primary"><i class="fa-solid fa-box"></i></div>
-                    <div>
-                        <h4 class="mb-1">Productos</h4>
-                        <p class="text-muted mb-0">Gestiona tu catálogo y stock.</p>
-                    </div>
+            <div class="scd-card h-100">
+                <div class="scd-card-icon scd-card-icon-dark">
+                    <i class="fa-solid fa-box"></i>
                 </div>
-                <a href="{% url 'productos_list' %}" class="btn btn-success w-100">Entrar</a>
+                <h4 class="scd-card-title">Productos</h4>
+                <p class="scd-card-text">Gestiona tu catalogo y stock.</p>
+                <a href="{% url 'productos_list' %}" class="scd-card-btn">Entrar</a>
             </div>
         </div>
 
         <div class="col-md-6 col-xl-4">
-            <div class="page-card h-100">
-                <div class="d-flex align-items-center gap-3 mb-3">
-                    <div class="btn-soft-primary"><i class="fa-solid fa-users"></i></div>
-                    <div>
-                        <h4 class="mb-1">Clientes</h4>
-                        <p class="text-muted mb-0">Administra el registro de clientes.</p>
-                    </div>
+            <div class="scd-card h-100">
+                <div class="scd-card-icon scd-card-icon-gray">
+                    <i class="fa-solid fa-users"></i>
                 </div>
-                <a href="{% url 'clientes_list' %}" class="btn btn-primary w-100">Entrar</a>
+                <h4 class="scd-card-title">Clientes</h4>
+                <p class="scd-card-text">Administra el registro de clientes.</p>
+                <a href="{% url 'clientes_list' %}" class="scd-card-btn">Entrar</a>
             </div>
         </div>
 
         <div class="col-md-6 col-xl-4">
-            <div class="page-card h-100">
-                <div class="d-flex align-items-center gap-3 mb-3">
-                    <div class="btn-soft-primary"><i class="fa-solid fa-cart-shopping"></i></div>
-                    <div>
-                        <h4 class="mb-1">Ventas</h4>
-                        <p class="text-muted mb-0">Consulta ventas y facturas.</p>
-                    </div>
+            <div class="scd-card h-100">
+                <div class="scd-card-icon scd-card-icon-light">
+                    <i class="fa-solid fa-cart-shopping"></i>
                 </div>
-                <a href="{% url 'ventas_list' %}" class="btn btn-warning w-100">Entrar</a>
+                <h4 class="scd-card-title">Ventas</h4>
+                <p class="scd-card-text">Consulta ventas y facturas.</p>
+                <a href="{% url 'ventas_list' %}" class="scd-card-btn">Entrar</a>
             </div>
         </div>
 
         {% if user.is_superuser %}
         <div class="col-md-6 col-xl-4">
-            <div class="page-card h-100">
-                <div class="d-flex align-items-center gap-3 mb-3">
-                    <div class="btn-soft-primary"><i class="fa-solid fa-user-gear"></i></div>
-                    <div>
-                        <h4 class="mb-1">Usuarios</h4>
-                        <p class="text-muted mb-0">Administra cuentas y roles.</p>
-                    </div>
+            <div class="scd-card h-100">
+                <div class="scd-card-icon scd-card-icon-gray">
+                    <i class="fa-solid fa-user-gear"></i>
                 </div>
-                <a href="{% url 'usuarios_list' %}" class="btn btn-dark w-100">Entrar</a>
+                <h4 class="scd-card-title">Usuarios</h4>
+                <p class="scd-card-text">Administra cuentas y roles.</p>
+                <a href="{% url 'usuarios_list' %}" class="scd-card-btn">Entrar</a>
             </div>
         </div>
         {% endif %}
 
         <div class="col-md-6 col-xl-4">
-            <div class="page-card h-100">
-                <div class="d-flex align-items-center gap-3 mb-3">
-                    <div class="btn-soft-primary"><i class="fa-solid fa-store"></i></div>
-                    <div>
-                        <h4 class="mb-1">Catálogo público</h4>
-                        <p class="text-muted mb-0">Ver la tienda como cliente.</p>
-                    </div>
+            <div class="scd-card h-100">
+                <div class="scd-card-icon scd-card-icon-light">
+                    <i class="fa-solid fa-store"></i>
                 </div>
-                <a href="{% url 'catalogo_cliente' %}" class="btn btn-outline-primary w-100">Abrir</a>
+                <h4 class="scd-card-title">Catalogo publico</h4>
+                <p class="scd-card-text">Ver la tienda como cliente.</p>
+                <a href="{% url 'catalogo_cliente' %}" class="scd-card-btn">Abrir</a>
             </div>
         </div>
     </div>
