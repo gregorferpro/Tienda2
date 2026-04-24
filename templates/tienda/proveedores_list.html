@@ -1,0 +1,71 @@
+{% extends 'base.html' %}
+{% block title %}Proveedores{% endblock %}
+
+{% block content %}
+<div class="page-card">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
+        <div>
+            <h2 class="section-title mb-1">Proveedores</h2>
+            <p class="section-subtitle mb-0">Gestión de personas y empresas proveedoras.</p>
+        </div>
+        <a href="{% url 'proveedor_create' %}" class="btn btn-primary">
+            <i class="fa-solid fa-plus"></i> Nuevo proveedor
+        </a>
+    </div>
+
+    <form method="get" class="mb-4">
+        <input type="text" name="q" value="{{ q }}" class="form-control"
+               placeholder="Buscar por nombre, razón social, nombre comercial, NIT o teléfono">
+    </form>
+
+    <div class="table-responsive">
+        <table class="table table-bordered table-hover align-middle bg-white">
+            <thead class="table-light">
+                <tr>
+                    <th>#</th>
+                    <th>Tipo</th>
+                    <th>Nombre</th>
+                    <th>Razón social</th>
+                    <th>Nombre comercial</th>
+                    <th>NIT</th>
+                    <th>Teléfono</th>
+                    <th>Estado</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for proveedor in proveedores %}
+                <tr>
+                    <td>{{ proveedor.id }}</td>
+                    <td>{{ proveedor.tipo_proveedor }}</td>
+                    <td>{{ proveedor.nombre }}</td>
+                    <td>{{ proveedor.razon_social|default:"-" }}</td>
+                    <td>{{ proveedor.nombre_comercial|default:"-" }}</td>
+                    <td>{{ proveedor.nit|default:"-" }}</td>
+                    <td>{{ proveedor.telefono|default:"-" }}</td>
+                    <td>
+                        {% if proveedor.estado == 'activo' %}
+                        <span class="badge bg-success">Activo</span>
+                        {% else %}
+                        <span class="badge bg-secondary">Inactivo</span>
+                        {% endif %}
+                    </td>
+                    <td class="d-flex gap-2 flex-wrap">
+                        <a href="{% url 'proveedor_update' proveedor.pk %}" class="btn btn-sm btn-outline-primary">Editar</a>
+                        {% if user.is_superuser %}
+                        <a href="{% url 'proveedor_toggle_estado' proveedor.pk %}" class="btn btn-sm btn-outline-warning">
+                            {% if proveedor.estado == 'activo' %}Inactivar{% else %}Activar{% endif %}
+                        </a>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="9" class="text-center">No hay proveedores registrados.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

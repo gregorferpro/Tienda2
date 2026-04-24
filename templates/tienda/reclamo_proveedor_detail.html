@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+{% block title %}Detalle reclamo proveedor{% endblock %}
+
+{% block content %}
+<div class="page-card">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
+        <div>
+            <h2 class="section-title mb-1">Reclamo #{{ reclamo.id }}</h2>
+            <p class="section-subtitle mb-0">{{ reclamo.producto.nombre }}</p>
+        </div>
+        <div class="d-flex gap-2">
+            {% if not reclamo.devolucion and reclamo.estado != 'devuelto' %}
+            <a href="{% url 'devolucion_proveedor_create' reclamo.pk %}" class="btn btn-warning">
+                Registrar devolución
+            </a>
+            {% endif %}
+            <a href="{% url 'reclamos_proveedor_list' %}" class="btn btn-outline-secondary">Volver</a>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-md-6">
+            <div class="page-card">
+                <h5>Datos del reclamo</h5>
+                <p><strong>Proveedor:</strong> {{ reclamo.proveedor.nombre }}</p>
+                <p><strong>Compra origen:</strong> #{{ reclamo.compra.id }}</p>
+                <p><strong>Producto:</strong> {{ reclamo.producto.nombre }}</p>
+                <p><strong>Cantidad:</strong> {{ reclamo.cantidad }}</p>
+                <p><strong>Motivo:</strong> {{ reclamo.motivo }}</p>
+                <p><strong>Estado:</strong> {{ reclamo.estado }}</p>
+                <p class="mb-0"><strong>Fecha:</strong> {{ reclamo.fecha_reclamo|date:"d/m/Y" }}</p>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="page-card">
+                <h5>Observaciones</h5>
+                <p class="mb-0">{{ reclamo.observaciones|default:"Sin observaciones." }}</p>
+            </div>
+        </div>
+    </div>
+
+    {% if reclamo.devolucion %}
+    <div class="page-card mt-4">
+        <h5>Devolución asociada</h5>
+        <p><strong>ID:</strong> {{ reclamo.devolucion.id }}</p>
+        <p><strong>Fecha devolución:</strong> {{ reclamo.devolucion.fecha_devolucion|date:"d/m/Y" }}</p>
+        <p><strong>Motivo:</strong> {{ reclamo.devolucion.motivo }}</p>
+        <p class="mb-0"><strong>Estado:</strong> {{ reclamo.devolucion.estado }}</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

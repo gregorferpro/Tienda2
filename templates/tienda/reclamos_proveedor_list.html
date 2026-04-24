@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+{% block title %}Reclamos a proveedor{% endblock %}
+
+{% block content %}
+<div class="page-card">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
+        <div>
+            <h2 class="section-title mb-1">Reclamos a proveedor</h2>
+            <p class="section-subtitle mb-0">Seguimiento de garantías, fallas y devoluciones.</p>
+        </div>
+        <a href="{% url 'reclamo_proveedor_create' %}" class="btn btn-primary">
+            <i class="fa-solid fa-plus"></i> Nuevo reclamo
+        </a>
+    </div>
+
+    <form method="get" class="mb-4">
+        <input type="text" name="q" value="{{ q }}" class="form-control"
+               placeholder="Buscar por proveedor, producto, motivo o estado">
+    </form>
+
+    <div class="table-responsive">
+        <table class="table table-bordered table-hover align-middle bg-white">
+            <thead class="table-light">
+                <tr>
+                    <th>#</th>
+                    <th>Proveedor</th>
+                    <th>Compra</th>
+                    <th>Producto</th>
+                    <th>Cantidad</th>
+                    <th>Estado</th>
+                    <th>Fecha reclamo</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for reclamo in reclamos %}
+                <tr>
+                    <td>{{ reclamo.id }}</td>
+                    <td>{{ reclamo.proveedor.nombre }}</td>
+                    <td>#{{ reclamo.compra.id }}</td>
+                    <td>{{ reclamo.producto.nombre }}</td>
+                    <td>{{ reclamo.cantidad }}</td>
+                    <td>{{ reclamo.estado }}</td>
+                    <td>{{ reclamo.fecha_reclamo|date:"d/m/Y" }}</td>
+                    <td>
+                        <a href="{% url 'reclamo_proveedor_detail' reclamo.pk %}" class="btn btn-sm btn-outline-primary">Ver</a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="8" class="text-center">No hay reclamos registrados.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

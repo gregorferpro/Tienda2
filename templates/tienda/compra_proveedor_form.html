@@ -1,0 +1,313 @@
+{% extends 'base.html' %}
+{% block title %}Nueva compra a proveedor{% endblock %}
+
+{% block content %}
+<div class="page-card">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="section-title mb-1">Nueva compra a proveedor</h2>
+            <p class="section-subtitle mb-0">Permite comprar productos existentes o crear productos nuevos dentro del mismo flujo.</p>
+        </div>
+        <a href="{% url 'compras_proveedor_list' %}" class="btn btn-outline-secondary">Volver</a>
+    </div>
+
+    <form method="post">
+        {% csrf_token %}
+
+        <div class="row g-3 mb-4">
+            <div class="col-md-4">
+                <label class="form-label">Proveedor</label>
+                {{ form.proveedor }}
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">Fecha compra</label>
+                {{ form.fecha_compra }}
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">Estado</label>
+                {{ form.estado }}
+            </div>
+
+            <div class="col-md-4">
+                <label class="form-label">Tipo documento</label>
+                {{ form.tipo_documento }}
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">Numero documento</label>
+                {{ form.numero_documento }}
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">Referencia libre</label>
+                {{ form.referencia_libre }}
+            </div>
+
+            <div class="col-md-4">
+                <label class="form-label">Descuento</label>
+                {{ form.descuento }}
+            </div>
+            <div class="col-md-8">
+                <label class="form-label">Observaciones</label>
+                {{ form.observaciones }}
+            </div>
+        </div>
+
+        <h5 class="mb-3">Detalle de compra</h5>
+
+        <div class="purchase-detail-shell mb-3">
+            <div class="purchase-detail-note">
+                Cada bloque representa un producto. Puedes elegir uno existente para autocompletar o escribirlo manualmente.
+            </div>
+
+            <div id="detalle-list" class="purchase-detail-list">
+                <div class="purchase-detail-item">
+                    <div class="purchase-detail-item-bar">
+                        <div>
+                            <span class="purchase-detail-kicker">Fila 1</span>
+                            <h6 class="purchase-detail-title mb-0">Producto a registrar</h6>
+                        </div>
+                        <button type="button" class="btn btn-outline-danger btn-sm quitar-fila" disabled>Quitar</button>
+                    </div>
+
+                    <div class="purchase-detail-grid">
+                        <div class="purchase-detail-field purchase-detail-field-span-2">
+                            <label class="purchase-detail-label">Producto existente</label>
+                            <select name="producto_id[]" class="form-control producto-select">
+                                <option value="">Producto nuevo</option>
+                                {% for producto in productos %}
+                                <option
+                                    value="{{ producto.id }}"
+                                    data-codigo="{{ producto.codigo }}"
+                                    data-nombre="{{ producto.nombre }}"
+                                    data-marca="{{ producto.marca }}"
+                                    data-modelo="{{ producto.modelo }}"
+                                    data-tipo="{{ producto.tipo_producto }}"
+                                    data-categoria="{{ producto.categoria }}"
+                                    data-precio="{{ producto.precio }}"
+                                >
+                                    {{ producto.codigo }} - {{ producto.nombre }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <div class="purchase-detail-field">
+                            <label class="purchase-detail-label">Codigo</label>
+                            <input type="text" name="producto_codigo[]" class="form-control" placeholder="Ej. IP15-256">
+                        </div>
+
+                        <div class="purchase-detail-field">
+                            <label class="purchase-detail-label">Tipo</label>
+                            <select name="tipo_producto[]" class="form-control">
+                                <option value="celular">Celular</option>
+                                <option value="accesorio">Accesorio</option>
+                                <option value="otro" selected>Otro</option>
+                            </select>
+                        </div>
+
+                        <div class="purchase-detail-field purchase-detail-field-span-2">
+                            <label class="purchase-detail-label">Nombre</label>
+                            <input type="text" name="producto_nombre[]" class="form-control" placeholder="Nombre del producto">
+                        </div>
+
+                        <div class="purchase-detail-field">
+                            <label class="purchase-detail-label">Marca</label>
+                            <input type="text" name="producto_marca[]" class="form-control" placeholder="Marca">
+                        </div>
+
+                        <div class="purchase-detail-field">
+                            <label class="purchase-detail-label">Modelo</label>
+                            <input type="text" name="producto_modelo[]" class="form-control" placeholder="Modelo">
+                        </div>
+
+                        <div class="purchase-detail-field">
+                            <label class="purchase-detail-label">Categoria</label>
+                            <input type="text" name="categoria[]" class="form-control" placeholder="Ej. Celulares">
+                        </div>
+
+                        <div class="purchase-detail-field">
+                            <label class="purchase-detail-label">Precio venta sugerido</label>
+                            <input type="number" step="0.01" name="precio_venta_sugerido[]" class="form-control" placeholder="0.00">
+                        </div>
+
+                        <div class="purchase-detail-field">
+                            <label class="purchase-detail-label">Cantidad</label>
+                            <input type="number" min="1" name="cantidad[]" class="form-control" placeholder="1">
+                        </div>
+
+                        <div class="purchase-detail-field">
+                            <label class="purchase-detail-label">Costo unitario</label>
+                            <input type="number" step="0.01" min="0.01" name="costo_unitario[]" class="form-control" placeholder="0.00">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <template id="detalle-item-template">
+            <div class="purchase-detail-item">
+                <div class="purchase-detail-item-bar">
+                    <div>
+                        <span class="purchase-detail-kicker">Fila</span>
+                        <h6 class="purchase-detail-title mb-0">Producto a registrar</h6>
+                    </div>
+                    <button type="button" class="btn btn-outline-danger btn-sm quitar-fila">Quitar</button>
+                </div>
+
+                <div class="purchase-detail-grid">
+                    <div class="purchase-detail-field purchase-detail-field-span-2">
+                        <label class="purchase-detail-label">Producto existente</label>
+                        <select name="producto_id[]" class="form-control producto-select">
+                            <option value="">Producto nuevo</option>
+                            {% for producto in productos %}
+                            <option
+                                value="{{ producto.id }}"
+                                data-codigo="{{ producto.codigo }}"
+                                data-nombre="{{ producto.nombre }}"
+                                data-marca="{{ producto.marca }}"
+                                data-modelo="{{ producto.modelo }}"
+                                data-tipo="{{ producto.tipo_producto }}"
+                                data-categoria="{{ producto.categoria }}"
+                                data-precio="{{ producto.precio }}"
+                            >
+                                {{ producto.codigo }} - {{ producto.nombre }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="purchase-detail-field">
+                        <label class="purchase-detail-label">Codigo</label>
+                        <input type="text" name="producto_codigo[]" class="form-control" placeholder="Ej. IP15-256">
+                    </div>
+
+                    <div class="purchase-detail-field">
+                        <label class="purchase-detail-label">Tipo</label>
+                        <select name="tipo_producto[]" class="form-control">
+                            <option value="celular">Celular</option>
+                            <option value="accesorio">Accesorio</option>
+                            <option value="otro" selected>Otro</option>
+                        </select>
+                    </div>
+
+                    <div class="purchase-detail-field purchase-detail-field-span-2">
+                        <label class="purchase-detail-label">Nombre</label>
+                        <input type="text" name="producto_nombre[]" class="form-control" placeholder="Nombre del producto">
+                    </div>
+
+                    <div class="purchase-detail-field">
+                        <label class="purchase-detail-label">Marca</label>
+                        <input type="text" name="producto_marca[]" class="form-control" placeholder="Marca">
+                    </div>
+
+                    <div class="purchase-detail-field">
+                        <label class="purchase-detail-label">Modelo</label>
+                        <input type="text" name="producto_modelo[]" class="form-control" placeholder="Modelo">
+                    </div>
+
+                    <div class="purchase-detail-field">
+                        <label class="purchase-detail-label">Categoria</label>
+                        <input type="text" name="categoria[]" class="form-control" placeholder="Ej. Celulares">
+                    </div>
+
+                    <div class="purchase-detail-field">
+                        <label class="purchase-detail-label">Precio venta sugerido</label>
+                        <input type="number" step="0.01" name="precio_venta_sugerido[]" class="form-control" placeholder="0.00">
+                    </div>
+
+                    <div class="purchase-detail-field">
+                        <label class="purchase-detail-label">Cantidad</label>
+                        <input type="number" min="1" name="cantidad[]" class="form-control" placeholder="1">
+                    </div>
+
+                    <div class="purchase-detail-field">
+                        <label class="purchase-detail-label">Costo unitario</label>
+                        <input type="number" step="0.01" min="0.01" name="costo_unitario[]" class="form-control" placeholder="0.00">
+                    </div>
+                </div>
+            </div>
+        </template>
+
+        <button type="button" class="btn btn-outline-primary btn-sm mb-4" id="agregar-fila">
+            <i class="fa-solid fa-plus"></i> Agregar fila
+        </button>
+
+        <div>
+            <button type="submit" class="btn btn-primary">Guardar compra</button>
+        </div>
+    </form>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+(function () {
+    const detalleList = document.getElementById('detalle-list');
+    const btnAgregar = document.getElementById('agregar-fila');
+    const itemTemplate = document.getElementById('detalle-item-template');
+
+    if (!detalleList || !btnAgregar || !itemTemplate) return;
+
+    function updateRowsState() {
+        const items = detalleList.querySelectorAll('.purchase-detail-item');
+
+        items.forEach(function (item, index) {
+            const kicker = item.querySelector('.purchase-detail-kicker');
+            const btnQuitar = item.querySelector('.quitar-fila');
+
+            if (kicker) {
+                kicker.textContent = `Fila ${index + 1}`;
+            }
+
+            if (btnQuitar) {
+                btnQuitar.disabled = items.length === 1;
+            }
+        });
+    }
+
+    function bindRow(row) {
+        const select = row.querySelector('.producto-select');
+        if (!select || select.dataset.bound === 'true') return;
+
+        select.dataset.bound = 'true';
+
+        select.addEventListener('change', function () {
+            const opt = this.options[this.selectedIndex];
+            if (!this.value) return;
+
+            row.querySelector('input[name="producto_codigo[]"]').value = opt.dataset.codigo || '';
+            row.querySelector('input[name="producto_nombre[]"]').value = opt.dataset.nombre || '';
+            row.querySelector('input[name="producto_marca[]"]').value = opt.dataset.marca || '';
+            row.querySelector('input[name="producto_modelo[]"]').value = opt.dataset.modelo || '';
+            row.querySelector('select[name="tipo_producto[]"]').value = opt.dataset.tipo || 'otro';
+            row.querySelector('input[name="categoria[]"]').value = opt.dataset.categoria || '';
+            row.querySelector('input[name="precio_venta_sugerido[]"]').value = opt.dataset.precio || '';
+        });
+    }
+
+    detalleList.querySelectorAll('.purchase-detail-item').forEach(bindRow);
+    updateRowsState();
+
+    btnAgregar.addEventListener('click', function () {
+        const clone = itemTemplate.content.firstElementChild.cloneNode(true);
+        detalleList.appendChild(clone);
+        bindRow(clone);
+        updateRowsState();
+
+        const inputNombre = clone.querySelector('input[name="producto_nombre[]"]');
+        if (inputNombre) {
+            inputNombre.focus();
+        }
+    });
+
+    detalleList.addEventListener('click', function (e) {
+        const btnQuitar = e.target.closest('.quitar-fila');
+        if (!btnQuitar) return;
+
+        if (detalleList.querySelectorAll('.purchase-detail-item').length > 1) {
+            btnQuitar.closest('.purchase-detail-item').remove();
+            updateRowsState();
+        }
+    });
+})();
+</script>
+{% endblock %}

@@ -6,26 +6,168 @@
     --asus-muted: #64748b;
     --asus-dark: #111111;
     --asus-soft: #f8fafc;
+    --asus-space-950: #060c15;
+    --asus-space-900: #0a1320;
+    --asus-space-850: #101c2b;
+    --asus-space-800: #162538;
+}
+
+.storefront-topbar {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    display: block;
+    padding: 0;
+    background:
+        linear-gradient(180deg, rgba(8, 14, 24, 0.96) 0%, rgba(13, 22, 36, 0.90) 100%);
+    border-bottom: 1px solid rgba(148, 163, 184, 0.20);
+    box-shadow: 0 12px 28px rgba(2, 8, 18, 0.30);
+    backdrop-filter: blur(16px);
+}
+
+.storefront-topbar-row {
+    padding: 18px 24px 14px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+}
+
+.storefront-category-bar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 0 24px 16px;
+    overflow-x: auto;
+    scrollbar-width: thin;
+    border-top: 1px solid rgba(148, 163, 184, 0.12);
+}
+
+.storefront-category-link {
+    flex: 0 0 auto;
+    min-height: 38px;
+    padding: 0 16px;
+    border-radius: 999px;
+    border: 1px solid rgba(148, 163, 184, 0.18);
+    background: rgba(255, 255, 255, 0.05);
+    color: #c9d6e5;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.92rem;
+    font-weight: 700;
+    transition: background 0.22s ease, border-color 0.22s ease, color 0.22s ease, transform 0.22s ease;
+}
+
+.storefront-category-link:hover {
+    color: #ffffff;
+    background: rgba(255, 255, 255, 0.10);
+    border-color: rgba(191, 219, 254, 0.28);
+    transform: translateY(-1px);
+}
+
+.storefront-category-link.is-active {
+    color: #0c1422;
+    background: linear-gradient(180deg, #f8fbff 0%, #dce9ff 100%);
+    border-color: rgba(191, 219, 254, 0.56);
+    box-shadow: 0 10px 20px rgba(96, 165, 250, 0.18);
+}
+
+.storefront-topbar .topbar-title {
+    color: #f8fbff;
+}
+
+.storefront-topbar .topbar-subtitle {
+    color: #9fb2c8;
+}
+
+.storefront-topbar .user-chip,
+.storefront-topbar .user-name {
+    color: #edf3fb;
+}
+
+.storefront-topbar .user-avatar {
+    background: rgba(255, 255, 255, 0.10);
+    color: #ffffff;
+    border: 1px solid rgba(255, 255, 255, 0.10);
+}
+
+.storefront-topbar .btn-primary.btn-sm {
+    box-shadow: 0 12px 24px rgba(37, 99, 235, 0.24);
+}
+
+.storefront-topbar .btn-outline-danger.btn-sm {
+    color: #ffd9de;
+    border-color: rgba(248, 113, 113, 0.34);
+    background: rgba(127, 29, 29, 0.08);
+}
+
+.storefront-topbar .btn-outline-danger.btn-sm:hover {
+    color: #ffffff;
+    background: rgba(127, 29, 29, 0.18);
+}
+
+.storefront-surface {
+    position: relative;
+    isolation: isolate;
+    background:
+        radial-gradient(circle at 8% 4%, rgba(59, 130, 246, 0.22), transparent 18rem),
+        radial-gradient(circle at 88% 10%, rgba(96, 165, 250, 0.14), transparent 22rem),
+        radial-gradient(circle at 50% 100%, rgba(14, 165, 233, 0.10), transparent 28rem),
+        linear-gradient(180deg, var(--asus-space-950) 0%, var(--asus-space-900) 40%, var(--asus-space-850) 100%);
+}
+
+.storefront-surface::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.04) 0%, rgba(255, 255, 255, 0) 100%),
+        repeating-linear-gradient(90deg, rgba(148, 163, 184, 0.10) 0 1px, transparent 1px 120px),
+        repeating-linear-gradient(180deg, rgba(148, 163, 184, 0.08) 0 1px, transparent 1px 120px);
+    opacity: 0.58;
+    pointer-events: none;
+    z-index: 0;
+}
+
+.storefront-surface::after {
+    content: "";
+    position: absolute;
+    inset: 0 0 auto;
+    height: 360px;
+    background:
+        radial-gradient(circle at top center, rgba(255, 255, 255, 0.07), transparent 60%),
+        linear-gradient(180deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0) 100%);
+    pointer-events: none;
+    z-index: 0;
+}
+
+.storefront-surface > * {
+    position: relative;
+    z-index: 1;
 }
 
 .asus-catalog-shell {
     display: flex;
     flex-direction: column;
     gap: 22px;
+    max-width: 1560px;
+    margin: 0 auto;
+    padding-bottom: 28px;
 }
 
 .asus-hero {
     background:
-        radial-gradient(circle at top right, rgba(255,255,255,0.80), transparent 28%),
-        linear-gradient(135deg, #dfe7f1 0%, #f4f7fb 55%, #ffffff 100%);
-    border: 1px solid var(--asus-border);
-    border-radius: 26px;
+        radial-gradient(circle at top right, rgba(91, 141, 255, 0.20), transparent 24%),
+        linear-gradient(135deg, rgba(18, 28, 42, 0.92) 0%, rgba(23, 36, 53, 0.88) 58%, rgba(31, 46, 66, 0.84) 100%);
+    border: 1px solid rgba(148, 163, 184, 0.18);
+    border-radius: 24px;
     padding: 30px;
     display: grid;
     grid-template-columns: 1.25fr 0.75fr;
     gap: 24px;
     align-items: center;
-    box-shadow: 0 14px 28px rgba(15, 23, 42, 0.05);
+    box-shadow: 0 22px 46px rgba(2, 8, 18, 0.32);
 }
 
 .asus-kicker {
@@ -35,7 +177,7 @@
     font-weight: 800;
     letter-spacing: 1.2px;
     text-transform: uppercase;
-    color: #475569;
+    color: #a7b8cc;
 }
 
 .asus-hero-title {
@@ -43,15 +185,14 @@
     font-size: 2.4rem;
     line-height: 1.05;
     font-weight: 900;
-    color: var(--asus-text);
-    letter-spacing: -0.8px;
+    color: #f8fbff;
     max-width: 720px;
 }
 
 .asus-hero-text {
     margin: 14px 0 0;
     max-width: 620px;
-    color: var(--asus-muted);
+    color: #c8d4e3;
     font-size: 1rem;
     line-height: 1.6;
 }
@@ -63,27 +204,52 @@
     margin-top: 24px;
 }
 
+.asus-hero-actions .btn-dark {
+    background: #f8fbff;
+    border-color: #f8fbff;
+    color: #0b1320;
+    box-shadow: 0 14px 24px rgba(15, 23, 42, 0.18);
+}
+
+.asus-hero-actions .btn-dark:hover {
+    background: #ffffff;
+    border-color: #ffffff;
+    color: #0b1320;
+}
+
+.asus-hero-actions .btn-outline-dark {
+    color: #edf3fb;
+    border-color: rgba(226, 232, 240, 0.40);
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.asus-hero-actions .btn-outline-dark:hover {
+    color: #ffffff;
+    border-color: rgba(226, 232, 240, 0.60);
+    background: rgba(255, 255, 255, 0.10);
+}
+
 .asus-hero-panel {
     display: grid;
     gap: 14px;
 }
 
 .asus-hero-card {
-    background: rgba(255,255,255,0.82);
-    border: 1px solid #dfe6ef;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(148, 163, 184, 0.18);
     border-radius: 18px;
-    padding: 18px 18px;
-    box-shadow: 0 10px 22px rgba(15, 23, 42, 0.04);
+    padding: 18px;
+    box-shadow: none;
 }
 
 .asus-mini-label {
-    color: var(--asus-muted);
+    color: #a7b8cc;
     font-size: 0.85rem;
     margin-bottom: 6px;
 }
 
 .asus-mini-value {
-    color: var(--asus-text);
+    color: #f8fbff;
     font-size: 1.15rem;
     font-weight: 800;
 }
@@ -99,14 +265,14 @@
 .asus-section-title {
     margin: 0;
     font-size: 2rem;
-    color: #2563eb;
+    color: #6f9cff;
     font-weight: 900;
-    letter-spacing: -0.5px;
+    text-shadow: 0 8px 24px rgba(47, 111, 237, 0.20);
 }
 
 .asus-section-subtitle {
     margin: 6px 0 0;
-    color: var(--asus-muted);
+    color: #a8b8cb;
     font-size: 1rem;
 }
 
@@ -130,12 +296,12 @@
     min-height: 52px;
     border-radius: 18px;
     border: 1px solid #cfd8e6;
-    background: #ffffff;
+    background: rgba(255, 255, 255, 0.96);
     padding: 0 18px 0 44px;
     color: var(--asus-text);
     outline: none;
     transition: 0.2s ease;
-    box-shadow: 0 8px 20px rgba(15, 23, 42, 0.04);
+    box-shadow: 0 16px 30px rgba(2, 8, 18, 0.18);
 }
 
 .asus-search-input:focus {
@@ -146,46 +312,172 @@
 .asus-product-card {
     background: var(--asus-surface);
     border: 1px solid var(--asus-border);
-    border-radius: 26px;
+    border-radius: 24px;
     overflow: hidden;
     height: 100%;
     display: flex;
     flex-direction: column;
-    box-shadow: 0 12px 26px rgba(15, 23, 42, 0.05);
+    box-shadow: 0 20px 36px rgba(2, 8, 18, 0.22);
     transition: transform 0.25s ease, box-shadow 0.25s ease;
+    perspective: 1600px;
 }
 
 .asus-product-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 18px 34px rgba(15, 23, 42, 0.08);
+    transform: translateY(-6px);
+    box-shadow: 0 28px 44px rgba(2, 8, 18, 0.28);
 }
 
 .asus-product-media {
-    height: 280px;
+    position: relative;
+    min-height: 300px;
     background:
-        linear-gradient(180deg, #f9fbfd 0%, #eef3f8 100%);
+        radial-gradient(circle at 50% 14%, rgba(255, 255, 255, 0.95), rgba(243, 247, 251, 0.96) 48%, #e8eef5 100%);
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 26px;
+    padding: 28px 24px 14px;
     overflow: hidden;
 }
 
+.asus-product-stage {
+    position: relative;
+    width: min(250px, 100%);
+    aspect-ratio: 0.78;
+    display: flex;
+    align-items: end;
+    justify-content: center;
+    transform-style: preserve-3d;
+}
+
+.asus-product-stage::after {
+    content: "";
+    position: absolute;
+    left: 18%;
+    right: 18%;
+    bottom: -2px;
+    height: 18px;
+    border-radius: 999px;
+    background: rgba(15, 23, 42, 0.12);
+    filter: blur(12px);
+    opacity: 0.7;
+    transition: transform 0.35s ease, opacity 0.35s ease;
+}
+
+.asus-product-aura {
+    position: absolute;
+    left: 12%;
+    right: 12%;
+    bottom: 10px;
+    height: 42px;
+    border-radius: 999px;
+    background: radial-gradient(circle, rgba(59, 130, 246, 0.22) 0%, rgba(59, 130, 246, 0.10) 48%, rgba(59, 130, 246, 0) 78%);
+    filter: blur(18px);
+    opacity: 0.55;
+    transition: transform 0.42s ease, opacity 0.42s ease;
+}
+
+.asus-product-poster {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    border-radius: 18px;
+    overflow: hidden;
+    background: linear-gradient(180deg, #ffffff 0%, #f5f8fb 100%);
+    box-shadow:
+        0 14px 28px rgba(15, 23, 42, 0.10),
+        0 2px 8px rgba(15, 23, 42, 0.06);
+    transform-origin: center bottom;
+    transition: transform 0.42s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.42s ease;
+}
+
+.asus-product-poster::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(120deg, transparent 0%, rgba(255, 255, 255, 0.55) 46%, transparent 68%);
+    transform: translateX(-130%);
+    transition: transform 0.65s ease;
+    pointer-events: none;
+}
+
 .asus-product-image {
-    max-width: 100%;
-    max-height: 100%;
+    width: 100%;
+    height: 100%;
     object-fit: contain;
     display: block;
-    transition: transform 0.25s ease;
+    padding: 18px;
+    transform-origin: center bottom;
+    transition: transform 0.42s cubic-bezier(0.22, 1, 0.36, 1), filter 0.42s ease;
+}
+
+.asus-product-float {
+    position: absolute;
+    left: 50%;
+    bottom: 18px;
+    width: 82%;
+    max-height: 94%;
+    object-fit: contain;
+    display: block;
+    opacity: 0;
+    pointer-events: none;
+    filter: drop-shadow(0 18px 26px rgba(15, 23, 42, 0.24));
+    transform: translate3d(-50%, 34px, 0) scale(0.90);
+    transform-origin: center bottom;
+    transition: transform 0.42s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.34s ease;
+}
+
+.asus-product-card:hover .asus-product-aura {
+    opacity: 0.88;
+    transform: scale(1.12);
+}
+
+.asus-product-card:hover .asus-product-stage::after {
+    opacity: 0.95;
+    transform: scaleX(1.08);
+}
+
+.asus-product-card:hover .asus-product-poster {
+    transform: translateY(-8px) rotateX(10deg) scale(1.01);
+    box-shadow:
+        0 26px 38px rgba(15, 23, 42, 0.18),
+        0 10px 24px rgba(15, 23, 42, 0.10);
+}
+
+.asus-product-card:hover .asus-product-poster::after {
+    transform: translateX(130%);
 }
 
 .asus-product-card:hover .asus-product-image {
-    transform: scale(1.04);
+    transform: translateY(-6px) scale(1.06);
+    filter: drop-shadow(0 18px 22px rgba(15, 23, 42, 0.16));
+}
+
+.asus-product-stage.has-float .asus-product-poster {
+    width: 92%;
+    height: 92%;
+}
+
+.asus-product-stage.has-float .asus-product-image {
+    padding: 14px 14px 20px;
+}
+
+.asus-product-card:hover .asus-product-stage.has-float .asus-product-poster {
+    transform: translateY(-2px) rotateX(13deg) scale(0.97);
+}
+
+.asus-product-card:hover .asus-product-stage.has-float .asus-product-image {
+    transform: none;
+    filter: none;
+}
+
+.asus-product-card:hover .asus-product-stage.has-float .asus-product-float {
+    opacity: 1;
+    transform: translate3d(-50%, -18px, 80px) scale(1.04);
 }
 
 .asus-product-placeholder {
     width: 100%;
-    height: 100%;
+    height: 240px;
     border-radius: 20px;
     background: linear-gradient(180deg, #f4f7fb 0%, #e8edf4 100%);
     display: flex;
@@ -240,7 +532,7 @@
     line-height: 1.05;
     font-weight: 900;
     color: var(--asus-text);
-    letter-spacing: -0.7px;
+    overflow-wrap: anywhere;
 }
 
 .asus-product-meta {
@@ -253,7 +545,6 @@
     font-size: 1.85rem;
     font-weight: 900;
     color: var(--asus-dark);
-    letter-spacing: -0.5px;
 }
 
 .asus-product-actions {
@@ -269,7 +560,7 @@
     padding: 40px 20px;
     text-align: center;
     color: var(--asus-muted);
-    box-shadow: 0 12px 24px rgba(15, 23, 42, 0.04);
+    box-shadow: 0 20px 34px rgba(2, 8, 18, 0.22);
 }
 
 .asus-empty i {
@@ -278,7 +569,6 @@
     color: #94a3b8;
 }
 
-/* DETALLE */
 .asus-detail-shell {
     display: flex;
     flex-direction: column;
@@ -385,7 +675,6 @@
     font-weight: 900;
     line-height: 1.04;
     color: var(--asus-text);
-    letter-spacing: -0.9px;
 }
 
 .asus-detail-submeta {
@@ -400,7 +689,6 @@
     font-size: 2.2rem;
     font-weight: 900;
     color: #111111;
-    letter-spacing: -0.6px;
 }
 
 .asus-detail-specs {
@@ -461,7 +749,52 @@
     }
 }
 
+@media (hover: none) {
+    .asus-product-card:hover {
+        transform: none;
+        box-shadow: 0 20px 36px rgba(2, 8, 18, 0.22);
+    }
+
+    .asus-product-card:hover .asus-product-poster {
+        transform: none;
+        box-shadow:
+            0 14px 28px rgba(15, 23, 42, 0.10),
+            0 2px 8px rgba(15, 23, 42, 0.06);
+    }
+
+    .asus-product-card:hover .asus-product-image {
+        transform: none;
+        filter: none;
+    }
+
+    .asus-product-card:hover .asus-product-float {
+        opacity: 0;
+        transform: translate3d(-50%, 34px, 0) scale(0.90);
+    }
+}
+
 @media (max-width: 768px) {
+    .storefront-topbar-row {
+        padding: 16px 18px 12px;
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .storefront-category-bar {
+        padding: 0 18px 14px;
+    }
+
+    .storefront-surface {
+        padding-inline: 16px;
+    }
+
+    .storefront-surface::before {
+        background:
+            linear-gradient(180deg, rgba(255, 255, 255, 0.04) 0%, rgba(255, 255, 255, 0) 100%),
+            repeating-linear-gradient(90deg, rgba(148, 163, 184, 0.08) 0 1px, transparent 1px 72px),
+            repeating-linear-gradient(180deg, rgba(148, 163, 184, 0.06) 0 1px, transparent 1px 72px);
+    }
+
     .asus-hero {
         padding: 22px;
     }
@@ -472,6 +805,15 @@
 
     .asus-section-title {
         font-size: 1.7rem;
+    }
+
+    .asus-search {
+        min-width: 100%;
+    }
+
+    .asus-product-media {
+        min-height: 270px;
+        padding: 22px 18px 12px;
     }
 
     .asus-product-title {
@@ -490,9 +832,5 @@
 
     .asus-detail-specs {
         grid-template-columns: 1fr;
-    }
-
-    .asus-search {
-        min-width: 100%;
     }
 }

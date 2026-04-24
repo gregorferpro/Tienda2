@@ -1,5 +1,6 @@
 from django.urls import path
 from . import views
+from . import proveedores_views
 
 urlpatterns = [
     path('catalogo/', views.catalogo_cliente, name='catalogo_cliente'),
@@ -33,4 +34,22 @@ urlpatterns = [
 
     path('notificaciones/pago/consultar/', views.consultar_notificacion_pago, name='consultar_notificacion_pago'),
     path('notificaciones/pago/<int:pk>/vista/', views.marcar_notificacion_pago_vista, name='marcar_notificacion_pago_vista'),
+
+    # PROVEEDORES
+    path('proveedores/', proveedores_views.proveedores_list, name='proveedores_list'),
+    path('proveedores/nuevo/', proveedores_views.proveedor_create, name='proveedor_create'),
+    path('proveedores/<int:pk>/editar/', proveedores_views.proveedor_update, name='proveedor_update'),
+    path('proveedores/<int:pk>/toggle-estado/', proveedores_views.proveedor_toggle_estado, name='proveedor_toggle_estado'),
+
+    # COMPRAS PROVEEDOR
+    path('compras-proveedor/', proveedores_views.compras_proveedor_list, name='compras_proveedor_list'),
+    path('compras-proveedor/nueva/', proveedores_views.compra_proveedor_create, name='compra_proveedor_create'),
+    path('compras-proveedor/<int:pk>/', proveedores_views.compra_proveedor_detail, name='compra_proveedor_detail'),
+    path('compras-proveedor/<int:pk>/confirmar/', proveedores_views.compra_proveedor_confirmar, name='compra_proveedor_confirmar'),
+
+    # RECLAMOS / DEVOLUCIONES
+    path('reclamos-proveedor/', proveedores_views.reclamos_proveedor_list, name='reclamos_proveedor_list'),
+    path('reclamos-proveedor/nuevo/', proveedores_views.reclamo_proveedor_create, name='reclamo_proveedor_create'),
+    path('reclamos-proveedor/<int:pk>/', proveedores_views.reclamo_proveedor_detail, name='reclamo_proveedor_detail'),
+    path('reclamos-proveedor/<int:reclamo_pk>/devolucion/', proveedores_views.devolucion_proveedor_create, name='devolucion_proveedor_create'),
 ]

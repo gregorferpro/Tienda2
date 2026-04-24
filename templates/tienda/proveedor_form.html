@@ -1,0 +1,82 @@
+{% extends 'base.html' %}
+{% block title %}{{ titulo }}{% endblock %}
+
+{% block content %}
+<div class="page-card">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="section-title mb-1">{{ titulo }}</h2>
+            <p class="section-subtitle mb-0">Completa los datos básicos del proveedor.</p>
+        </div>
+        <a href="{% url 'proveedores_list' %}" class="btn btn-outline-secondary">Volver</a>
+    </div>
+
+    <form method="post">
+        {% csrf_token %}
+        {% if form.non_field_errors %}
+        <div class="alert alert-danger">{{ form.non_field_errors }}</div>
+        {% endif %}
+
+        <div class="row g-3">
+            <div class="col-md-4">
+                <label class="form-label">Tipo proveedor</label>
+                {{ form.tipo_proveedor }}
+            </div>
+            <div class="col-md-8">
+                <label class="form-label">Nombre</label>
+                {{ form.nombre }}
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label">Razón social</label>
+                {{ form.razon_social }}
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">Nombre comercial</label>
+                {{ form.nombre_comercial }}
+            </div>
+
+            <div class="col-md-4">
+                <label class="form-label">Documento referencia</label>
+                {{ form.documento_ref }}
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">NIT</label>
+                {{ form.nit }}
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">Contacto</label>
+                {{ form.contacto }}
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label">Teléfono</label>
+                {{ form.telefono }}
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">Correo</label>
+                {{ form.email }}
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label">Estado</label>
+                {{ form.estado }}
+            </div>
+
+            <div class="col-12">
+                <label class="form-label">Dirección</label>
+                {{ form.direccion }}
+            </div>
+
+            <div class="col-12">
+                <label class="form-label">Observaciones</label>
+                {{ form.observaciones }}
+            </div>
+        </div>
+
+        <div class="mt-4">
+            <button type="submit" class="btn btn-primary">Guardar proveedor</button>
+        </div>
+    </form>
+</div>
+{% endblock %}

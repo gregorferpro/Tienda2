@@ -9,30 +9,285 @@
         <div class="form-header">
             <div>
                 <h2 class="section-title mb-1">{{ titulo }}</h2>
-                <p class="section-subtitle mb-0">Completa la información del producto.</p>
+                {% if modo == 'compra' %}
+                <p class="section-subtitle mb-0">Completa el producto usando las caracteristicas esenciales que ya guardaste en compras proveedor.</p>
+                {% else %}
+                <p class="section-subtitle mb-0">Completa la informacion del producto.</p>
+                {% endif %}
             </div>
             <a href="{% url 'productos_list' %}" class="btn btn-outline-secondary">
                 <i class="fa-solid fa-arrow-left"></i> Volver
             </a>
         </div>
 
+        {% if titulo == 'Nuevo producto' %}
+        <div class="catalog-mode-switch">
+            <a href="{% url 'producto_create' %}" class="catalog-mode-link {% if modo == 'compra' %}is-active{% endif %}">
+                <i class="fa-solid fa-truck-ramp-box"></i> Desde compras proveedor
+            </a>
+            <a href="{% url 'producto_create' %}?modo=manual" class="catalog-mode-link {% if modo == 'manual' %}is-active{% endif %}">
+                <i class="fa-solid fa-keyboard"></i> Manual
+            </a>
+        </div>
+        {% endif %}
+
         <div class="form-layout">
             <div class="page-card">
                 <form method="post" enctype="multipart/form-data" novalidate>
                     {% csrf_token %}
-                    <div class="form-grid">
-                        <div class="field-group"><label class="field-label" for="{{ form.codigo.id_for_label }}">Código</label>{{ form.codigo }}</div>
-                        <div class="field-group"><label class="field-label" for="{{ form.nombre.id_for_label }}">Nombre</label>{{ form.nombre }}</div>
-                        <div class="field-group"><label class="field-label" for="{{ form.marca.id_for_label }}">Marca</label>{{ form.marca }}</div>
-                        <div class="field-group"><label class="field-label" for="{{ form.modelo.id_for_label }}">Modelo</label>{{ form.modelo }}</div>
-                        <div class="field-group full"><label class="field-label" for="{{ form.descripcion.id_for_label }}">Descripción</label>{{ form.descripcion }}</div>
-                        <div class="field-group"><label class="field-label" for="{{ form.precio.id_for_label }}">Precio</label>{{ form.precio }}</div>
-                        <div class="field-group"><label class="field-label" for="{{ form.stock.id_for_label }}">Stock</label>{{ form.stock }}</div>
-                        <div class="field-group full"><label class="field-label" for="id_imagenes_extra">Imágenes del producto</label><input type="file" name="imagenes_extra" id="id_imagenes_extra" multiple><div class="field-help">La primera imagen será la portada.</div></div>
-                        <div class="field-group full"><label class="field-label">Estado</label><div class="checkbox-wrap">{{ form.activo }}<span>Producto activo en catálogo</span></div></div>
+                    <input type="hidden" name="modo" value="{{ modo|default:'manual' }}">
+
+                    {% if form.non_field_errors %}
+                    <div class="alert alert-danger">
+                        {{ form.non_field_errors }}
                     </div>
+                    {% endif %}
+
+                    {% if modo == 'compra' %}
+                    <div class="catalog-source-block">
+                        <div class="catalog-source-header">
+                            <div>
+                                <h5 class="mb-1">Base desde compras proveedor</h5>
+                                <p class="mb-0">Selecciona un item guardado y el sistema tomara codigo, nombre, marca, modelo, tipo y categoria.</p>
+                            </div>
+                            <span class="catalog-source-badge">{{ detalles_compra|length }} registros</span>
+                        </div>
+
+                        {% if detalles_compra %}
+                        <div class="field-group full mb-0">
+                            <label class="field-label" for="id_detalle_compra_id">Producto base</label>
+                            <select name="detalle_compra_id" id="id_detalle_compra_id" class="form-control catalog-source-select">
+                                <option value="">Selecciona un registro de compra</option>
+                                {% for detalle in detalles_compra %}
+                                <option
+                                    value="{{ detalle.id }}"
+                                    {% if detalle_actual and detalle_actual.id == detalle.id %}selected{% endif %}
+                                    data-compra="{{ detalle.compra.id }}"
+                                    data-estado="{{ detalle.compra.estado }}"
+                                    data-codigo="{% if detalle.producto %}{{ detalle.producto.codigo }}{% else %}{{ detalle.producto_codigo }}{% endif %}"
+                                    data-nombre="{% if detalle.producto %}{{ detalle.producto.nombre }}{% else %}{{ detalle.producto_nombre }}{% endif %}"
+                                    data-marca="{% if detalle.producto %}{{ detalle.producto.marca }}{% else %}{{ detalle.producto_marca }}{% endif %}"
+                                    data-modelo="{% if detalle.producto %}{{ detalle.producto.modelo }}{% else %}{{ detalle.producto_modelo }}{% endif %}"
+                                    data-tipo="{% if detalle.producto %}{{ detalle.producto.tipo_producto }}{% else %}{{ detalle.tipo_producto }}{% endif %}"
+                                    data-categoria="{% if detalle.producto %}{{ detalle.producto.categoria }}{% else %}{{ detalle.categoria }}{% endif %}"
+                                    data-cantidad="{{ detalle.cantidad }}"
+                                    data-costo="{{ detalle.costo_unitario }}"
+                                    data-precio="{% if detalle.producto %}{{ detalle.producto.precio }}{% elif detalle.precio_venta_sugerido %}{{ detalle.precio_venta_sugerido }}{% else %}{{ detalle.costo_unitario }}{% endif %}"
+                                    data-descripcion="{% if detalle.producto and detalle.producto.descripcion %}{{ detalle.producto.descripcion }}{% else %}{{ detalle.descripcion_base }}{% endif %}"
+                                    data-vinculado="{% if detalle.producto %}si{% else %}no{% endif %}"
+                                >
+                                    Compra #{{ detalle.compra.id }} - {% if detalle.producto %}{{ detalle.producto.codigo }}{% else %}{{ detalle.producto_codigo|default:'Sin codigo' }}{% endif %} - {% if detalle.producto %}{{ detalle.producto.nombre }}{% else %}{{ detalle.producto_nombre|default:'Producto sin nombre' }}{% endif %}
+                                </option>
+                                {% endfor %}
+                            </select>
+                            <div class="field-help">Si el producto ya fue vinculado antes, aqui lo completaras sin duplicarlo.</div>
+                        </div>
+
+                        <div class="catalog-source-summary" id="catalog-source-summary">
+                            <div class="catalog-source-card">
+                                <span class="catalog-source-label">Compra</span>
+                                <strong id="catalog-compra">{% if detalle_actual %}#{{ detalle_actual.compra.id }}{% else %}-{% endif %}</strong>
+                            </div>
+                            <div class="catalog-source-card">
+                                <span class="catalog-source-label">Estado compra</span>
+                                <strong id="catalog-estado">{% if detalle_actual %}{{ detalle_actual.compra.estado }}{% else %}-{% endif %}</strong>
+                            </div>
+                            <div class="catalog-source-card">
+                                <span class="catalog-source-label">Codigo</span>
+                                <strong id="catalog-codigo">{% if detalle_actual and detalle_actual.producto %}{{ detalle_actual.producto.codigo }}{% elif detalle_actual %}{{ detalle_actual.producto_codigo|default:'-' }}{% else %}-{% endif %}</strong>
+                            </div>
+                            <div class="catalog-source-card">
+                                <span class="catalog-source-label">Nombre</span>
+                                <strong id="catalog-nombre">{% if detalle_actual and detalle_actual.producto %}{{ detalle_actual.producto.nombre }}{% elif detalle_actual %}{{ detalle_actual.producto_nombre|default:'-' }}{% else %}-{% endif %}</strong>
+                            </div>
+                            <div class="catalog-source-card">
+                                <span class="catalog-source-label">Marca</span>
+                                <strong id="catalog-marca">{% if detalle_actual and detalle_actual.producto %}{{ detalle_actual.producto.marca|default:'-' }}{% elif detalle_actual %}{{ detalle_actual.producto_marca|default:'-' }}{% else %}-{% endif %}</strong>
+                            </div>
+                            <div class="catalog-source-card">
+                                <span class="catalog-source-label">Modelo</span>
+                                <strong id="catalog-modelo">{% if detalle_actual and detalle_actual.producto %}{{ detalle_actual.producto.modelo|default:'-' }}{% elif detalle_actual %}{{ detalle_actual.producto_modelo|default:'-' }}{% else %}-{% endif %}</strong>
+                            </div>
+                            <div class="catalog-source-card">
+                                <span class="catalog-source-label">Tipo</span>
+                                <strong id="catalog-tipo">{% if detalle_actual and detalle_actual.producto %}{{ detalle_actual.producto.get_tipo_producto_display }}{% elif detalle_actual %}{{ detalle_actual.get_tipo_producto_display }}{% else %}-{% endif %}</strong>
+                            </div>
+                            <div class="catalog-source-card">
+                                <span class="catalog-source-label">Categoria</span>
+                                <strong id="catalog-categoria">{% if detalle_actual and detalle_actual.producto %}{{ detalle_actual.producto.categoria|default:'-' }}{% elif detalle_actual %}{{ detalle_actual.categoria|default:'-' }}{% else %}-{% endif %}</strong>
+                            </div>
+                            <div class="catalog-source-card">
+                                <span class="catalog-source-label">Cantidad comprada</span>
+                                <strong id="catalog-cantidad">{% if detalle_actual %}{{ detalle_actual.cantidad }}{% else %}-{% endif %}</strong>
+                            </div>
+                            <div class="catalog-source-card">
+                                <span class="catalog-source-label">Precio sugerido</span>
+                                <strong id="catalog-precio">{% if detalle_actual and detalle_actual.producto %}Bs {{ detalle_actual.producto.precio }}{% elif detalle_actual and detalle_actual.precio_venta_sugerido %}Bs {{ detalle_actual.precio_venta_sugerido }}{% elif detalle_actual %}Bs {{ detalle_actual.costo_unitario }}{% else %}-{% endif %}</strong>
+                            </div>
+                            <div class="catalog-source-card">
+                                <span class="catalog-source-label">Costo referencia</span>
+                                <strong id="catalog-costo">{% if detalle_actual %}Bs {{ detalle_actual.costo_unitario }}{% else %}-{% endif %}</strong>
+                            </div>
+                            <div class="catalog-source-card">
+                                <span class="catalog-source-label">Vinculado</span>
+                                <strong id="catalog-vinculado">{% if detalle_actual and detalle_actual.producto %}Si{% elif detalle_actual %}No{% else %}-{% endif %}</strong>
+                            </div>
+                        </div>
+                        {% else %}
+                        <div class="catalog-empty-state">
+                            <i class="fa-solid fa-box-open"></i>
+                            <div>
+                                <strong>No hay registros de compras proveedor todavia.</strong>
+                                <p class="mb-0">Primero registra una compra proveedor o usa el modo manual para crear un producto desde cero.</p>
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="form-grid">
+                        <div class="field-group full">
+                            <label class="field-label" for="{{ form.descripcion.id_for_label }}">Descripcion</label>
+                            {{ form.descripcion }}
+                            {% if form.descripcion.errors %}
+                            <div class="field-error">{{ form.descripcion.errors|join:", " }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="field-group">
+                            <label class="field-label" for="{{ form.precio.id_for_label }}">Precio</label>
+                            {{ form.precio }}
+                            {% if form.precio.errors %}
+                            <div class="field-error">{{ form.precio.errors|join:", " }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="field-group full">
+                            <label class="field-label" for="id_imagenes_extra">Imagenes del producto</label>
+                            <input type="file" name="imagenes_extra" id="id_imagenes_extra" multiple>
+                            <div class="field-help">La primera imagen sera la portada.</div>
+                        </div>
+                        <div class="field-group full">
+                            <label class="field-label">Estado</label>
+                            <div class="checkbox-wrap">{{ form.activo }}<span>Producto activo en catalogo</span></div>
+                            {% if form.activo.errors %}
+                            <div class="field-error">{{ form.activo.errors|join:", " }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% else %}
+                    <div class="form-grid">
+                        <div class="field-group">
+                            <label class="field-label" for="{{ form.codigo.id_for_label }}">Codigo</label>
+                            {{ form.codigo }}
+                            {% if form.codigo.errors %}
+                            <div class="field-error">{{ form.codigo.errors|join:", " }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="field-group">
+                            <label class="field-label" for="{{ form.nombre.id_for_label }}">Nombre</label>
+                            {{ form.nombre }}
+                            {% if form.nombre.errors %}
+                            <div class="field-error">{{ form.nombre.errors|join:", " }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="field-group">
+                            <label class="field-label" for="{{ form.marca.id_for_label }}">Marca</label>
+                            {{ form.marca }}
+                            {% if form.marca.errors %}
+                            <div class="field-error">{{ form.marca.errors|join:", " }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="field-group">
+                            <label class="field-label" for="{{ form.modelo.id_for_label }}">Modelo</label>
+                            {{ form.modelo }}
+                            {% if form.modelo.errors %}
+                            <div class="field-error">{{ form.modelo.errors|join:", " }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="field-group">
+                            <label class="field-label" for="{{ form.tipo_producto.id_for_label }}">Tipo</label>
+                            {{ form.tipo_producto }}
+                            {% if form.tipo_producto.errors %}
+                            <div class="field-error">{{ form.tipo_producto.errors|join:", " }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="field-group">
+                            <label class="field-label" for="{{ form.categoria.id_for_label }}">Categoria</label>
+                            {{ form.categoria }}
+                            {% if form.categoria.errors %}
+                            <div class="field-error">{{ form.categoria.errors|join:", " }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="field-group full">
+                            <label class="field-label" for="{{ form.descripcion.id_for_label }}">Descripcion</label>
+                            {{ form.descripcion }}
+                            {% if form.descripcion.errors %}
+                            <div class="field-error">{{ form.descripcion.errors|join:", " }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="field-group">
+                            <label class="field-label" for="{{ form.precio.id_for_label }}">Precio</label>
+                            {{ form.precio }}
+                            {% if form.precio.errors %}
+                            <div class="field-error">{{ form.precio.errors|join:", " }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="field-group">
+                            <label class="field-label" for="{{ form.costo_referencia.id_for_label }}">Costo referencia</label>
+                            {{ form.costo_referencia }}
+                            {% if form.costo_referencia.errors %}
+                            <div class="field-error">{{ form.costo_referencia.errors|join:", " }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="field-group">
+                            <label class="field-label" for="{{ form.stock.id_for_label }}">Stock</label>
+                            {{ form.stock }}
+                            {% if form.stock.errors %}
+                            <div class="field-error">{{ form.stock.errors|join:", " }}</div>
+                            {% endif %}
+                        </div>
+                        {% if producto and producto.imagenes_extra.all %}
+                        <div class="field-group full">
+                            <label class="field-label">Imagenes actuales</label>
+                            <div class="existing-image-grid">
+                                {% for img in producto.imagenes_extra.all %}
+                                <label class="existing-image-card">
+                                    <div class="existing-image-preview">
+                                        <img src="{{ img.imagen.url }}" alt="Imagen {{ forloop.counter }} de {{ producto.nombre }}">
+                                    </div>
+                                    <div class="existing-image-meta">
+                                        <span class="existing-image-name">Imagen {{ forloop.counter }}</span>
+                                        <span class="existing-image-toggle">
+                                            <input
+                                                type="checkbox"
+                                                name="imagenes_eliminar"
+                                                value="{{ img.id }}"
+                                                {% if img.id|stringformat:"s" in imagenes_eliminar_ids %}checked{% endif %}
+                                            >
+                                            <span>Quitar esta imagen</span>
+                                        </span>
+                                    </div>
+                                </label>
+                                {% endfor %}
+                            </div>
+                            <div class="field-help">Marca las imagenes que quieras quitar. Puedes agregar nuevas debajo.</div>
+                        </div>
+                        {% endif %}
+                        <div class="field-group full">
+                            <label class="field-label" for="id_imagenes_extra">Imagenes del producto</label>
+                            <input type="file" name="imagenes_extra" id="id_imagenes_extra" multiple>
+                            <div class="field-help">La primera imagen sera la portada.</div>
+                        </div>
+                        <div class="field-group full">
+                            <label class="field-label">Estado</label>
+                            <div class="checkbox-wrap">{{ form.activo }}<span>Producto activo en catalogo</span></div>
+                            {% if form.activo.errors %}
+                            <div class="field-error">{{ form.activo.errors|join:", " }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endif %}
+
                     <div class="actions">
-                        <button type="submit" class="btn-main btn-save"><i class="fa-solid fa-floppy-disk"></i> Guardar</button>
+                        <button type="submit" class="btn-main btn-save" {% if modo == 'compra' and not detalles_compra %}disabled{% endif %}><i class="fa-solid fa-floppy-disk"></i> Guardar</button>
                         <a href="{% url 'productos_list' %}" class="btn-main btn-cancel"><i class="fa-solid fa-arrow-left"></i> Cancelar</a>
                     </div>
                 </form>
@@ -52,19 +307,110 @@
                             <i class="fa-solid fa-box preview-icon"></i>
                         {% endif %}
                     </div>
+                    {% if producto and producto.imagenes_extra.all %}
+                    <div class="thumb-grid">
+                        {% for img in producto.imagenes_extra.all %}
+                        <div class="thumb">
+                            <img src="{{ img.imagen.url }}" alt="Miniatura {{ forloop.counter }}">
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
                 </div>
                 <div class="side-box">
                     <div class="side-title">Recomendaciones</div>
                     <ul class="muted-list">
-                        <li>Usa códigos únicos y fáciles de buscar.</li>
+                        {% if modo == 'compra' %}
+                        <li>El codigo, nombre, marca y modelo se tomarán desde compras proveedor.</li>
+                        <li>Usa el precio final de venta para el catalogo.</li>
+                        <li>La primera imagen sera la portada.</li>
+                        <li>Si ya vinculaste el item antes, aqui solo lo completas.</li>
+                        <li>Confirma la compra despues si todavia esta en borrador.</li>
+                        {% else %}
+                        <li>Usa codigos unicos y faciles de buscar.</li>
                         <li>Coloca nombres claros.</li>
-                        <li>La primera imagen será la portada.</li>
-                        <li>Sube imágenes nítidas.</li>
+                        <li>La primera imagen sera la portada.</li>
+                        <li>Sube imagenes nitidas.</li>
                         <li>Revisa siempre el stock antes de guardar.</li>
+                        {% endif %}
                     </ul>
                 </div>
             </div>
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+(function () {
+    const sourceSelect = document.getElementById('id_detalle_compra_id');
+    if (!sourceSelect) return;
+
+    const precioInput = document.getElementById('{{ form.precio.id_for_label }}');
+    const descripcionInput = document.getElementById('{{ form.descripcion.id_for_label }}');
+
+    const refs = {
+        compra: document.getElementById('catalog-compra'),
+        estado: document.getElementById('catalog-estado'),
+        codigo: document.getElementById('catalog-codigo'),
+        nombre: document.getElementById('catalog-nombre'),
+        marca: document.getElementById('catalog-marca'),
+        modelo: document.getElementById('catalog-modelo'),
+        tipo: document.getElementById('catalog-tipo'),
+        categoria: document.getElementById('catalog-categoria'),
+        cantidad: document.getElementById('catalog-cantidad'),
+        precio: document.getElementById('catalog-precio'),
+        costo: document.getElementById('catalog-costo'),
+        vinculado: document.getElementById('catalog-vinculado')
+    };
+
+    function toLabel(value) {
+        if (!value) return '-';
+        const labels = {
+            celular: 'Celular',
+            accesorio: 'Accesorio',
+            otro: 'Otro'
+        };
+        return labels[value] || value;
+    }
+
+    function syncSummary(option) {
+        if (!option || !option.value) {
+            Object.values(refs).forEach(function (node) {
+                if (node) node.textContent = '-';
+            });
+            return;
+        }
+
+        if (refs.compra) refs.compra.textContent = '#' + (option.dataset.compra || '-');
+        if (refs.estado) refs.estado.textContent = option.dataset.estado || '-';
+        if (refs.codigo) refs.codigo.textContent = option.dataset.codigo || '-';
+        if (refs.nombre) refs.nombre.textContent = option.dataset.nombre || '-';
+        if (refs.marca) refs.marca.textContent = option.dataset.marca || '-';
+        if (refs.modelo) refs.modelo.textContent = option.dataset.modelo || '-';
+        if (refs.tipo) refs.tipo.textContent = toLabel(option.dataset.tipo);
+        if (refs.categoria) refs.categoria.textContent = option.dataset.categoria || '-';
+        if (refs.cantidad) refs.cantidad.textContent = option.dataset.cantidad || '-';
+        if (refs.precio) refs.precio.textContent = option.dataset.precio ? ('Bs ' + option.dataset.precio) : '-';
+        if (refs.costo) refs.costo.textContent = option.dataset.costo ? ('Bs ' + option.dataset.costo) : '-';
+        if (refs.vinculado) refs.vinculado.textContent = option.dataset.vinculado === 'si' ? 'Si' : 'No';
+    }
+
+    sourceSelect.addEventListener('change', function () {
+        const option = this.options[this.selectedIndex];
+        syncSummary(option);
+
+        if (precioInput && option && option.dataset.precio) {
+            precioInput.value = option.dataset.precio;
+        }
+
+        if (descripcionInput && option && option.dataset.descripcion) {
+            descripcionInput.value = option.dataset.descripcion;
+        }
+    });
+
+    syncSummary(sourceSelect.options[sourceSelect.selectedIndex]);
+})();
+</script>
 {% endblock %}

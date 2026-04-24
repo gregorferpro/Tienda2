@@ -38,6 +38,28 @@
         <div class="col-md-6 col-xl-4">
             <div class="scd-card h-100">
                 <div class="scd-card-icon scd-card-icon-gray">
+                    <i class="fa-solid fa-truck-field"></i>
+                </div>
+                <h4 class="scd-card-title">Proveedores</h4>
+                <p class="scd-card-text">Administra proveedores y sus datos de contacto.</p>
+                <a href="{% url 'proveedores_list' %}" class="scd-card-btn">Entrar</a>
+            </div>
+        </div>
+
+        <div class="col-md-6 col-xl-4">
+            <div class="scd-card h-100">
+                <div class="scd-card-icon scd-card-icon-light">
+                    <i class="fa-solid fa-file-invoice-dollar"></i>
+                </div>
+                <h4 class="scd-card-title">Compras</h4>
+                <p class="scd-card-text">Registra compras al proveedor y actualiza stock.</p>
+                <a href="{% url 'compras_proveedor_list' %}" class="scd-card-btn">Entrar</a>
+            </div>
+        </div>
+
+        <div class="col-md-6 col-xl-4">
+            <div class="scd-card h-100">
+                <div class="scd-card-icon scd-card-icon-gray">
                     <i class="fa-solid fa-users"></i>
                 </div>
                 <h4 class="scd-card-title">Clientes</h4>
@@ -80,6 +102,38 @@
                 <a href="{% url 'catalogo_cliente' %}" class="scd-card-btn">Abrir</a>
             </div>
         </div>
+        <div class="col-md-6 col-xl-4">
+    <div class="scd-card h-100">
+        <div class="scd-card-icon scd-card-icon-gray">
+            <i class="fa-solid fa-truck-field"></i>
+        </div>
+        <h4 class="scd-card-title">Proveedores</h4>
+        <p class="scd-card-text">Gestiona proveedores activos e inactivos.</p>
+        <a href="{% url 'proveedores_list' %}" class="scd-card-btn">Entrar</a>
+    </div>
+</div>
+
+<div class="col-md-6 col-xl-4">
+    <div class="scd-card h-100">
+        <div class="scd-card-icon scd-card-icon-light">
+            <i class="fa-solid fa-file-invoice-dollar"></i>
+        </div>
+        <h4 class="scd-card-title">Compras proveedor</h4>
+        <p class="scd-card-text">Registra compras y actualiza el stock con trazabilidad.</p>
+        <a href="{% url 'compras_proveedor_list' %}" class="scd-card-btn">Entrar</a>
+    </div>
+</div>
+
+<div class="col-md-6 col-xl-4">
+    <div class="scd-card h-100">
+        <div class="scd-card-icon scd-card-icon-dark">
+            <i class="fa-solid fa-rotate-left"></i>
+        </div>
+        <h4 class="scd-card-title">Reclamos proveedor</h4>
+        <p class="scd-card-text">Controla garantías, reclamos y devoluciones.</p>
+        <a href="{% url 'reclamos_proveedor_list' %}" class="scd-card-btn">Entrar</a>
+    </div>
+</div>
     </div>
 </div>
 {% endblock %}

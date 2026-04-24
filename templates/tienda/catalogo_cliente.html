@@ -1,15 +1,15 @@
 {% extends 'base.html' %}
 
-{% block title %}Catálogo público{% endblock %}
+{% block title %}Cat&aacute;logo p&uacute;blico{% endblock %}
 
 {% block page_content %}
 <section class="asus-catalog-shell">
     <section class="asus-hero">
         <div class="asus-hero-copy">
             <span class="asus-kicker">ScourgeTech Store</span>
-            <h2 class="asus-hero-title">Tecnología premium para tu próxima compra</h2>
+            <h2 class="asus-hero-title">Tecnolog&iacute;a premium para tu pr&oacute;xima compra</h2>
             <p class="asus-hero-text">
-                Explora celulares destacados, compara modelos y compra de forma rápida con una experiencia más moderna.
+                Explora celulares destacados, compara modelos y compra r&aacute;pido con una experiencia m&aacute;s moderna.
             </p>
 
             <div class="asus-hero-actions">
@@ -28,7 +28,7 @@
                 <div class="asus-mini-value">QR / Efectivo</div>
             </div>
             <div class="asus-hero-card">
-                <div class="asus-mini-label">Catálogo activo</div>
+                <div class="asus-mini-label">Cat&aacute;logo activo</div>
                 <div class="asus-mini-value">{{ productos|length }} productos</div>
             </div>
             <div class="asus-hero-card">
@@ -49,75 +49,66 @@
             <input
                 type="text"
                 name="q"
+                id="catalogo-search"
                 class="asus-search-input"
-                placeholder="Buscar por código, nombre, marca o modelo"
+                placeholder="Buscar por c&oacute;digo, nombre, marca o modelo"
                 value="{{ q }}"
+                autocomplete="off"
             >
         </form>
     </section>
 
-    {% if productos %}
-    <section id="grid-productos" class="row g-4 align-items-stretch">
-        {% for producto in productos %}
-        <div class="col-md-6 col-xl-4">
-            <article class="asus-product-card">
-                <div class="asus-product-media">
-                    {% with imagenes=producto.imagenes_extra.all %}
-                        {% if imagenes %}
-                            {% for img in imagenes %}
-                                {% if forloop.first %}
-                                    <img src="{{ img.imagen.url }}" alt="{{ producto.nombre }}" class="asus-product-image">
-                                {% endif %}
-                            {% endfor %}
-                        {% else %}
-                            <div class="asus-product-placeholder">
-                                <i class="fa-solid fa-mobile-screen-button"></i>
-                            </div>
-                        {% endif %}
-                    {% endwith %}
-                </div>
-
-                <div class="asus-product-body">
-                    <div class="asus-product-topline">
-                        <span class="asus-chip">{{ producto.marca }}</span>
-                        <span class="asus-stock">Stock: {{ producto.stock }}</span>
-                    </div>
-
-                    <h4 class="asus-product-title">{{ producto.nombre }}</h4>
-
-                    <div class="asus-product-meta">
-                        <div><strong>Código:</strong> {{ producto.codigo }}</div>
-                        <div><strong>Modelo:</strong> {{ producto.modelo }}</div>
-                    </div>
-
-                    <div class="asus-product-price">Bs {{ producto.precio }}</div>
-
-                    <div class="asus-product-actions">
-                        <a href="{% url 'detalle_producto_cliente' producto.pk %}" class="btn btn-outline-dark">
-                            Ver detalle
-                        </a>
-
-                        {% if user.is_authenticated %}
-                            <a href="{% url 'agregar_carrito' producto.pk %}" class="btn btn-dark">
-                                Agregar al carrito
-                            </a>
-                        {% else %}
-                            <a href="{% url 'login' %}?next={% url 'agregar_carrito' producto.pk %}" class="btn btn-dark">
-                                Comprar
-                            </a>
-                        {% endif %}
-                    </div>
-                </div>
-            </article>
-        </div>
-        {% endfor %}
-    </section>
-    {% else %}
-    <div class="asus-empty">
-        <i class="fa-solid fa-store-slash"></i>
-        <h4>No hay productos disponibles</h4>
-        <p>Prueba con otra búsqueda o vuelve más tarde.</p>
+    <div id="catalogo-grid-wrapper">
+        {% include 'tienda/partials/catalogo_grid.html' %}
     </div>
-    {% endif %}
 </section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+(function () {
+    const input = document.getElementById('catalogo-search');
+    const wrapper = document.getElementById('catalogo-grid-wrapper');
+    let timer = null;
+
+    if (!input || !wrapper) return;
+
+    input.addEventListener('input', function () {
+        clearTimeout(timer);
+        timer = setTimeout(function () {
+            const params = new URLSearchParams(window.location.search);
+            const q = input.value.trim();
+
+            if (q) {
+                params.set('q', q);
+            } else {
+                params.delete('q');
+            }
+
+            const query = params.toString();
+            const url = query ? `?${query}` : window.location.pathname;
+
+            fetch(url, {
+                headers: { 'x-requested-with': 'XMLHttpRequest' }
+            })
+            .then(response => response.text())
+            .then(html => {
+                wrapper.innerHTML = html;
+                const nextUrl = query ? `${window.location.pathname}?${query}` : window.location.pathname;
+                window.history.replaceState({}, '', nextUrl);
+
+                document.querySelectorAll('.storefront-category-link').forEach(function (link) {
+                    const nextLink = new URL(link.href, window.location.origin);
+                    if (q) {
+                        nextLink.searchParams.set('q', q);
+                    } else {
+                        nextLink.searchParams.delete('q');
+                    }
+                    link.href = `${nextLink.pathname}${nextLink.search}`;
+                });
+            });
+        }, 250);
+    });
+})();
+</script>
 {% endblock %}

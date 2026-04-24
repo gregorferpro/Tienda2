@@ -33,8 +33,8 @@
         </div>
 
         <div class="info-card">
-            <div class="badge-state">
-                <i class="fa-solid fa-circle-check"></i>
+            <div class="badge-state {% if not producto.activo %}is-inactive{% endif %}">
+                <i class="fa-solid {% if producto.activo %}fa-circle-check{% else %}fa-circle-xmark{% endif %}"></i>
                 {% if producto.activo %}Activo{% else %}Inactivo{% endif %}
             </div>
             <div class="product-name">{{ producto.nombre }}</div>

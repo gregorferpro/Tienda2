@@ -1,34 +1,72 @@
-<div class="products-grid">
-    {% for p in productos %}
-    <div class="product-card">
-        <div class="product-image-wrap">
-            {% if p.imagenes_extra.all %}
-                {% for img in p.imagenes_extra.all %}
-                    {% if forloop.first %}
-                        <img src="{{ img.imagen.url }}" alt="{{ p.nombre }}" class="product-image">
+{% if productos %}
+<section id="grid-productos" class="row g-4 align-items-stretch">
+    {% for producto in productos %}
+    <div class="col-md-6 col-xl-4">
+        <article class="asus-product-card">
+            <div class="asus-product-media">
+                {% with imagen=producto.catalog_base_image imagen_flotante=producto.catalog_float_image %}
+                    {% if imagen and imagen.imagen %}
+                    <div class="asus-product-stage {% if imagen_flotante and imagen_flotante.imagen and imagen_flotante.pk != imagen.pk %}has-float{% endif %}">
+                        <div class="asus-product-aura"></div>
+                        <div class="asus-product-poster">
+                            <img src="{{ imagen.imagen.url }}" alt="{{ producto.nombre }}" class="asus-product-image">
+                        </div>
+                        {% if imagen_flotante and imagen_flotante.imagen and imagen_flotante.pk != imagen.pk %}
+                        <img
+                            src="{{ imagen_flotante.imagen.url }}"
+                            alt=""
+                            class="asus-product-float"
+                            aria-hidden="true"
+                        >
+                        {% endif %}
+                    </div>
+                    {% else %}
+                    <div class="asus-product-placeholder">
+                        <i class="fa-solid fa-mobile-screen-button"></i>
+                    </div>
                     {% endif %}
-                {% endfor %}
-            {% else %}
-                <div class="product-image no-image">Sin imagen</div>
-            {% endif %}
-        </div>
+                {% endwith %}
+            </div>
 
-        <h5 class="product-code">{{ p.codigo }}</h5>
-        <p class="product-line">{{ p.nombre }}</p>
-        <p class="product-line">{{ p.marca }} {{ p.modelo }}</p>
-        <p class="product-price">Bs {{ p.precio }}</p>
+            <div class="asus-product-body">
+                <div class="asus-product-topline">
+                    <span class="asus-chip">{{ producto.marca }}</span>
+                    <span class="asus-stock">Stock: {{ producto.stock }}</span>
+                </div>
 
-        <div class="product-actions">
-            <a href="{% url 'agregar_carrito' p.id %}" class="btn btn-success w-100">
-                <i class="fa-solid fa-cart-plus"></i> Agregar al carrito
-            </a>
+                <h4 class="asus-product-title">{{ producto.nombre }}</h4>
 
-            <a href="{% url 'detalle_producto_cliente' p.id %}" class="btn btn-info text-white w-100">
-                Ver
-            </a>
-        </div>
+                <div class="asus-product-meta">
+                    <div><strong>C&oacute;digo:</strong> {{ producto.codigo }}</div>
+                    <div><strong>Modelo:</strong> {{ producto.modelo }}</div>
+                </div>
+
+                <div class="asus-product-price">Bs {{ producto.precio }}</div>
+
+                <div class="asus-product-actions">
+                    <a href="{% url 'detalle_producto_cliente' producto.pk %}" class="btn btn-outline-dark">
+                        Ver detalle
+                    </a>
+
+                    {% if user.is_authenticated %}
+                    <a href="{% url 'agregar_carrito' producto.pk %}" class="btn btn-dark">
+                        Agregar al carrito
+                    </a>
+                    {% else %}
+                    <a href="{% url 'login' %}?next={% url 'agregar_carrito' producto.pk %}" class="btn btn-dark">
+                        Comprar
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+        </article>
     </div>
-    {% empty %}
-    <p>No hay productos disponibles.</p>
     {% endfor %}
+</section>
+{% else %}
+<div class="asus-empty">
+    <i class="fa-solid fa-store-slash"></i>
+    <h4>No hay productos disponibles</h4>
+    <p>Prueba con otra b&uacute;squeda o vuelve m&aacute;s tarde.</p>
 </div>
+{% endif %}

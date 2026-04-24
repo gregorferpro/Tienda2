@@ -1,0 +1,77 @@
+{% extends 'base.html' %}
+{% block title %}Detalle compra proveedor{% endblock %}
+
+{% block content %}
+<div class="page-card">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
+        <div>
+            <h2 class="section-title mb-1">Compra #{{ compra.id }}</h2>
+            <p class="section-subtitle mb-0">{{ compra.proveedor.nombre }}</p>
+        </div>
+        <div class="d-flex gap-2">
+            {% if puede_aplicar_stock %}
+            <form method="post" action="{% url 'compra_proveedor_confirmar' compra.pk %}">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-success">
+                    {% if compra.estado == 'borrador' %}Confirmar compra{% else %}Sincronizar stock{% endif %}
+                </button>
+            </form>
+            {% endif %}
+            <a href="{% url 'compras_proveedor_list' %}" class="btn btn-outline-secondary">Volver</a>
+        </div>
+    </div>
+
+    <div class="row g-4 mb-4">
+        <div class="col-md-6">
+            <div class="page-card">
+                <h5>Cabecera</h5>
+                <p><strong>Fecha:</strong> {{ compra.fecha_compra|date:"d/m/Y" }}</p>
+                <p><strong>Tipo documento:</strong> {{ compra.tipo_documento }}</p>
+                <p><strong>Número documento:</strong> {{ compra.numero_documento|default:"-" }}</p>
+                <p><strong>Referencia:</strong> {{ compra.referencia_libre|default:"-" }}</p>
+                <p class="mb-0"><strong>Estado:</strong> {{ compra.estado }}</p>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="page-card">
+                <h5>Proveedor / usuario</h5>
+                <p><strong>Proveedor:</strong> {{ compra.proveedor.nombre }}</p>
+                <p><strong>Usuario:</strong> {{ compra.usuario.username }}</p>
+                <p><strong>Subtotal:</strong> Bs {{ compra.subtotal }}</p>
+                <p><strong>Descuento:</strong> Bs {{ compra.descuento }}</p>
+                <p><strong>Total:</strong> Bs {{ compra.total }}</p>
+                <p class="mb-0"><strong>Stock aplicado:</strong> {% if puede_aplicar_stock %}No{% else %}Si{% endif %}</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table table-bordered table-hover bg-white">
+            <thead class="table-light">
+                <tr>
+                    <th>Producto</th>
+                    <th>Marca</th>
+                    <th>Modelo</th>
+                    <th>Cantidad</th>
+                    <th>Costo unitario</th>
+                    <th>Subtotal</th>
+                    <th>En catálogo</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for d in compra.detalles.all %}
+                <tr>
+                    <td>{{ d.nombre_mostrado }}</td>
+                    <td>{{ d.producto_marca|default:"-" }}</td>
+                    <td>{{ d.producto_modelo|default:"-" }}</td>
+                    <td>{{ d.cantidad }}</td>
+                    <td>Bs {{ d.costo_unitario }}</td>
+                    <td>Bs {{ d.subtotal }}</td>
+                    <td>{% if d.producto %}Sí{% else %}No{% endif %}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

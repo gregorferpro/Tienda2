@@ -1,0 +1,41 @@
+<div class="table-responsive">
+    <table class="table table-bordered table-hover align-middle bg-white">
+        <thead class="table-light">
+            <tr>
+                <th>#</th>
+                <th>Nombre</th>
+                <th>Razón social</th>
+                <th>NIT</th>
+                <th>Contacto</th>
+                <th>Teléfono</th>
+                <th>Email</th>
+                <th>Estado</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for proveedor in proveedores %}
+            <tr>
+                <td>{{ proveedor.id }}</td>
+                <td>{{ proveedor.nombre }}</td>
+                <td>{{ proveedor.razon_social|default:"-" }}</td>
+                <td>{{ proveedor.nit|default:"-" }}</td>
+                <td>{{ proveedor.contacto|default:"-" }}</td>
+                <td>{{ proveedor.telefono|default:"-" }}</td>
+                <td>{{ proveedor.email|default:"-" }}</td>
+                <td>{{ proveedor.estado }}</td>
+                <td class="d-flex gap-2 flex-wrap">
+                    <a href="{% url 'proveedor_update' proveedor.pk %}" class="btn btn-sm btn-outline-primary">Editar</a>
+                    {% if user.is_superuser %}
+                    <a href="{% url 'proveedor_delete' proveedor.pk %}" class="btn btn-sm btn-outline-danger">Eliminar</a>
+                    {% endif %}
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="9" class="text-center">No hay proveedores registrados.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>

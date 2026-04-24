@@ -1,0 +1,46 @@
+<div class="table-responsive">
+    <table class="table table-bordered table-hover align-middle bg-white">
+        <thead class="table-light">
+            <tr>
+                <th>#</th>
+                <th>Número</th>
+                <th>Proveedor</th>
+                <th>Usuario</th>
+                <th>Método</th>
+                <th>Estado</th>
+                <th>Total</th>
+                <th>Fecha</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for compra in compras %}
+            <tr>
+                <td>{{ compra.id }}</td>
+                <td>{{ compra.numero_compra }}</td>
+                <td>{{ compra.proveedor.nombre }}</td>
+                <td>{{ compra.usuario.username }}</td>
+                <td>{{ compra.metodo_pago }}</td>
+                <td>
+                    {% if compra.estado == 'recibida' %}
+                        <span class="badge bg-success">Recibida</span>
+                    {% elif compra.estado == 'pendiente' %}
+                        <span class="badge bg-warning text-dark">Pendiente</span>
+                    {% else %}
+                        <span class="badge bg-danger">Anulada</span>
+                    {% endif %}
+                </td>
+                <td>Bs {{ compra.total }}</td>
+                <td>{{ compra.fecha|date:"d/m/Y H:i" }}</td>
+                <td class="d-flex gap-2 flex-wrap">
+                    <a href="{% url 'compra_proveedor_detail' compra.pk %}" class="btn btn-sm btn-outline-primary">Ver</a>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="9" class="text-center">No hay compras registradas.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
