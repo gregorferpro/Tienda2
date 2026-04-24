@@ -1,11 +1,13 @@
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.auth.models import User
+from django.contrib.auth.views import LoginView
 from django.contrib.sites.models import Site
 from django.db.models import Q
 from django.db.models.deletion import ProtectedError
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse
 
 from allauth.socialaccount.models import SocialApp
 
@@ -21,12 +23,31 @@ def solo_superuser(user):
     )
 
 
+def destino_inicio_usuario(user):
+    if hasattr(user, 'perfil') and user.perfil.rol == 'cliente':
+        return 'catalogo_cliente'
+    return 'dashboard'
+
+
 def home_redirect(request):
     if request.user.is_authenticated:
-        if hasattr(request.user, 'perfil') and request.user.perfil.rol == 'cliente':
-            return redirect('catalogo_cliente')
-        return redirect('dashboard')
+        return redirect(destino_inicio_usuario(request.user))
     return redirect('catalogo_cliente')
+
+
+class CustomLoginView(LoginView):
+    template_name = 'registration/login.html'
+
+    def dispatch(self, request, *args, **kwargs):
+        if request.user.is_authenticated:
+            return redirect(destino_inicio_usuario(request.user))
+        return super().dispatch(request, *args, **kwargs)
+
+    def get_success_url(self):
+        redirect_url = self.get_redirect_url()
+        if redirect_url:
+            return redirect_url
+        return reverse(destino_inicio_usuario(self.request.user))
 
 
 @login_required

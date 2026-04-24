@@ -302,7 +302,7 @@
 
         <div class="no-print">
             <button onclick="window.print()" class="btn btn-primary">Imprimir factura</button>
-            <a href="{% url 'productos_list' %}" class="btn btn-secondary">Volver</a>
+            <a href="{{ volver_url }}" class="btn btn-secondary">{{ volver_texto }}</a>
         </div>
     </div>
 </body>

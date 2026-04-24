@@ -7,6 +7,7 @@ from django.db.models import Q
 from django.db.models.deletion import ProtectedError
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse
 from django.utils import timezone
 
 from .forms import (
@@ -459,9 +460,14 @@ def factura_view(request, pk):
         )
         return redirect('catalogo_cliente')
 
+    perfil = getattr(request.user, 'perfil', None)
+    es_equipo_interno = request.user.is_staff and getattr(perfil, 'rol', '') != 'cliente'
+
     return render(request, 'tienda/factura.html', {
         'venta': venta,
         'numero_literal': numero_a_texto_basico(venta.total),
+        'volver_url': reverse('ventas_list') if es_equipo_interno else reverse('catalogo_cliente'),
+        'volver_texto': 'Volver a ventas' if es_equipo_interno else 'Volver al catalogo',
     })
 
 

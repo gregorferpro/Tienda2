@@ -17,7 +17,7 @@ urlpatterns = [
 
     path(
         'login/',
-        auth_views.LoginView.as_view(template_name='registration/login.html'),
+        cuentas_views.CustomLoginView.as_view(),
         name='login'
     ),
     path(
