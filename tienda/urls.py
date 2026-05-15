@@ -13,6 +13,9 @@ urlpatterns = [
 
     path('checkout/', views.checkout, name='checkout'),
     path('factura/<int:pk>/', views.factura_view, name='factura_view'),
+    path('devoluciones/', views.mis_devoluciones, name='mis_devoluciones'),
+    path('devoluciones/gestion/', views.devoluciones_clientes_list, name='devoluciones_clientes_list'),
+    path('devoluciones/gestion/<int:pk>/', views.devolucion_cliente_detail, name='devolucion_cliente_detail'),
 
     path('productos/', views.productos_list, name='productos_list'),
     path('productos/nuevo/', views.producto_create, name='producto_create'),

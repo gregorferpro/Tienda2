@@ -60,5 +60,55 @@
     <div class="text-end mt-4">
         <h4>Total: Bs {{ venta.total }}</h4>
     </div>
+
+    {% if devoluciones_cliente %}
+    <div class="mt-4">
+        <h4 class="mb-3">Devoluciones vinculadas</h4>
+        <div class="table-responsive">
+            <table class="table table-bordered table-hover bg-white">
+                <thead class="table-light">
+                    <tr>
+                        <th>Ticket</th>
+                        <th>Producto</th>
+                        <th>Fecha de cita</th>
+                        <th>Estado</th>
+                        <th>Revision</th>
+                        <th>Accion</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for devolucion in devoluciones_cliente %}
+                    <tr>
+                        <td>{{ devolucion.codigo_ticket }}</td>
+                        <td>{{ devolucion.detalle_venta.producto.nombre }}</td>
+                        <td>{{ devolucion.fecha_cita|date:"d/m/Y" }}</td>
+                        <td>
+                            {% if devolucion.estado == 'aprobada' %}
+                            <span class="badge bg-success">Aprobada</span>
+                            {% elif devolucion.estado == 'rechazada' %}
+                            <span class="badge bg-danger">Rechazada</span>
+                            {% else %}
+                            <span class="badge bg-warning text-dark">Solicitada</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if devolucion.fecha_revision %}
+                            {{ devolucion.fecha_revision|date:"d/m/Y H:i" }}
+                            {% else %}
+                            Pendiente
+                            {% endif %}
+                        </td>
+                        <td>
+                            <a href="{% url 'devolucion_cliente_detail' devolucion.pk %}" class="btn btn-outline-primary btn-sm">
+                                Revisar
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% endif %}
 </div>
 {% endblock %}

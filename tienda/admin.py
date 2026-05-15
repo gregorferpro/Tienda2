@@ -1,6 +1,6 @@
 from django.contrib import admin
 from .models import (
-    Producto, ProductoImagen, Cliente, Venta, DetalleVenta,
+    Producto, ProductoImagen, Cliente, Venta, DetalleVenta, DevolucionCliente,
     Proveedor, CompraProveedor, DetalleCompraProveedor,
     ReclamoProveedor, DevolucionProveedor, MovimientoInventario
 )
@@ -10,6 +10,7 @@ admin.site.register(ProductoImagen)
 admin.site.register(Cliente)
 admin.site.register(Venta)
 admin.site.register(DetalleVenta)
+admin.site.register(DevolucionCliente)
 
 admin.site.register(Proveedor)
 admin.site.register(CompraProveedor)

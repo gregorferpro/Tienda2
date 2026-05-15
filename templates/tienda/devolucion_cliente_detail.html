@@ -1,0 +1,110 @@
+{% extends 'base.html' %}
+
+{% block title %}Revision de devolucion{% endblock %}
+
+{% block content %}
+<div class="page-card">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
+        <div>
+            <h2 class="section-title mb-1">Ticket {{ devolucion.codigo_ticket }}</h2>
+            <p class="section-subtitle mb-0">Factura {{ devolucion.venta.numero_factura }} | cita {{ devolucion.fecha_cita|date:"d/m/Y" }}</p>
+        </div>
+        <a href="{% url 'devoluciones_clientes_list' %}" class="btn btn-outline-secondary">
+            <i class="fa-solid fa-arrow-left"></i> Volver
+        </a>
+    </div>
+
+    <div class="row g-4 mb-4">
+        <div class="col-md-6">
+            <div class="return-admin-card h-100">
+                <h4>Cliente</h4>
+                <p><strong>Nombre:</strong> {{ devolucion.cliente.nombre_completo }}</p>
+                <p><strong>CI/NIT:</strong> {{ devolucion.cliente.ci_nit }}</p>
+                <p><strong>Telefono:</strong> {{ devolucion.cliente.telefono }}</p>
+                <p class="mb-0"><strong>Fecha de reporte:</strong> {{ devolucion.fecha_reporte|date:"d/m/Y H:i" }}</p>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="return-admin-card h-100">
+                <h4>Producto</h4>
+                <p><strong>Nombre:</strong> {{ devolucion.detalle_venta.producto.nombre }}</p>
+                <p><strong>Codigo:</strong> {{ devolucion.detalle_venta.producto.codigo }}</p>
+                <p><strong>Cantidad:</strong> {{ devolucion.detalle_venta.cantidad }}</p>
+                <p class="mb-0"><strong>Stock actual:</strong> {{ devolucion.detalle_venta.producto.stock }}</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4 mb-4">
+        <div class="col-md-4">
+            <div class="return-admin-stat">
+                <span>Estado</span>
+                <strong>{{ devolucion.get_estado_display }}</strong>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="return-admin-stat">
+                <span>Limite de reporte</span>
+                <strong>{{ plazo_limite|date:"d/m/Y H:i" }}</strong>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="return-admin-stat">
+                <span>Stock restablecido</span>
+                <strong>{% if devolucion.stock_restaurado %}Si{% else %}No{% endif %}</strong>
+            </div>
+        </div>
+    </div>
+
+    <div class="return-admin-card mb-4">
+        <h4>Motivo y notas del cliente</h4>
+        <p><strong>Motivo:</strong> {{ devolucion.motivo }}</p>
+        <p class="mb-0"><strong>Observaciones:</strong> {{ devolucion.observaciones_cliente|default:'Sin observaciones del cliente.' }}</p>
+    </div>
+
+    <div class="return-admin-card">
+        <h4>Revision interna</h4>
+
+        {% if devolucion.estado == 'aprobada' %}
+        <div class="alert alert-success">
+            La devolucion ya fue aprobada y el stock se restablecio correctamente.
+        </div>
+        {% elif devolucion.estado == 'rechazada' %}
+        <div class="alert alert-danger">
+            Esta solicitud fue rechazada. Puedes revisar las observaciones registradas abajo.
+        </div>
+        {% endif %}
+
+        <form method="post">
+            {% csrf_token %}
+
+            <div class="form-check mb-3">
+                {{ form.confirmar_revision }}
+                <label class="form-check-label" for="{{ form.confirmar_revision.id_for_label }}">
+                    {{ form.confirmar_revision.label }}
+                </label>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label" for="{{ form.observaciones_revision.id_for_label }}">Observaciones de revision</label>
+                {{ form.observaciones_revision }}
+            </div>
+
+            {% if devolucion.revisado_por %}
+            <p class="text-muted small">
+                Ultima revision: {{ devolucion.fecha_revision|date:"d/m/Y H:i" }} por {{ devolucion.revisado_por.username }}.
+            </p>
+            {% endif %}
+
+            <div class="d-flex gap-2 flex-wrap">
+                <button type="submit" name="accion" value="aprobar" class="btn btn-success" {% if devolucion.estado == 'aprobada' %}disabled{% endif %}>
+                    <i class="fa-solid fa-circle-check"></i> Confirmar devolucion y reponer stock
+                </button>
+                <button type="submit" name="accion" value="rechazar" class="btn btn-outline-danger" {% if devolucion.estado == 'aprobada' %}disabled{% endif %}>
+                    <i class="fa-solid fa-circle-xmark"></i> Rechazar solicitud
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

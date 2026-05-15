@@ -16,11 +16,12 @@
     <link rel="stylesheet" href="{% static 'css/forms.css' %}">
     <link rel="stylesheet" href="{% static 'css/catalogo.css' %}">
     <link rel="stylesheet" href="{% static 'css/factura.css' %}">
+    <link rel="stylesheet" href="{% static 'css/devoluciones.css' %}">
     {% block extra_css %}{% endblock %}
 </head>
 <body>
 {% with current_name=request.resolver_match.url_name %}
-{% if user.is_authenticated and user.is_staff and current_name != 'catalogo_cliente' and current_name != 'detalle_producto_cliente' and current_name != 'carrito' and current_name != 'checkout' and current_name != 'factura_view' and current_name != 'login' and current_name != 'password_reset' and current_name != 'account_signup' %}
+{% if user.is_authenticated and user.is_staff and current_name != 'catalogo_cliente' and current_name != 'detalle_producto_cliente' and current_name != 'carrito' and current_name != 'checkout' and current_name != 'factura_view' and current_name != 'mis_devoluciones' and current_name != 'login' and current_name != 'password_reset' and current_name != 'account_signup' %}
 
 <div class="sc-admin-shell">
     <aside class="sc-sidebar">
@@ -35,47 +36,52 @@
 
         <nav class="sc-sidebar-nav">
     <a href="{% url 'dashboard' %}" class="sc-nav-link {% if current_name == 'dashboard' %}active{% endif %}">
-        <span class="sc-nav-dot"></span>
+        <span class="sc-nav-icon"><i class="fa-solid fa-grid-2"></i></span>
         <span>Dashboard</span>
     </a>
 
     <a href="{% url 'pagos_pendientes' %}" class="sc-nav-link {% if current_name == 'pagos_pendientes' %}active{% endif %}">
-        <span class="sc-nav-dot"></span>
+        <span class="sc-nav-icon"><i class="fa-solid fa-clock"></i></span>
         <span>Pagos pendientes</span>
     </a>
 
     <a href="{% url 'productos_list' %}" class="sc-nav-link {% if current_name == 'productos_list' or current_name == 'producto_create' or current_name == 'producto_update' or current_name == 'producto_detail' or current_name == 'producto_delete' %}active{% endif %}">
-        <span class="sc-nav-dot"></span>
+        <span class="sc-nav-icon"><i class="fa-solid fa-box-open"></i></span>
         <span>Productos</span>
     </a>
 
    <a href="{% url 'proveedores_list' %}" class="sc-nav-link {% if current_name == 'proveedores_list' or current_name == 'proveedor_create' or current_name == 'proveedor_update' %}active{% endif %}">
-    <span class="sc-nav-dot"></span>
+    <span class="sc-nav-icon"><i class="fa-solid fa-truck-field"></i></span>
     <span>Proveedores</span>
 </a>
 
 <a href="{% url 'compras_proveedor_list' %}" class="sc-nav-link {% if current_name == 'compras_proveedor_list' or current_name == 'compra_proveedor_create' or current_name == 'compra_proveedor_detail' %}active{% endif %}">
-    <span class="sc-nav-dot"></span>
+    <span class="sc-nav-icon"><i class="fa-solid fa-file-invoice-dollar"></i></span>
     <span>Compras proveedor</span>
 </a>
 
 <a href="{% url 'reclamos_proveedor_list' %}" class="sc-nav-link {% if current_name == 'reclamos_proveedor_list' or current_name == 'reclamo_proveedor_create' or current_name == 'reclamo_proveedor_detail' or current_name == 'devolucion_proveedor_create' %}active{% endif %}">
-    <span class="sc-nav-dot"></span>
+    <span class="sc-nav-icon"><i class="fa-solid fa-rotate-left"></i></span>
     <span>Reclamos proveedor</span>
 </a>
     <a href="{% url 'clientes_list' %}" class="sc-nav-link {% if current_name == 'clientes_list' or current_name == 'cliente_create' or current_name == 'cliente_update' or current_name == 'cliente_delete' %}active{% endif %}">
-        <span class="sc-nav-dot"></span>
+        <span class="sc-nav-icon"><i class="fa-solid fa-users"></i></span>
         <span>Clientes</span>
     </a>
 
     <a href="{% url 'ventas_list' %}" class="sc-nav-link {% if current_name == 'ventas_list' or current_name == 'venta_detail' %}active{% endif %}">
-        <span class="sc-nav-dot"></span>
+        <span class="sc-nav-icon"><i class="fa-solid fa-cart-shopping"></i></span>
         <span>Ventas</span>
+    </a>
+
+    <a href="{% url 'devoluciones_clientes_list' %}" class="sc-nav-link {% if current_name == 'devoluciones_clientes_list' or current_name == 'devolucion_cliente_detail' %}active{% endif %}">
+        <span class="sc-nav-icon"><i class="fa-solid fa-ticket"></i></span>
+        <span>Devoluciones cliente</span>
     </a>
 
     {% if user.is_superuser %}
     <a href="{% url 'usuarios_list' %}" class="sc-nav-link {% if current_name == 'usuarios_list' or current_name == 'usuario_create' or current_name == 'usuario_update' or current_name == 'usuario_delete' %}active{% endif %}">
-        <span class="sc-nav-dot"></span>
+        <span class="sc-nav-icon"><i class="fa-solid fa-user-gear"></i></span>
         <span>Usuarios</span>
     </a>
     {% endif %}
@@ -140,14 +146,16 @@
 <div class="app-shell">
     <div class="app-main">
         {% if current_name != 'login' and current_name != 'password_reset' and current_name != 'account_signup' %}
-        <header class="topbar {% if current_name == 'catalogo_cliente' or current_name == 'detalle_producto_cliente' or current_name == 'carrito' or current_name == 'checkout' or current_name == 'factura_view' %}storefront-topbar{% endif %}">
+        <header class="topbar {% if current_name == 'catalogo_cliente' or current_name == 'detalle_producto_cliente' or current_name == 'carrito' or current_name == 'checkout' or current_name == 'factura_view' or current_name == 'mis_devoluciones' %}storefront-topbar{% endif %}">
             <div class="storefront-topbar-row">
                 <div class="topbar-left topbar-left-with-logo">
                     <img src="{% static 'img/logo-Scourge.png' %}" alt="Logo ScourgeTech" class="public-topbar-logo">
                     <div class="topbar-copy">
                         <h1 class="topbar-title">Sistema de Tienda</h1>
                         <div class="topbar-subtitle">
-                            {% if current_name == 'catalogo_cliente' or current_name == 'detalle_producto_cliente' or current_name == 'carrito' or current_name == 'checkout' or current_name == 'factura_view' %}
+                            {% if current_name == 'mis_devoluciones' %}
+                                Soporte y devoluciones
+                            {% elif current_name == 'catalogo_cliente' or current_name == 'detalle_producto_cliente' or current_name == 'carrito' or current_name == 'checkout' or current_name == 'factura_view' %}
                                 Catalogo publico
                             {% elif user.is_authenticated and user.is_staff %}
                                 Panel de gestion
@@ -160,6 +168,12 @@
 
                 <div class="topbar-right">
                     {% if user.is_authenticated %}
+                        {% if not user.is_staff %}
+                        <a href="{% url 'mis_devoluciones' %}" class="btn btn-outline-light btn-sm">
+                            <i class="fa-solid fa-rotate-left"></i> Devoluciones
+                        </a>
+                        {% endif %}
+
                         <a href="{% url 'carrito' %}" class="btn btn-warning btn-sm me-3">
                             <i class="fa-solid fa-cart-shopping"></i> Carrito
                         </a>
@@ -195,7 +209,7 @@
         </header>
         {% endif %}
 
-        <main class="content-area {% if current_name == 'catalogo_cliente' or current_name == 'detalle_producto_cliente' or current_name == 'carrito' or current_name == 'checkout' or current_name == 'factura_view' %}storefront-surface{% endif %} {% if current_name == 'login' or current_name == 'password_reset' or current_name == 'account_signup' %}auth-page-content{% endif %}">
+        <main class="content-area {% if current_name == 'catalogo_cliente' or current_name == 'detalle_producto_cliente' or current_name == 'carrito' or current_name == 'checkout' or current_name == 'factura_view' or current_name == 'mis_devoluciones' %}storefront-surface{% endif %} {% if current_name == 'login' or current_name == 'password_reset' or current_name == 'account_signup' %}auth-page-content{% endif %}">
             {% if messages %}
                 {% for message in messages %}
                     <div class="alert alert-{{ message.tags|default:'info' }} mb-4" role="alert">

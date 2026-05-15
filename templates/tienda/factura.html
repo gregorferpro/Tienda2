@@ -237,7 +237,7 @@
 
         <div class="cliente">
             <div class="izq">
-                <p><strong>Fecha:</strong> {{ venta.creado|date:'d/m/Y h:i A' }}</p>
+                <p><strong>Fecha:</strong> {{ venta.fecha|date:'d/m/Y h:i A' }}</p>
                 <p><strong>Nombre/Razón Social:</strong> {{ venta.cliente.nombre_completo }}</p>
             </div>
             <div class="der">
@@ -302,6 +302,9 @@
 
         <div class="no-print">
             <button onclick="window.print()" class="btn btn-primary">Imprimir factura</button>
+            {% if not user.is_staff %}
+            <a href="{% url 'mis_devoluciones' %}?numero_factura={{ venta.numero_factura }}" class="btn btn-primary">Solicitar devolucion</a>
+            {% endif %}
             <a href="{{ volver_url }}" class="btn btn-secondary">{{ volver_texto }}</a>
         </div>
     </div>

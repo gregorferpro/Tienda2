@@ -1,0 +1,209 @@
+{% extends 'base.html' %}
+
+{% block title %}Mis devoluciones{% endblock %}
+
+{% block page_content %}
+<section class="return-shell">
+    <section class="return-hero">
+        <div>
+            <span class="return-kicker">Soporte ScourgeTech</span>
+            <h2 class="return-title">Agenda tu devolucion con cita y ticket</h2>
+            <p class="return-text">
+                Ingresa el codigo de tu factura, verifica si aun estas dentro del plazo de {{ plazo_reporte_dias }} dias
+                y elige el dia que prefieres para acercarte a tienda.
+            </p>
+        </div>
+
+        <div class="return-hero-card">
+            <div class="return-hero-label">Regla activa</div>
+            <div class="return-hero-value">Reporte maximo en {{ plazo_reporte_dias }} dias</div>
+            <small>La cita puede ser cualquier dia disponible dentro del calendario mostrado.</small>
+        </div>
+    </section>
+
+    <section class="return-panel">
+        <div class="return-panel-head">
+            <div>
+                <h3>Buscar factura</h3>
+                <p>Solo podras solicitar devoluciones sobre facturas pagadas vinculadas a tu cuenta.</p>
+            </div>
+        </div>
+
+        <form method="get" class="return-lookup-form">
+            <div class="return-field">
+                <label for="{{ lookup_form.numero_factura.id_for_label }}">Codigo de factura</label>
+                {{ lookup_form.numero_factura }}
+            </div>
+            <button type="submit" class="btn btn-dark">Consultar factura</button>
+        </form>
+
+        {% if busqueda_error %}
+        <div class="alert alert-warning mt-4 mb-0">{{ busqueda_error }}</div>
+        {% endif %}
+    </section>
+
+    {% if venta %}
+    <section class="return-panel">
+        <div class="return-panel-head">
+            <div>
+                <h3>Factura {{ venta.numero_factura }}</h3>
+                <p>Compra realizada el {{ venta.fecha|date:"d/m/Y H:i" }} por {{ venta.cliente.nombre_completo }}.</p>
+            </div>
+            <div class="return-status {% if venta_en_plazo %}is-open{% else %}is-closed{% endif %}">
+                {% if venta_en_plazo %}
+                En plazo de reporte
+                {% else %}
+                Fuera del plazo de reporte
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="return-summary-grid">
+            <article class="return-summary-card">
+                <span>Fecha de compra</span>
+                <strong>{{ venta.fecha|date:"d/m/Y H:i" }}</strong>
+            </article>
+            <article class="return-summary-card">
+                <span>Limite de reporte</span>
+                <strong>{{ plazo_limite|date:"d/m/Y H:i" }}</strong>
+            </article>
+            <article class="return-summary-card">
+                <span>Total factura</span>
+                <strong>Bs {{ venta.total }}</strong>
+            </article>
+        </div>
+
+        <div class="table-responsive mt-4">
+            <table class="table table-bordered table-hover bg-white">
+                <thead class="table-light">
+                    <tr>
+                        <th>Producto</th>
+                        <th>Codigo</th>
+                        <th>Cantidad</th>
+                        <th>Subtotal</th>
+                        <th>Estado de devolucion</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in detalles_venta %}
+                    <tr>
+                        <td>{{ item.detalle.producto.nombre }}</td>
+                        <td>{{ item.detalle.producto.codigo }}</td>
+                        <td>{{ item.detalle.cantidad }}</td>
+                        <td>Bs {{ item.detalle.subtotal }}</td>
+                        <td>
+                            {% if item.devolucion %}
+                            <span class="badge bg-info text-dark">Ticket {{ item.devolucion.codigo_ticket }}</span>
+                            {% else %}
+                            <span class="badge bg-success">Disponible</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        {% if not venta_en_plazo %}
+        <div class="alert alert-danger mt-4 mb-0">
+            Esta factura ya supero el plazo permitido. El reporte debe registrarse dentro de los primeros {{ plazo_reporte_dias }} dias posteriores a la compra.
+        </div>
+        {% elif not hay_detalles_disponibles %}
+        <div class="alert alert-info mt-4 mb-0">
+            Todos los productos de esta factura ya tienen una solicitud de devolucion registrada.
+        </div>
+        {% elif solicitud_form %}
+        <form method="post" class="return-request-form">
+            {% csrf_token %}
+            <input type="hidden" name="numero_factura" value="{{ numero_factura_actual }}">
+
+            <div class="return-form-block">
+                <h4>1. Selecciona el producto a devolver</h4>
+                <div class="return-choice-grid">
+                    {% for radio in solicitud_form.detalle_venta %}
+                    <label class="return-choice-card" for="{{ radio.id_for_label }}">
+                        {{ radio.tag }}
+                        <span class="return-choice-label">{{ radio.choice_label }}</span>
+                    </label>
+                    {% endfor %}
+                </div>
+                {% if solicitud_form.detalle_venta.errors %}
+                <div class="text-danger small mt-2">{{ solicitud_form.detalle_venta.errors|join:', ' }}</div>
+                {% endif %}
+            </div>
+
+            <div class="return-form-block">
+                <h4>2. Elige un dia disponible para tu cita</h4>
+                <div class="return-date-grid">
+                    {% for radio in solicitud_form.fecha_cita %}
+                    <label class="return-date-card" for="{{ radio.id_for_label }}">
+                        {{ radio.tag }}
+                        <span>{{ radio.choice_label }}</span>
+                    </label>
+                    {% endfor %}
+                </div>
+                {% if solicitud_form.fecha_cita.errors %}
+                <div class="text-danger small mt-2">{{ solicitud_form.fecha_cita.errors|join:', ' }}</div>
+                {% endif %}
+            </div>
+
+            <div class="row g-4">
+                <div class="col-md-6">
+                    <label class="form-label" for="{{ solicitud_form.motivo.id_for_label }}">Motivo</label>
+                    {{ solicitud_form.motivo }}
+                    {% if solicitud_form.motivo.errors %}
+                    <div class="text-danger small mt-2">{{ solicitud_form.motivo.errors|join:', ' }}</div>
+                    {% endif %}
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label" for="{{ solicitud_form.observaciones_cliente.id_for_label }}">Observaciones</label>
+                    {{ solicitud_form.observaciones_cliente }}
+                </div>
+            </div>
+
+            <div class="return-form-actions">
+                <button type="submit" class="btn btn-dark">
+                    <i class="fa-solid fa-ticket"></i> Generar ticket de devolucion
+                </button>
+            </div>
+        </form>
+        {% endif %}
+    </section>
+    {% endif %}
+
+    <section class="return-panel">
+        <div class="return-panel-head">
+            <div>
+                <h3>Mis tickets</h3>
+                <p>Consulta el estado de tus solicitudes y el dia en que debes presentarte en tienda.</p>
+            </div>
+        </div>
+
+        <div class="return-history-grid">
+            {% for devolucion in devoluciones %}
+            <article class="return-history-card">
+                <div class="return-history-top">
+                    <div>
+                        <span class="return-history-label">Ticket</span>
+                        <h4>{{ devolucion.codigo_ticket }}</h4>
+                    </div>
+                    <span class="return-history-badge {% if devolucion.estado == 'aprobada' %}is-approved{% elif devolucion.estado == 'rechazada' %}is-rejected{% else %}is-pending{% endif %}">
+                        {{ devolucion.get_estado_display }}
+                    </span>
+                </div>
+                <p class="mb-2"><strong>Factura:</strong> {{ devolucion.venta.numero_factura }}</p>
+                <p class="mb-2"><strong>Producto:</strong> {{ devolucion.detalle_venta.producto.nombre }}</p>
+                <p class="mb-2"><strong>Cita:</strong> {{ devolucion.fecha_cita|date:"d/m/Y" }}</p>
+                <p class="mb-2"><strong>Reporte:</strong> {{ devolucion.fecha_reporte|date:"d/m/Y H:i" }}</p>
+                <p class="mb-0"><strong>Motivo:</strong> {{ devolucion.motivo }}</p>
+            </article>
+            {% empty %}
+            <div class="return-empty">
+                <i class="fa-solid fa-ticket"></i>
+                <p class="mb-0">Todavia no tienes tickets de devolucion registrados.</p>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+</section>
+{% endblock %}

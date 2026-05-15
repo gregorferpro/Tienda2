@@ -79,6 +79,17 @@
             </div>
         </div>
 
+        <div class="col-md-6 col-xl-4">
+            <div class="scd-card h-100">
+                <div class="scd-card-icon scd-card-icon-dark">
+                    <i class="fa-solid fa-rotate-left"></i>
+                </div>
+                <h4 class="scd-card-title">Devoluciones cliente</h4>
+                <p class="scd-card-text">Agenda citas, revisa tickets y restablece stock al aprobar.</p>
+                <a href="{% url 'devoluciones_clientes_list' %}" class="scd-card-btn">Entrar</a>
+            </div>
+        </div>
+
         {% if user.is_superuser %}
         <div class="col-md-6 col-xl-4">
             <div class="scd-card h-100">

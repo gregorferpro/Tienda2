@@ -1,3 +1,4 @@
+from datetime import timedelta
 from decimal import Decimal, InvalidOperation
 
 from django.contrib import messages
@@ -12,14 +13,28 @@ from django.utils import timezone
 
 from .forms import (
     CheckoutForm, ClienteForm, ProductoCatalogoForm, ProductoForm,
-    ProveedorForm, CompraProveedorForm
+    ProveedorForm, CompraProveedorForm, FacturaDevolucionLookupForm,
+    DevolucionClienteForm, RevisionDevolucionClienteForm
 )
 from .models import (
     Cliente, DetalleVenta, Producto, ProductoImagen, Venta,
     Proveedor, CompraProveedor, DetalleCompraProveedor,
     ReclamoProveedor, DevolucionProveedor, MovimientoInventario,
+    DevolucionCliente,
 )
 from .producto_utils import build_product_from_purchase_detail
+
+PLAZO_REPORTE_DEVOLUCION_DIAS = 3
+VENTANA_CITAS_DEVOLUCION_DIAS = 21
+
+DIAS_SEMANA_ES = [
+    'lunes', 'martes', 'miercoles', 'jueves', 'viernes', 'sabado', 'domingo'
+]
+
+MESES_ES = [
+    'enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio',
+    'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'
+]
 
 
 def generar_numero_factura():
@@ -32,6 +47,51 @@ def generar_numero_compra():
 
 def generar_codigo_producto():
     return f'PRD-{timezone.now().strftime("%Y%m%d%H%M%S%f")}'
+
+
+def generar_codigo_ticket_devolucion():
+    return f'DEV-{timezone.now().strftime("%Y%m%d%H%M%S%f")}'
+
+
+def obtener_limite_reporte_devolucion(venta):
+    return venta.fecha + timedelta(days=PLAZO_REPORTE_DEVOLUCION_DIAS)
+
+
+def venta_esta_en_plazo_devolucion(venta):
+    return timezone.now() <= obtener_limite_reporte_devolucion(venta)
+
+
+def obtener_opciones_cita_devolucion():
+    opciones = []
+    fecha_base = timezone.localdate()
+
+    for offset in range(VENTANA_CITAS_DEVOLUCION_DIAS):
+        fecha = fecha_base + timedelta(days=offset)
+        etiqueta = (
+            f"{DIAS_SEMANA_ES[fecha.weekday()].capitalize()} "
+            f"{fecha.day} de {MESES_ES[fecha.month - 1]}"
+        )
+        opciones.append((fecha.isoformat(), etiqueta))
+
+    return opciones
+
+
+def buscar_venta_del_cliente_por_factura(user, numero_factura):
+    numero_factura = (numero_factura or '').strip()
+    if not numero_factura:
+        return None
+
+    return (
+        Venta.objects
+        .select_related('cliente', 'usuario')
+        .prefetch_related('detalles__producto', 'devoluciones_cliente__detalle_venta__producto')
+        .filter(
+            numero_factura=numero_factura,
+            cliente__user=user,
+            estado_pago='pagado',
+        )
+        .first()
+    )
 
 
 def obtener_detalles_compra_para_catalogo():
@@ -472,6 +532,239 @@ def factura_view(request, pk):
 
 
 @login_required
+def mis_devoluciones(request):
+    devoluciones = (
+        DevolucionCliente.objects
+        .select_related(
+            'venta',
+            'cliente',
+            'detalle_venta__producto',
+            'revisado_por',
+        )
+        .filter(cliente__user=request.user)
+        .order_by('-fecha_reporte')
+    )
+
+    numero_factura = (
+        request.POST.get('numero_factura')
+        if request.method == 'POST'
+        else request.GET.get('numero_factura')
+    ) or ''
+
+    lookup_form = FacturaDevolucionLookupForm(
+        {'numero_factura': numero_factura} if numero_factura else None
+    )
+
+    venta = None
+    solicitud_form = None
+    detalles_bloqueados = []
+    busqueda_error = ''
+    plazo_limite = None
+    venta_en_plazo = False
+    hay_detalles_disponibles = False
+    detalles_venta = []
+
+    if numero_factura:
+        venta = buscar_venta_del_cliente_por_factura(request.user, numero_factura)
+        if venta is None:
+            busqueda_error = (
+                'No encontramos una factura pagada con ese codigo dentro de tu cuenta.'
+            )
+        else:
+            plazo_limite = obtener_limite_reporte_devolucion(venta)
+            venta_en_plazo = venta_esta_en_plazo_devolucion(venta)
+            detalles_venta = [
+                {
+                    'detalle': detalle,
+                    'devolucion': getattr(detalle, 'devolucion_cliente', None),
+                }
+                for detalle in venta.detalles.select_related('producto').all()
+            ]
+            detalles_bloqueados = [
+                item['detalle'] for item in detalles_venta
+                if item['devolucion'] is not None
+            ]
+
+            solicitud_form = DevolucionClienteForm(
+                request.POST if request.method == 'POST' else None,
+                venta=venta,
+                dias_disponibles=obtener_opciones_cita_devolucion(),
+            )
+            hay_detalles_disponibles = solicitud_form.fields['detalle_venta'].queryset.exists()
+
+            if request.method == 'POST':
+                if not venta_en_plazo:
+                    messages.error(
+                        request,
+                        'La solicitud debe registrarse dentro de los primeros 3 dias posteriores a la compra.'
+                    )
+                elif solicitud_form.is_valid():
+                    detalle_venta = solicitud_form.cleaned_data['detalle_venta']
+
+                    if DevolucionCliente.objects.filter(detalle_venta=detalle_venta).exists():
+                        messages.warning(
+                            request,
+                            'Ese producto ya tiene una solicitud de devolucion registrada.'
+                        )
+                    else:
+                        devolucion = solicitud_form.save(commit=False)
+                        devolucion.venta = venta
+                        devolucion.cliente = venta.cliente
+                        devolucion.codigo_ticket = generar_codigo_ticket_devolucion()
+                        devolucion.save()
+                        messages.success(
+                            request,
+                            f'Solicitud registrada. Tu ticket es {devolucion.codigo_ticket} y tu cita fue agendada correctamente.'
+                        )
+                        return redirect('mis_devoluciones')
+
+    return render(request, 'tienda/mis_devoluciones.html', {
+        'lookup_form': lookup_form,
+        'solicitud_form': solicitud_form,
+        'venta': venta,
+        'devoluciones': devoluciones,
+        'detalles_venta': detalles_venta,
+        'detalles_bloqueados': detalles_bloqueados,
+        'busqueda_error': busqueda_error,
+        'plazo_reporte_dias': PLAZO_REPORTE_DEVOLUCION_DIAS,
+        'plazo_limite': plazo_limite,
+        'venta_en_plazo': venta_en_plazo,
+        'hay_detalles_disponibles': hay_detalles_disponibles,
+        'numero_factura_actual': numero_factura,
+    })
+
+
+@login_required
+@user_passes_test(es_staff_o_superuser)
+def devoluciones_clientes_list(request):
+    q = request.GET.get('q', '').strip()
+    estado = request.GET.get('estado', '').strip().lower()
+
+    devoluciones = (
+        DevolucionCliente.objects
+        .select_related('venta', 'cliente', 'detalle_venta__producto', 'revisado_por')
+        .all()
+    )
+
+    if q:
+        devoluciones = devoluciones.filter(
+            Q(codigo_ticket__icontains=q) |
+            Q(venta__numero_factura__icontains=q) |
+            Q(cliente__nombres__icontains=q) |
+            Q(cliente__apellidos__icontains=q) |
+            Q(detalle_venta__producto__nombre__icontains=q) |
+            Q(detalle_venta__producto__codigo__icontains=q)
+        )
+
+    estados_validos = {'solicitada', 'aprobada', 'rechazada'}
+    if estado in estados_validos:
+        devoluciones = devoluciones.filter(estado=estado)
+
+    devoluciones = devoluciones.order_by('estado', 'fecha_cita', '-fecha_reporte')
+
+    return render(request, 'tienda/devoluciones_clientes_list.html', {
+        'devoluciones': devoluciones,
+        'q': q,
+        'estado': estado,
+    })
+
+
+@login_required
+@user_passes_test(es_staff_o_superuser)
+@transaction.atomic
+def devolucion_cliente_detail(request, pk):
+    devolucion = get_object_or_404(
+        DevolucionCliente.objects.select_related(
+            'venta',
+            'cliente',
+            'detalle_venta__producto',
+            'revisado_por',
+        ),
+        pk=pk
+    )
+
+    form = RevisionDevolucionClienteForm(
+        request.POST if request.method == 'POST' else None,
+        initial={'observaciones_revision': devolucion.observaciones_revision},
+    )
+
+    if request.method == 'POST':
+        accion = request.POST.get('accion')
+
+        if devolucion.estado == 'aprobada':
+            messages.info(request, 'Esta devolucion ya fue aprobada anteriormente.')
+            return redirect('devolucion_cliente_detail', pk=devolucion.pk)
+
+        if form.is_valid():
+            devolucion.observaciones_revision = form.cleaned_data['observaciones_revision']
+            devolucion.revisado_por = request.user
+            devolucion.fecha_revision = timezone.now()
+
+            if accion == 'aprobar':
+                if not form.cleaned_data['confirmar_revision']:
+                    messages.error(
+                        request,
+                        'Marca el check de revision antes de confirmar la devolucion.'
+                    )
+                else:
+                    detalle = devolucion.detalle_venta
+                    producto = detalle.producto
+
+                    if not devolucion.stock_restaurado:
+                        stock_anterior = producto.stock
+                        producto.stock += detalle.cantidad
+                        producto.save(update_fields=['stock'])
+
+                        MovimientoInventario.objects.create(
+                            producto=producto,
+                            cantidad=detalle.cantidad,
+                            tipo_movimiento='entrada',
+                            motivo=(
+                                f'Devolucion cliente aprobada ticket {devolucion.codigo_ticket} '
+                                f'factura {devolucion.venta.numero_factura}'
+                            ),
+                            stock_anterior=stock_anterior,
+                            stock_nuevo=producto.stock,
+                            usuario=request.user,
+                        )
+
+                    devolucion.estado = 'aprobada'
+                    devolucion.stock_restaurado = True
+                    devolucion.save(update_fields=[
+                        'observaciones_revision',
+                        'revisado_por',
+                        'fecha_revision',
+                        'estado',
+                        'stock_restaurado',
+                    ])
+                    messages.success(
+                        request,
+                        'Devolucion confirmada correctamente y stock restablecido.'
+                    )
+                    return redirect('devolucion_cliente_detail', pk=devolucion.pk)
+
+            elif accion == 'rechazar':
+                devolucion.estado = 'rechazada'
+                devolucion.save(update_fields=[
+                    'observaciones_revision',
+                    'revisado_por',
+                    'fecha_revision',
+                    'estado',
+                ])
+                messages.warning(request, 'La devolucion fue marcada como rechazada.')
+                return redirect('devolucion_cliente_detail', pk=devolucion.pk)
+
+            else:
+                messages.error(request, 'Accion no valida para la devolucion.')
+
+    return render(request, 'tienda/devolucion_cliente_detail.html', {
+        'devolucion': devolucion,
+        'form': form,
+        'plazo_limite': obtener_limite_reporte_devolucion(devolucion.venta),
+    })
+
+
+@login_required
 @user_passes_test(es_staff_o_superuser)
 def productos_list(request):
     q = request.GET.get('q', '').strip()
@@ -815,12 +1108,17 @@ def ventas_list(request):
 @user_passes_test(es_staff_o_superuser)
 def venta_detail(request, pk):
     venta = get_object_or_404(
-        Venta.objects.select_related('cliente', 'usuario').prefetch_related('detalles__producto'),
+        Venta.objects.select_related('cliente', 'usuario').prefetch_related(
+            'detalles__producto',
+            'devoluciones_cliente__detalle_venta__producto',
+            'devoluciones_cliente__revisado_por',
+        ),
         pk=pk
     )
 
     return render(request, 'tienda/venta_detail.html', {
-        'venta': venta
+        'venta': venta,
+        'devoluciones_cliente': venta.devoluciones_cliente.all(),
     })
 
 

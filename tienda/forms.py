@@ -1,7 +1,9 @@
+from datetime import datetime
+
 from django import forms
 from .models import (
     Cliente, Producto, Proveedor, CompraProveedor,
-    ReclamoProveedor, DevolucionProveedor
+    ReclamoProveedor, DevolucionProveedor, DevolucionCliente, DetalleVenta
 )
 
 
@@ -64,6 +66,72 @@ class CheckoutForm(forms.Form):
     metodo_pago = forms.ChoiceField(
         choices=[('efectivo', 'Efectivo'), ('qr', 'QR')],
         widget=forms.Select(attrs={'class': 'form-control'})
+    )
+
+
+class FacturaDevolucionLookupForm(forms.Form):
+    numero_factura = forms.CharField(
+        label='Codigo de factura',
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Ej. 20260515093022',
+            'autocomplete': 'off',
+        })
+    )
+
+
+class DevolucionClienteForm(forms.ModelForm):
+    detalle_venta = forms.ModelChoiceField(
+        queryset=DetalleVenta.objects.none(),
+        empty_label=None,
+        widget=forms.RadioSelect
+    )
+    fecha_cita = forms.TypedChoiceField(
+        choices=(),
+        coerce=lambda value: datetime.strptime(value, '%Y-%m-%d').date(),
+        widget=forms.RadioSelect
+    )
+
+    class Meta:
+        model = DevolucionCliente
+        fields = ['detalle_venta', 'fecha_cita', 'motivo', 'observaciones_cliente']
+        widgets = {
+            'motivo': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Motivo de la devolucion'}),
+            'observaciones_cliente': forms.Textarea(attrs={'class': 'form-control', 'rows': 4}),
+        }
+
+    def __init__(self, *args, venta=None, dias_disponibles=None, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self.fields['detalle_venta'].label_from_instance = self._detalle_label
+
+        if venta is not None:
+            self.fields['detalle_venta'].queryset = (
+                venta.detalles
+                .select_related('producto')
+                .filter(devolucion_cliente__isnull=True)
+                .order_by('id')
+            )
+
+        if dias_disponibles is not None:
+            self.fields['fecha_cita'].choices = dias_disponibles
+
+    @staticmethod
+    def _detalle_label(detalle):
+        return (
+            f"{detalle.producto.nombre} | Codigo {detalle.producto.codigo} | "
+            f"Cantidad {detalle.cantidad} | Bs {detalle.subtotal}"
+        )
+
+
+class RevisionDevolucionClienteForm(forms.Form):
+    confirmar_revision = forms.BooleanField(
+        required=False,
+        label='Confirmo que el equipo fue revisado y la devolucion procede.'
+    )
+    observaciones_revision = forms.CharField(
+        required=False,
+        widget=forms.Textarea(attrs={'class': 'form-control', 'rows': 4})
     )
 
 

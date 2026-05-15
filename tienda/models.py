@@ -131,6 +131,59 @@ class DetalleVenta(models.Model):
         super().save(*args, **kwargs)
 
 
+ESTADO_DEVOLUCION_CLIENTE_CHOICES = [
+    ('solicitada', 'Solicitada'),
+    ('aprobada', 'Aprobada'),
+    ('rechazada', 'Rechazada'),
+]
+
+
+class DevolucionCliente(models.Model):
+    venta = models.ForeignKey(Venta, on_delete=models.PROTECT, related_name='devoluciones_cliente')
+    detalle_venta = models.OneToOneField(
+        DetalleVenta,
+        on_delete=models.PROTECT,
+        related_name='devolucion_cliente'
+    )
+    cliente = models.ForeignKey(Cliente, on_delete=models.PROTECT, related_name='devoluciones_cliente')
+    codigo_ticket = models.CharField(max_length=40, unique=True)
+    fecha_reporte = models.DateTimeField(auto_now_add=True)
+    fecha_cita = models.DateField()
+    motivo = models.CharField(max_length=200)
+    observaciones_cliente = models.TextField(blank=True)
+    observaciones_revision = models.TextField(blank=True)
+    estado = models.CharField(
+        max_length=20,
+        choices=ESTADO_DEVOLUCION_CLIENTE_CHOICES,
+        default='solicitada'
+    )
+    revisado_por = models.ForeignKey(
+        User,
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        related_name='devoluciones_cliente_revisadas'
+    )
+    fecha_revision = models.DateTimeField(null=True, blank=True)
+    stock_restaurado = models.BooleanField(default=False)
+
+    class Meta:
+        ordering = ['-fecha_reporte']
+
+    def save(self, *args, **kwargs):
+        if self.detalle_venta_id:
+            self.venta = self.detalle_venta.venta
+            self.cliente = self.detalle_venta.venta.cliente
+        super().save(*args, **kwargs)
+
+    @property
+    def producto(self):
+        return self.detalle_venta.producto
+
+    def __str__(self):
+        return f'Devolucion {self.codigo_ticket} - {self.venta.numero_factura}'
+
+
 # =========================
 # MODULO DE PROVEEDORES
 # =========================
